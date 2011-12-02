@@ -17,6 +17,10 @@
 *.so.dbg
 *.bin
 *.gz
+*.patch
+*.log
+#win
+win/*
 
 #
 # Top-level generic files
