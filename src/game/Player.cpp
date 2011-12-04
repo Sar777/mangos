@@ -2569,6 +2569,9 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
     if (victim)
     {
+        if (victim->GetMaxHealth() < (victim->getLevel() * 8 * (1 + victim->getLevel() / 10.0f)))
+            return;
+
         // handle SPELL_AURA_MOD_KILL_XP_PCT auras
         Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_KILL_XP_PCT);
         for(Unit::AuraList::const_iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
