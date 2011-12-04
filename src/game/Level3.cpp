@@ -5594,21 +5594,21 @@ bool ChatHandler::HandleBanHelper(BanMode mode, char* args)
                 {
                     case BAN_ACCOUNT:
                         if (duration_secs > 0)
-                            PSendGlobalSysMessage(LANG_BAN_ACCOUNT_ANNOUNCE, GMnameLink.c_str(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                            PSendGlobalSysMessage(LANG_BAN_ACCOUNT_ANNOUNCE, m_session->GetPlayerName(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
                         else
-                            PSendGlobalSysMessage(LANG_PERMBAN_ACCOUNT_ANNOUNCE, GMnameLink.c_str(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                            PSendGlobalSysMessage(LANG_PERMBAN_ACCOUNT_ANNOUNCE, m_session->GetPlayerName(), nameOrIP.c_str(), reason);
                         break;
                     case BAN_CHARACTER:
                         if (duration_secs > 0)
-                            PSendGlobalSysMessage(LANG_BAN_CHARACTER_ANNOUNCE, GMnameLink.c_str(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                            PSendGlobalSysMessage(LANG_BAN_CHARACTER_ANNOUNCE, m_session->GetPlayerName(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
                         else
-                            PSendGlobalSysMessage(LANG_PERMBAN_CHARACTER_ANNOUNCE, GMnameLink.c_str(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                            PSendGlobalSysMessage(LANG_PERMBAN_CHARACTER_ANNOUNCE, m_session->GetPlayerName(), nameOrIP.c_str(), reason);
                        break;
                     case BAN_IP:
                         if (duration_secs > 0)
-                            PSendGlobalSysMessage(LANG_BAN_IP_ANNOUNCE, GMnameLink.c_str(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                            PSendGlobalSysMessage(LANG_BAN_IP_ANNOUNCE, m_session->GetPlayerName(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
                         else
-                            PSendGlobalSysMessage(LANG_PERMBAN_IP_ANNOUNCE, GMnameLink.c_str(), nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                            PSendGlobalSysMessage(LANG_PERMBAN_IP_ANNOUNCE, m_session->GetPlayerName(), nameOrIP.c_str(), reason);
                         break;
                 }
             }

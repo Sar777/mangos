@@ -502,6 +502,14 @@ bool AntiCheat::CheckMovement()
 
 bool AntiCheat::CheckSpeed()
 {
+	if (GetMover()->HasAura(45472) // SPELL_AURA_FEATHER_FALL
+	    ||  GetMover()->HasAura(130) //SPELL_AURA_FEATHER_FALL
+		||  GetMover()->HasAura(46705) //SPELL_AURA_NO_PVP_CREDIT
+		||  GetMover()->HasAura(1860) //SPELL_AURA_SAFE_FALL
+		||  GetMover()->HasAuraType(SPELL_AURA_GHOST)
+		)
+        return true;
+
     float speedRate   = 1.0f;
     int   serverDelta = WorldTimer::getMSTimeDiff(m_oldCheckTime[CHECK_MOVEMENT_SPEED],WorldTimer::getMSTime());
 
@@ -566,6 +574,8 @@ bool AntiCheat::CheckWaterWalking()
     if  (   GetMover()->HasAuraType(SPELL_AURA_WATER_WALK)
         ||  GetMover()->HasAura(60068)
         ||  GetMover()->HasAura(61081)
+		||	GetMover()->HasAura(130)   //Slow Fall 1 SPELL_AURA_FEATHER_FALL
+		||  GetMover()->HasAura(12438) //Slow Fall 2 SPELL_AURA_FEATHER_FALL
         ||  GetMover()->HasAuraType(SPELL_AURA_GHOST)
         )
         return true;
@@ -580,6 +590,15 @@ bool AntiCheat::CheckTeleport()
 
     if (m_currentDelta < m_currentConfig->checkFloatParam[0])
         return true;
+
+	if (   GetMover()->HasAuraType(SPELL_AURA_MOD_STUN)
+	   ||  GetMover()->HasAuraType(SPELL_AURA_GHOST)
+	   ||  GetMover()->HasAura(46705) //SPELL_AURA_NO_PVP_CREDIT
+	   )
+		return true;
+
+	if (GetPlayer()->GetZoneId() == 4384) //Bereg Drevnih 
+		return true;
 
     char buffer[255];
     sprintf(buffer," Moved with with one tick on %e but allowed %e",
@@ -664,6 +683,17 @@ bool AntiCheat::CheckFly()
 
 bool AntiCheat::CheckAirJump()
 {
+	if  (   GetMover()->HasAura(130)   //Slow Fall 1 SPELL_AURA_FEATHER_FALL
+		||  GetMover()->HasAura(12438) //Slow Fall 2 SPELL_AURA_FEATHER_FALL
+		||  GetMover()->HasAura(45472) //Slow Fall(Dalaran) SPELL_AURA_FEATHER_FALL
+		||  GetMover()->HasAura(46705) //SPELL_AURA_NO_PVP_CREDIT
+		||  GetMover()->HasAura(16593) //SPELL_AURA_FEATHER_FALL
+        ||  GetMover()->HasAuraType(SPELL_AURA_GHOST)
+        )
+		return true;
+
+	if (GetPlayer()->GetZoneId() == 4384) //Bereg Drevnih 
+		return true;
 
     float ground_z = GetMover()->GetTerrain()->GetHeight(GetMover()->GetPositionX(),GetMover()->GetPositionY(),MAX_HEIGHT);
     float floor_z  = GetMover()->GetTerrain()->GetHeight(GetMover()->GetPositionX(),GetMover()->GetPositionY(),GetMover()->GetPositionZ());
@@ -691,7 +721,13 @@ bool AntiCheat::CheckTp2Plane()
     if (m_currentmovementInfo->GetPos()->z > m_currentConfig->checkFloatParam[0] || m_currentmovementInfo->GetPos()->z < -m_currentConfig->checkFloatParam[0])
         return true;
 
-    if (GetMover()->HasAuraType(SPELL_AURA_GHOST))
+    if (GetMover()->HasAuraType(SPELL_AURA_GHOST)
+	   ||  GetMover()->HasAuraType(SPELL_AURA_WATER_WALK)
+	   ||  GetMover()->HasAura(60068) //Path of Frost
+       ||  GetMover()->HasAura(61081) //dummy Path of Frost(60068)
+	   ||  GetMover()->HasAura(11319) //SPELL_AURA_WATER_WALK, Spell Water Walking
+	   ||  GetMover()->HasAura(27986) // SPELL_AURA_FEATHER_FALL and SPELL_AURA_HOVER and SPELL_EFFECT_APPLY_AURA
+	   )
         return true;
 
     float plane_z = 0.0f;
@@ -840,6 +876,12 @@ bool AntiCheat::CheckDamage()
 
 bool AntiCheat::CheckSpellDamage()
 {
+	if (  GetMover()->HasAura(71289) //SPELL_AURA_AOE_CHARM... Instance Icecrown Citadel spell boss 2
+	   || GetMover()->HasAura(58361) //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE... Deatch Knight Zone
+	   || GetMover()->HasAura(53642) //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE... Deatch Knight Zone
+	   )
+	    return true;
+
     if (!m_currentspellID)
         return true;
 
@@ -871,6 +913,12 @@ bool AntiCheat::CheckSpellDamage()
 
 bool AntiCheat::CheckMeleeDamage()
 {
+	if (  GetMover()->HasAura(71289) //SPELL_AURA_AOE_CHARM... Instance Icecrown Citadel spell boss 2
+	   || GetMover()->HasAura(58361) //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE... Deatch Knight Zone
+	   || GetMover()->HasAura(53642) //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE... Deatch Knight Zone
+	   )
+        return true;
+
     if (m_currentspellID)
         return true;
 

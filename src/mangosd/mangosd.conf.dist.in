@@ -220,6 +220,8 @@ MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
 MapUpdate.Threads = 1
+HomeBind.Enable = 1
+HomeBind.Timer = 1000
 
 ###################################################################################################################
 # SERVER LOGGING
@@ -852,6 +854,11 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 - flags not unique
 #                 1 - flags unique, not more then 1 player may have this flag
 #
+#    WOWArmorySupport
+#        Support collect statistics for Shadez WOW Armory frontend
+#        Default: 0 - don't support
+#                 1 - supported
+#
 #    ClientCacheVersion
 #        Client cache version for client cache data reset. Use any different from DB value and not recently used for triggering reset.
 #        Default: 0 (use DB value from world DB db_version.cache_id field)
@@ -965,6 +972,7 @@ PetUnsummonAtMount = 1
 PetSaveAllInDB = 0
 RaidFlags.Unique = 0
 AllowFlightOnOldMaps = 0
+WOWArmorySupport = 0
 ClientCacheVersion = 0
 Event.Announce = 0
 BeepAtStart = 1
@@ -974,6 +982,7 @@ Motd = "Welcome to the Massive Network Game Object Server."
 Raid.MinLevel = 10
 CheckGOInPath = 0
 CrowdControlHPBase = 0.1
+ResetCooldown.Enable = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -1602,6 +1611,31 @@ Death.Ghost.RunSpeed.World = 1.0
 Death.Ghost.RunSpeed.Battleground = 1.0
 
 ###################################################################################################################
+# DROP CONFIG
+#
+#    Drop.ItemLevel.Enable
+#        Turn off the system.
+#        Default: 0 (disable)
+#                 1 (enable)
+#	
+#	 Drop.ItemLevel
+#		 Reservation of slots for items specified above itemlevel.
+#        Default: 220
+#
+#	 Drop.Count.Item.SmallLevel
+#		 Number of slots for any item is below itemlevel
+#		 Default: 12
+#
+###################################################################################################################
+
+Rate.Drop.Item.Percent = 1
+Rate.Drop.Item.Count = 1
+
+Drop.ItemLevel.Enable = 0
+Drop.ItemLevel = 220
+Drop.Count.Item.SmallLevel = 12
+
+###################################################################################################################
 # BATTLEGROUND CONFIG
 #
 #    Battleground.CastDeserter
@@ -2012,6 +2046,34 @@ PlayerbotAI.Collect.Loot = 0
 PlayerbotAI.Collect.Skin = 0
 PlayerbotAI.Collect.Objects = 0
 PlayerbotAI.SellGarbage = 0
+
+###################################################################################################################
+# AUTOMUTE SETTINGS
+#
+#    AutoMute.Enable
+#        Chat anti-flood protection, haste message count to activate protection
+#        Default: 1 - on
+#                 0 - off
+#                 
+#    AutoMute.MessageCount
+#        Chat anti-flood protection, haste message count to activate protection
+#        Default: 10
+#                 0 (disable anti-flood protection)
+#
+#    AutoMute.MessageDelay
+#        Chat anti-flood protection, minimum message delay to count message
+#        Default: 10 (in secs)
+#
+#    AutoMute.MuteTime
+#        Chat anti-flood protection, mute time at activation flood protection (not saved)
+#        Default: 10 (in min)
+#
+###################################################################################################################
+
+AutoMute.Enable = 1
+AutoMute.MessageCount = 1
+AutoMute.MessageDelay = 10
+AutoMute.MuteTime = 10
 
 ###################################################################################################################
 # Virtual map serving system (VMSS) configuration

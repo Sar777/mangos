@@ -44,6 +44,7 @@ void WorldSession::SendTradeStatus(TradeStatus status)
             data.Initialize(SMSG_TRADE_STATUS, 4+4);
             data << uint32(status);
             data << uint32(0);                              // added in 2.4.0
+            _player->SetTradeState(true);
             break;
         case TRADE_STATUS_CLOSE_WINDOW:
             data.Initialize(SMSG_TRADE_STATUS, 4+4+1+4);
@@ -51,6 +52,7 @@ void WorldSession::SendTradeStatus(TradeStatus status)
             data << uint32(0);
             data << uint8(0);
             data << uint32(0);
+            _player->SetTradeState(false);
             break;
         case TRADE_STATUS_ONLY_CONJURED:
         case TRADE_STATUS_NOT_ELIGIBLE:
@@ -61,6 +63,8 @@ void WorldSession::SendTradeStatus(TradeStatus status)
         default:
             data.Initialize(SMSG_TRADE_STATUS, 4);
             data << uint32(status);
+            if (status == TRADE_STATUS_TRADE_CANCELED || status == TRADE_STATUS_TRADE_COMPLETE)
+                _player->SetTradeState(false);
             break;
     }
 

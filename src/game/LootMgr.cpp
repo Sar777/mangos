@@ -429,14 +429,30 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(PermissionTypes permission, Play
 // Inserts the item into the loot (called by LootTemplate processors)
 void Loot::AddItem(LootStoreItem const & item)
 {
+    bool stop = false;
+    int tempcount=urand(1, int(sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_COUNT)));
+    for (int i = 0; i < tempcount; ++i) {
+
     if (item.needs_quest)                                   // Quest drop
     {
-        if (m_questItems.size() < MAX_NR_QUEST_ITEMS)
+        if (m_questItems.size() < MAX_NR_QUEST_ITEMS && !stop)
+           {
             m_questItems.push_back(LootItem(item));
+            stop = true;
+           }
     }
     else if (items.size() < MAX_NR_LOOT_ITEMS)              // Non-quest drop
     {
-        items.push_back(LootItem(item));
+		if (sWorld.getConfig(CONFIG_BOOL_DROP_ITEM_LEVEL_ENABLE))
+		{
+			ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item.itemid);
+			if (proto && proto->ItemLevel >= sWorld.getConfig(CONFIG_UINT32_RATE_DROP_ITEM_LEVEL))
+				items.push_back(LootItem(item));
+			else if (items.size() < sWorld.getConfig(CONFIG_UINT32_RATE_DROP_ITEM_COUNT_SMALL_ITEM_LEVEL))
+				items.push_back(LootItem(item));
+			else 
+				break;
+		} else items.push_back(LootItem(item));
 
         // non-conditional one-player only items are counted here,
         // free for all items are counted in FillFFALoot(),
@@ -448,6 +464,8 @@ void Loot::AddItem(LootStoreItem const & item)
                 ++unlootedCount;
         }
     }
+	}//for
+
 }
 
 // Calls processor of corresponding LootTemplate (which handles everything including references)

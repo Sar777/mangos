@@ -23,6 +23,7 @@
 #include "Opcodes.h"
 #include "UpdateData.h"
 #include "Player.h"
+#include "World.h"
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
@@ -45,6 +46,24 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     time_t now = time(NULL);
     pl->duel->startTimer = now;
     plTarget->duel->startTimer = now;
+
+	if (sWorld.getConfig(CONFIG_BOOL_RESETCOOLDOWN_ENABLE))
+	{
+		pl->SetHealth(pl->GetMaxHealth());
+		plTarget->SetHealth(pl->GetMaxHealth());
+		if (pl->getPowerType() == POWER_MANA) 
+			pl->SetPower(POWER_MANA, pl->GetMaxPower(POWER_MANA)); 
+	
+	    if (plTarget->getPowerType() == POWER_MANA) 
+			plTarget->SetPower(POWER_MANA, plTarget->GetMaxPower(POWER_MANA)); 
+
+	    //only for cooldowns which < 15 min  
+		if (!pl->GetMap()->IsDungeon())
+		{ 
+			pl->RemoveArenaSpellCooldowns(); 
+			plTarget->RemoveArenaSpellCooldowns(); 
+		}
+	}
 
     pl->SendDuelCountdown(3000);
     plTarget->SendDuelCountdown(3000);

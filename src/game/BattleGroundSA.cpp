@@ -462,7 +462,7 @@ void BattleGroundSA::UpdatePhase()
 void BattleGroundSA::HandleInteractivity()
 {
     for (int i = 0; i < BG_SA_GRY_MAX; i++)
-        MakeInteractive(i, (GetDefender() == ALLIANCE) ? BG_SA_GRAVE_STATUS_ALLY_CONTESTED : BG_SA_GRAVE_STATUS_HORDE_CONTESTED, false);
+        MakeInteractive(i, (GetDefender() == ALLIANCE) ? BG_SA_GRAVE_STATUS_HORDE_CONTESTED : BG_SA_GRAVE_STATUS_ALLY_CONTESTED, false);
 }
 
 bool BattleGroundSA::SetupBattleGround()

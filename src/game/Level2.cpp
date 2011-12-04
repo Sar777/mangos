@@ -71,6 +71,11 @@ bool ChatHandler::HandleMuteCommand(char* args)
     if (!ExtractUInt32(&args, notspeaktime))
         return false;
 
+	char* mutereason = ExtractArg(&args);
+    std::string mutereasonstr = "No reason";
+    if (mutereason != NULL)
+         mutereasonstr = mutereason;
+
     uint32 account_id = target ? target->GetSession()->GetAccountId() : sObjectMgr.GetPlayerAccountIdByGUID(target_guid);
 
     // find only player from same account if any
@@ -82,7 +87,22 @@ bool ChatHandler::HandleMuteCommand(char* args)
 
     // must have strong lesser security level
     if (HasLowerSecurity(target, target_guid, true))
-        return false;
+		return false;
+
+	QueryResult *result = LoginDatabase.PQuery("SELECT mutetime FROM account WHERE id='%u'", account_id);
+	if (result)
+	{
+		Field *fields = result->Fetch();
+		uint64 m_uiMuteTime = fields[0].GetUInt64();
+
+		if (m_uiMuteTime > time(NULL))
+		{
+			if (target)
+				PSendSysMessage(LANG_DISABLE_CHAT_CHARACTER, target->GetName());
+			return true;
+		}
+		delete result;
+	}
 
     time_t mutetime = time(NULL) + notspeaktime*60;
 
@@ -92,12 +112,12 @@ bool ChatHandler::HandleMuteCommand(char* args)
     LoginDatabase.PExecute("UPDATE account SET mutetime = " UI64FMTD " WHERE id = '%u'", uint64(mutetime), account_id);
 
     if (target)
-        ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notspeaktime);
+		ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, m_session->GetPlayerName(), notspeaktime, mutereasonstr.c_str());
 
     std::string nameLink = playerLink(target_name);
 
-    PSendSysMessage(LANG_YOU_DISABLE_CHAT, nameLink.c_str(), notspeaktime);
-
+    PSendSysMessage(LANG_YOU_DISABLE_CHAT, nameLink.c_str(), notspeaktime, mutereasonstr.c_str());
+/*
     if (sWorld.getConfig(CONFIG_BOOL_GM_ANNOUNCE_BAN))
     {
         std::string GMnameLink;
@@ -105,9 +125,9 @@ bool ChatHandler::HandleMuteCommand(char* args)
             GMnameLink = playerLink(m_session->GetPlayerName());
         else
             GMnameLink = "";
-        PSendGlobalSysMessage(LANG_MUTE_ANNOUNCE, GMnameLink.c_str(), nameLink.c_str(), notspeaktime);
+		PSendGlobalSysMessage(LANG_MUTE_ANNOUNCE, GMnameLink.c_str(), nameLink.c_str(), notspeaktime);
     }
-
+*/
     return true;
 }
 

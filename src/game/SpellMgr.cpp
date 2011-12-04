@@ -734,6 +734,7 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
         case 64904:                                         // Hymn of Hope
         case 67369:                                         // Grunty Focus
         case 67398:                                         // Zergling Periodic Effect
+		case 72771:                                         // Scent of Blood (Saurfang)
             return true;
         default:
             break;
@@ -4457,6 +4458,17 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         else
             // not have expected aura
             return !player->HasAura(-auraSpell, EFFECT_INDEX_0);
+    }
+
+	// Extra conditions -- leaving the possibility add extra conditions...
+    switch(spellId)
+    {
+        case 68719: // Oil Refinery - Isle of Conquest.
+        case 68720: // Quarry - Isle of Conquest.
+        {
+            if (player->GetBattleGroundTypeId() != BATTLEGROUND_IC || !player->GetBattleGround())
+                return false;
+        }
     }
 
     return true;

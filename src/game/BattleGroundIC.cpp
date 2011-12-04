@@ -117,7 +117,7 @@ void BattleGroundIC::Reset()
 
 void BattleGroundIC::SendTransportInit(Player* player)
 {
-    if (!gunshipAlliance || !gunshipHorde)
+/*    if (!gunshipAlliance || !gunshipHorde || !player || !player->IsInWorld())
         return;
 
     UpdateData transData;
@@ -128,7 +128,7 @@ void BattleGroundIC::SendTransportInit(Player* player)
     WorldPacket packet;
 
     transData.BuildPacket(&packet);
-    player->GetSession()->SendPacket(&packet);
+    player->GetSession()->SendPacket(&packet);*/
 }
 
 void BattleGroundIC::UpdateScore(BattleGroundTeamIndex teamIdx, int32 points )
@@ -204,18 +204,18 @@ void BattleGroundIC::Update(uint32 diff)
                 // Message to chatlog
                 if (teamIndex == BG_TEAM_ALLIANCE)
                 {
-                    SendMessage2ToAll(LANG_BG_IC_NODE_TAKEN,CHAT_MSG_BG_SYSTEM_ALLIANCE,NULL,LANG_BG_ALLY,_GetNodeNameId(node));
+                    SendMessage2ToAll(LANG_BG_IC_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_IC_ALLY, _GetNodeNameId(node));
                     PlaySoundToAll(BG_IC_SOUND_NODE_CAPTURED_ALLIANCE);
                 }
                 else
                 {
-                    SendMessage2ToAll(LANG_BG_IC_NODE_TAKEN,CHAT_MSG_BG_SYSTEM_HORDE,NULL,LANG_BG_HORDE,_GetNodeNameId(node));
+                    SendMessage2ToAll(LANG_BG_IC_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_IC_HORDE, _GetNodeNameId(node));
                     PlaySoundToAll(BG_IC_SOUND_NODE_CAPTURED_HORDE);
                 }
 
                 // gunship starting
-                if (node == BG_IC_NODE_HANGAR)
-                    (teamIndex == BG_TEAM_ALLIANCE ? gunshipAlliance : gunshipHorde)->BuildStartMovePacket(GetBgMap());
+//                if (node == BG_IC_NODE_HANGAR && gunshipAlliance && gunshipHorde)
+//                    (teamIndex == BG_TEAM_ALLIANCE ? gunshipAlliance : gunshipHorde)->BuildStartMovePacket(GetBgMap());
             }
         }
     }
@@ -273,8 +273,10 @@ void BattleGroundIC::RemovePlayer(Player* plr)
 {
     if (plr)
     {
-        plr->RemoveAurasDueToSpell(SPELL_QUARRY);
-        plr->RemoveAurasDueToSpell(SPELL_REFINERY);
+		if (plr->HasAura(SPELL_QUARRY))
+			plr->RemoveAurasDueToSpell(SPELL_QUARRY);
+		if (plr->HasAura(SPELL_REFINERY))
+			plr->RemoveAurasDueToSpell(SPELL_REFINERY);
     }
 }
 
@@ -528,9 +530,9 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player *source, GameObject* target
         m_NodeTimers[node] = BG_IC_FLAG_CAPTURING_TIME;
 
         if (teamIndex == BG_TEAM_ALLIANCE)
-            SendMessage2ToAll(LANG_BG_IC_NODE_CLAIMED,CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node), LANG_BG_ALLY);
+            SendMessage2ToAll(LANG_BG_IC_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node), LANG_BG_IC_ALLY);
         else
-            SendMessage2ToAll(LANG_BG_IC_NODE_CLAIMED,CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node), LANG_BG_HORDE);
+            SendMessage2ToAll(LANG_BG_IC_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node), LANG_BG_IC_HORDE);
 
         sound = BG_IC_SOUND_NODE_CLAIMED;
     }
@@ -592,8 +594,8 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player *source, GameObject* target
 
         sound = (teamIndex == BG_TEAM_ALLIANCE) ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
-        if (node == BG_IC_NODE_HANGAR)
-            (teamIndex == BG_TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->BuildStopMovePacket(GetBgMap());
+//        if (node == BG_IC_NODE_HANGAR && gunshipHorde && gunshipAlliance)
+//            (teamIndex == BG_TEAM_ALLIANCE ? gunshipHorde : gunshipAlliance)->BuildStopMovePacket(GetBgMap());
     }
     PlaySoundToAll(sound);
 }
@@ -831,10 +833,12 @@ void BattleGroundIC::HandleBuffs()
     {
         if (Player *plr = sObjectMgr.GetPlayer(itr->first))
         {
+			if (!plr)
+				continue;
             // quarry / refinery buffs
             for (uint8 node = BG_IC_NODE_QUARRY; node <= BG_IC_NODE_REFINERY; node++)
             {
-                if (m_Nodes[node] >= BG_IC_NODE_TYPE_OCCUPIED)
+				if (m_Nodes[node] >= BG_IC_NODE_TYPE_OCCUPIED)
                 {
                     if ((node == BG_IC_NODE_QUARRY) && (!plr->HasAura(SPELL_QUARRY)) && (plr->GetTeam() == (m_Nodes[node] - BG_IC_NODE_TYPE_OCCUPIED == 0 ? ALLIANCE : HORDE)))
                         plr->CastSpell(plr, SPELL_QUARRY, true);
@@ -844,9 +848,13 @@ void BattleGroundIC::HandleBuffs()
                 else
                 {
                     if (node == BG_IC_NODE_QUARRY)
-                        plr->RemoveAurasDueToSpell(SPELL_QUARRY);
-                    else
-                        plr->RemoveAurasDueToSpell(SPELL_REFINERY);
+					{
+						if (plr->HasAura(SPELL_QUARRY))
+							plr->RemoveAurasDueToSpell(SPELL_QUARRY);
+					} else { if (node == BG_IC_NODE_REFINERY) 
+							if (plr->HasAura(SPELL_REFINERY))
+								plr->RemoveAurasDueToSpell(SPELL_REFINERY);
+					}
                 }
             }
             // parachute handling

@@ -466,6 +466,13 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_RATE_POWER_FOCUS,             "Rate.Focus",  1.0f);
     setConfig(CONFIG_FLOAT_RATE_POWER_ENERGY,            "Rate.Energy", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_SKILL_DISCOVERY,      "Rate.Skill.Discovery",      1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_PERCENT,       "Rate.Drop.Item.Percent",       1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_COUNT,       "Rate.Drop.Item.Count",       1.0f);
+
+	setConfig(CONFIG_BOOL_DROP_ITEM_LEVEL_ENABLE,       "Drop.ItemLevel.Enable", false);
+	setConfig(CONFIG_UINT32_RATE_DROP_ITEM_LEVEL,       "Drop.ItemLevel", 200);
+	setConfig(CONFIG_UINT32_RATE_DROP_ITEM_COUNT_SMALL_ITEM_LEVEL, "Drop.Count.Item.SmallLevel", 10);
+
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_POOR,       "Rate.Drop.Item.Poor",       1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_NORMAL,     "Rate.Drop.Item.Normal",     1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_UNCOMMON,   "Rate.Drop.Item.Uncommon",   1.0f);
@@ -538,6 +545,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_ANTICHEAT_GMLEVEL,        "Anticheat.GmLevel",0);
     setConfig(CONFIG_BOOL_ANTICHEAT_WARDEN,              "Anticheat.Warden", false);
 
+	setConfig(CONFIG_BOOL_RESETCOOLDOWN_ENABLE,              "ResetCooldown.Enable", false);
+
     setConfigMinMax(CONFIG_UINT32_COMPRESSION, "Compression", 1, 1, 9);
     setConfig(CONFIG_BOOL_ADDON_CHANNEL, "AddonChannel", true);
     setConfig(CONFIG_BOOL_CLEAN_CHARACTER_DB, "CleanCharacterDB", true);
@@ -589,6 +598,9 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_UINT32_CHARACTERS_PER_REALM, "CharactersPerRealm", 10, 1, 10);
 
+	setConfig(CONFIG_BOOL_HOMEBIND_ENABLE,  "HomeBind.Enable", false);
+	setConfig(CONFIG_UINT32_HOMEBIND_TIMER, "HomeBind.Timer",   1000);
+
     // must be after CONFIG_UINT32_CHARACTERS_PER_REALM
     setConfigMin(CONFIG_UINT32_CHARACTERS_PER_ACCOUNT, "CharactersPerAccount", 50, getConfig(CONFIG_UINT32_CHARACTERS_PER_REALM));
 
@@ -636,6 +648,11 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_LFR_EXTEND, "LFR.Extend", false);
     setConfig(CONFIG_BOOL_LFG_ONLYLASTENCOUNTER, "LFG.OnlyLastEncounterForCompleteDungeon", false);
     setConfigMinMax(CONFIG_UINT32_LFG_MAXKICKS, "LFG.MaxKicks", 5, 1, 10);
+  
+	setConfig(CONFIG_BOOL_AUTOMUTE_ENABLE, "AutoMute.Enable",false);
+	setConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_COUNT, "AutoMute.MessageCount", 5);
+    setConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_DELAY, "AutoMute.MessageDelay", 10);
+    setConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME, "AutoMute.MuteTime", 30);
 
     setConfig(CONFIG_BOOL_CHECK_GO_IN_PATH, "CheckGOInPath", false);
 
@@ -855,6 +872,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_RAID_FLAGS_UNIQUE,      "RaidFlags.Unique", false);
 
     setConfig(CONFIG_BOOL_ALLOW_FLIGHT_ON_OLD_MAPS, "AllowFlightOnOldMaps", false);
+	setConfig(CONFIG_BOOL_ARMORY_SUPPORT, "WOWArmorySupport", false);
 
     m_relocation_ai_notify_delay = sConfig.GetIntDefault("Visibility.AIRelocationNotifyDelay", 1000u);
     m_relocation_lower_limit_sq  = pow(sConfig.GetFloatDefault("Visibility.RelocationLowerLimit",10), 2);
@@ -1962,6 +1980,14 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
         else
             return BAN_NOTFOUND;                                // Nobody to ban
     }
+
+	Field* fieldsAccount = resultAccounts->Fetch();
+	uint32 account = fieldsAccount->GetUInt32();
+	if (sAccountMgr.GetSecurity(sObjectMgr.GetPlayerAccountIdByPlayerName(safe_author)) < sAccountMgr.GetSecurity(account))
+	{
+		delete resultAccounts;
+		return BAN_SYNTAX_ERROR;
+	}
 
     ///- Disconnect all affected players (for IP it can be several)
     do

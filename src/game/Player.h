@@ -1166,6 +1166,16 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetDeathState(DeathState s);                   // overwrite Unit::SetDeathState
 
+        bool m_bTradeState;
+        void SetTradeState(bool state)
+        {
+                m_bTradeState = state;
+        }
+        bool isTradeState()
+        {
+                return m_bTradeState;
+        }
+
         float GetRestBonus() const { return m_rest_bonus; }
         void SetRestBonus(float rest_bonus_new);
 
@@ -2212,6 +2222,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ChangeSpeakTime(int utime);
 
         /*********************************************************/
+        /***               AUTOMUTE SYSTEM                     ***/
+        /*********************************************************/
+
+		void AutoMute(std::string msg);
+
+        /*********************************************************/
         /*** REFER-A-FRIEND SYSTEM ***/
         /*********************************************************/
         void SendReferFriendError(ReferAFriendError err, Player * target = NULL);
@@ -2260,6 +2276,10 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
+
+		/** World of Warcraft Armory **/
+        void WriteWowArmoryDatabaseLog(uint32 type, uint32 data);
+        /** World of Warcraft Armory **/
 
         // Recall position
         uint32 m_recallMap;
@@ -2541,6 +2561,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_nextSave;
         time_t m_speakTime;
         uint32 m_speakCount;
+		time_t m_speakTimeAutoMute;
+        uint32 m_speakCountAutoMute;
         Difficulty m_dungeonDifficulty;
         Difficulty m_raidDifficulty;
 

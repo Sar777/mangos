@@ -271,7 +271,7 @@ enum MangosStrings
     LANG_COMMAND_ADDVENDORITEMITEMS     = 280,
     LANG_COMMAND_KICKSELF               = 281,
     LANG_COMMAND_KICKMESSAGE            = 282,
-    //                                    283, not used
+    LANG_DISABLE_CHAT_CHARACTER         = 283,
     LANG_COMMAND_WHISPERACCEPTING       = 284,
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
@@ -1071,6 +1071,8 @@ enum MangosStrings
     LANG_BG_IC_NODE_REFINERY            = 20100,
     LANG_BG_IC_NODE_QUARRY              = 20101,
     LANG_BG_IC_NODE_HANGAR              = 20102,
+	LANG_BG_IC_ALLY						= 20103,
+	LANG_BG_IC_HORDE					= 20104,
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)

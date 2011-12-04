@@ -189,6 +189,10 @@ enum BattleGroundQueueTypeId
 
 enum ScoreType
 {
+	/** World of Warcraft Armory **/
+    SCORE_DAMAGE_TAKEN          = 16,
+    SCORE_HEALING_TAKEN         = 17,
+    /** World of Warcraft Armory **/
     SCORE_KILLING_BLOWS         = 1,
     SCORE_DEATHS                = 2,
     SCORE_HONORABLE_KILLS       = 3,
@@ -293,6 +297,9 @@ class BattleGroundScore
     public:
         BattleGroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
             BonusHonor(0), DamageDone(0), HealingDone(0)
+			/** World of Warcraft Armory **/
+			, DamageTaken(0), HealingTaken(0)
+			/** World of Warcraft Armory **/
         {}
         virtual ~BattleGroundScore() {}                     //virtual destructor is used when deleting score from scores map
 
@@ -302,6 +309,10 @@ class BattleGroundScore
         uint32 BonusHonor;
         uint32 DamageDone;
         uint32 HealingDone;
+		/** World of Warcraft Armory **/
+        uint32 DamageTaken;
+        uint32 HealingTaken;
+        /** World of Warcraft Armory **/
 };
 
 /*

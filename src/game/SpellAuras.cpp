@@ -2611,6 +2611,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 75973:                             // X-53 Touring Rocket
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 75957, 75972, 76154);
                         return;
+					case 70623:
+						if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+						target->CastSpell(target, 70525, true);
+						break;
+					case 70638:
+						if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+						target->CastSpell(target, 70639, true);
+						break;
                 }
                 break;
             }
@@ -5622,6 +5632,10 @@ void Aura::HandleAuraModUseNormalSpeed(bool /*apply*/, bool Real)
 void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
 {
     uint32 misc  = m_modifier.m_miscvalue;
+    // Forbearance
+    // in DBC wrong mechanic immune since 3.0.x
+    if (GetId() == 25771)
+        misc = MECHANIC_IMMUNE_SHIELD;
 
     Unit *target = GetTarget();
 
@@ -5673,6 +5687,34 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     // Heroic Fury (Intercept cooldown remove)
     else if (apply && GetSpellProto()->Id == 60970 && target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)target)->RemoveSpellCooldown(20252, true);
+
+	if (apply && GetSpellProto()->Id == 42292 && target->GetTypeId() == TYPEID_PLAYER)
+	{
+		if (!((Player*)target)->HasSpellCooldown(7744))
+		{
+			((Player*)target)->AddSpellCooldown(7744, 0, time(NULL) + 45);
+			WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+			data << uint64(target->GetObjectGuid());
+			data << uint8(0);
+			data << uint32(7744);
+			data << uint32(45*IN_MILLISECONDS);
+			((Player*)target)->GetSession()->SendPacket(&data);
+		}
+	}
+	else if (apply && GetSpellProto()->Id == 7744 && target->GetTypeId() == TYPEID_PLAYER)
+	{
+		if (!((Player*)target)->HasSpellCooldown(42292))
+		{
+			((Player*)target)->AddSpellCooldown(42292, 0, time(NULL) + 45);
+
+			WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+			data << uint64(target->GetObjectGuid());
+			data << uint8(0);
+			data << uint32(42292);
+			data << uint32(45*IN_MILLISECONDS);
+			((Player*)target)->GetSession()->SendPacket(&data);
+		}
+	}
 }
 
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
@@ -8060,7 +8102,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     if (spellProto->SpellFamilyFlags.test<CF_PALADIN_SACRED_SHIELD>())
                     {
                         // +75% from spell power
-                        DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.75f;
+                        DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.54f;
                     }
                     break;
                 default:
@@ -8195,6 +8237,13 @@ void Aura::PeriodicTick()
                     case 67298:
                         pCaster->CastSpell(target, 65952, true);
                         break;
+					// Boiling Blood (Saurfang)
+					case 72385:
+					case 72441:
+                    case 72442:
+                    case 72443:	
+                        target->CastSpell(target, 72202, true); // Blood Link
+						break;
                     default:
                         break;
                 }
@@ -8448,6 +8497,22 @@ void Aura::PeriodicTick()
             }
 
             pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
+
+            if (pCaster->HasAura(32386))   //Shadow Embrace Rank 1
+                if (Aura *aura = pCaster->GetAura(60448, EFFECT_INDEX_0))
+                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*2)) / 100.0f;
+            if (pCaster->HasAura(32388))    //Shadow Embrace Rank 2
+                if (Aura *aura = pCaster->GetAura(60465, EFFECT_INDEX_0))
+                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*4)) / 100.0f;
+            if (pCaster->HasAura(32389))    //Shadow Embrace Rank 3
+                if (Aura *aura = pCaster->GetAura(60466, EFFECT_INDEX_0))
+                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*6)) / 100.0f;
+            if (pCaster->HasAura(32390))    //Shadow Embrace Rank 4
+                if (Aura *aura = pCaster->GetAura(60467, EFFECT_INDEX_0))
+                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*8)) / 100.0f;
+            if (pCaster->HasAura(32391))    //Shadow Embrace Rank 5
+                if (Aura *aura = pCaster->GetAura(32391, EFFECT_INDEX_0))
+                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*10)) / 100.0f;
 
             // This method can modify pdamage
             bool isCrit = IsCritFromAbilityAura(pCaster, pdamage);

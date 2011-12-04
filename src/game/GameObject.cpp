@@ -1204,7 +1204,7 @@ void GameObject::Use(Unit* user)
                     {
                         if (BattleGround *bg = player->GetBattleGround())
                         {
-                            if (bg->GetTypeID(true) == BATTLEGROUND_SA)
+                            if (bg->GetTypeID(true) == BATTLEGROUND_SA || bg->GetTypeID(true) == BATTLEGROUND_IC)
                                 bg->EventPlayerDamageGO(player, this, info->goober.eventId, 0);
                         }
                     }

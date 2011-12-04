@@ -1,0 +1,1 @@
+UPDATE `spell_target_position` SET `target_map`='609', `target_position_x`='2450.16', `target_position_y`='-5600.19', `target_position_z`='367.43', `target_orientation`='0.57' WHERE (`id`='53053');

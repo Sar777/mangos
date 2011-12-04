@@ -1326,6 +1326,10 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             if (m_spellInfo->Mechanic == MECHANIC_SAPPED)
                 unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
+            // Remove Bladestrom disarm
+            if ((m_spellInfo->Id == 51722 || m_spellInfo->Id == 676 || m_spellInfo->Id == 64058) && unit->HasAura(46924))
+                unit->RemoveAurasDueToSpell(46924);
+
             // can cause back attack (if detected), stealth removed at Spell::cast if spell break it
             if (!(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NO_THREAT) && !IsPositiveSpell(m_spellInfo->Id) &&
                 m_caster->isVisibleForOrDetect(unit, unit, false))
@@ -1558,7 +1562,10 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo *target)
             }
     }
 
-    target->damage = damageInfo.damage;
+	//Hack, damage fire totem 1 rank
+	if (m_spellInfo->Id == 22048)
+		target->damage = m_damage;
+	else target->damage = damageInfo.damage;
     target->HitInfo = damageInfo.HitInfo;
 }
 
@@ -1705,6 +1712,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 802:                                   // Mutate Bug
                 case 804:                                   // Explode Bug
                 case 23138:                                 // Gate of Shazzrah
+				case 27808:									// Frost Blast Kel'thuzad
                 case 28560:                                 // Summon Blizzard
                 case 31347:                                 // Doom TODO: exclude top threat target from target selection
                 case 33711:                                 // Murmur's Touch
@@ -1887,13 +1895,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 72289:                                 // Frost infusion credit
                 case 72706:                                 // Valithria event credit
                 case 72934:                                 // Blood infusion credit
+				case 72769:                                 // Scent of Blood (Saurfang)
+                case 72771:
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
                 case 69845:                                 // Sindragosa Frost bomb (hack!)
                 case 71053:
                 case 71054:
                 case 71055:
-                    radius = 50;
+                    radius = 35;
                     break;
                 case 72350:                                 // Fury of Frostmourne
                 case 72351:                                 // Fury of Frostmourne
@@ -3756,6 +3766,78 @@ void Spell::cast(bool skipCheck)
     {
         for (SpellLinkedSet::const_iterator itr = linkedSet.begin(); itr != linkedSet.end(); ++itr)
             AddTriggeredSpell(*itr);
+    }
+
+    //grounding totem fix
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+        {
+            if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
+            {
+                if (m_targets.getUnitTarget()->HasAura(8178)) 
+					m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+                break;
+            } 
+            switch (m_spellInfo->Id)
+            {
+                case 16979:                                                      //feral charge
+                case 49376:                                                      //feral charge
+                {
+                    if (m_targets.getUnitTarget()->HasAura(8178)) 
+						m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+                    break;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
+            {
+                if (m_targets.getUnitTarget()->HasAura(8178))
+					m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+                break;
+            } 
+            if (m_spellInfo->SpellFamilyFlags.test<CF_WARRIOR_CHARGE>())          //charge
+            {
+                if(m_targets.getUnitTarget()->HasAura(8178)) 
+					m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+                break;
+            }
+            switch (m_spellInfo->Id)
+            {
+                case 20252:                                                      //intercept
+                {
+                    if (m_targets.getUnitTarget()->HasAura(8178)) 
+						m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+                    break;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
+            {
+                if (m_targets.getUnitTarget()->HasAura(8178)) 
+					m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+				break;
+            }
+            switch (m_spellInfo->Id)
+            {
+                case 36554:                                                      //ROGUE_SHADOWSTEP
+                case 14183:                                                      //PREMEDITATION
+                {
+                    if (m_targets.getUnitTarget()->HasAura(8178)) 
+						m_targets.getUnitTarget()->RemoveAurasDueToSpell(8178);
+                    break;
+                }
+            }
+            break;
+		}            
+        default: 
+			break;
     }
 
     // traded items have trade slot instead of guid in m_itemTargetGUID
@@ -8272,6 +8354,29 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
                 return true;
             break;
         }
+		case 45822: // Alterac buffs
+        case 45823:
+        case 45824:
+        case 45826:
+        case 45828:
+        case 45829:
+        case 45830:
+        case 45831:
+        {
+            UnitList tempTargetUnitMap;
+            FillAreaTargets(tempTargetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            if (!tempTargetUnitMap.empty())
+            {
+                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
+                {
+                    if ((*iter)->GetObjectGuid().IsPlayer())
+                        continue;
+
+                    targetUnitMap.push_back((*iter));
+                }
+            }
+            break;
+        }
         case 46584: // Raise Dead
         {
             Unit* pCorpseTarget = NULL;
@@ -8717,7 +8822,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
-        case 72378: // Blood Nova
+        case 72378: // Blood Nova (Saurfang)
         case 73058:
         {
             UnitList tempTargetUnitMap;
@@ -8726,15 +8831,49 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             {
                 for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
                 {
-                    if (!(*iter)->GetObjectGuid().IsPlayerOrPet())
+                    if (!(*iter)->GetObjectGuid().IsPlayer())
                         continue;
 
-                    if (m_caster->GetDistance(*iter) < 8.0f)
+                    if (m_caster->GetDistance(*iter) < 10.0f)
                         continue;
 
                     targetUnitMap.push_back((*iter));
                 }
             }
+            break;
+        }
+		case 72385:                                     // Boiling Blood
+        case 72441:
+        case 72442:
+        case 72443:
+        {
+            UnitList tempTargetUnitMap;
+            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            if (!tempTargetUnitMap.empty())
+            {
+                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
+                {
+                    if (!(*iter)->GetObjectGuid().IsPlayer())
+                        continue;
+
+                    if ((*iter) == m_caster->getVictim())
+                        continue;
+
+                    targetUnitMap.push_back((*iter));
+                }
+            }
+
+            if (!targetUnitMap.empty())
+            {
+                UnitList::iterator i = targetUnitMap.begin();
+                Unit *pTmp;
+
+                advance(i, urand(0, targetUnitMap.size() - 1));
+                pTmp = *i;
+                targetUnitMap.clear();
+                targetUnitMap.push_back(pTmp);
+            }
+
             break;
         }
         case 71336:                                     // Pact of the Darkfallen

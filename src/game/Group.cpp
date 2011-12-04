@@ -1897,8 +1897,8 @@ void Group::_homebindIfInstance(Player *player)
             // leaving the group in an instance, the homebind timer is started
             // unless the player is permanently saved to the instance
             InstancePlayerBind *playerBind = player->GetBoundInstance(map->GetId(), map->GetDifficulty());
-            if(!playerBind || !playerBind->perm)
-                player->m_InstanceValid = false;
+			if ((!playerBind || !playerBind->perm) || (sWorld.getConfig(CONFIG_BOOL_HOMEBIND_ENABLE) && (playerBind || playerBind->perm)))
+				player->m_InstanceValid = false;
         }
     }
 }

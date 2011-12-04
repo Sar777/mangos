@@ -387,6 +387,11 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     m_speakTime = 0;
     m_speakCount = 0;
 
+	m_speakTimeAutoMute = 0;
+    m_speakCountAutoMute = 0;
+
+    m_bTradeState = false;
+
     m_objectType |= TYPEMASK_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
 
@@ -12478,6 +12483,11 @@ void Player::SwapItem( uint16 src, uint16 dst )
     if (!pSrcItem)
         return;
 
+    if (isTradeState())
+    {
+        SendEquipError(EQUIP_ERR_CANT_TRADE_EQUIP_BAGS, pSrcItem, pDstItem);
+        return;
+    }
     DEBUG_LOG( "STORAGE: SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
 
     if (!isAlive())
@@ -17976,6 +17986,20 @@ void Player::SaveToDB()
     DEBUG_FILTER_LOG(LOG_FILTER_PLAYER_STATS, "The value of player %s at save: ", m_name.c_str());
     outDebugStatsValues();
 
+	/** World of Warcraft Armory **/
+    if (sWorld.getConfig(CONFIG_BOOL_ARMORY_SUPPORT))
+    {
+        std::ostringstream ps;
+        ps << "REPLACE INTO armory_character_stats (guid,data) VALUES ('" << GetGUIDLow() << "', '";
+        for(uint16 i = 0; i < m_valuesCount; ++i )
+        {
+            ps << GetUInt32Value(i) << " ";
+        }
+        ps << "')";
+        CharacterDatabase.Execute( ps.str().c_str() );
+    }
+    /** World of Warcraft Armory **/
+
     CharacterDatabase.BeginTransaction();
 
     static SqlStatementID delChar ;
@@ -18918,6 +18942,61 @@ void Player::UpdateSpeakTime()
     m_speakTime = current + sWorld.getConfig(CONFIG_UINT32_CHATFLOOD_MESSAGE_DELAY);
 }
 
+/*********************************************************/
+/***               AUTOMUTE SYSTEM                     ***/
+/*********************************************************/
+
+std::string msg_data;
+void Player::AutoMute(std::string msg)
+{
+    // ignore chat spam protection for GMs in any mode
+    if(GetSession()->GetSecurity() > SEC_PLAYER)
+        return;
+	
+	if (!sWorld.getConfig(CONFIG_BOOL_AUTOMUTE_ENABLE))
+		return;
+
+	if (msg == "")
+		return;
+
+	if (msg_data != msg)
+	{
+		msg_data = msg;
+		m_speakCountAutoMute = 1;
+		return;
+	}
+
+    time_t currentAutoMute = time (NULL);
+	if (m_speakTimeAutoMute >= currentAutoMute)
+	{
+		uint32 max_countAutoMute = sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_COUNT);
+		if(!max_countAutoMute)
+		    return;
+		++m_speakCountAutoMute;
+		if (m_speakCountAutoMute >= max_countAutoMute && msg_data == msg)
+		{
+			// prev ent overwrite mute time, if message send just before mutes set, for example.
+			uint32 timeMute = sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME);
+			time_t new_muteAutoMute = currentAutoMute + (timeMute * 60);
+			if (GetSession()->m_muteTime < new_muteAutoMute)
+			{
+				uint32 account_id = GetSession()->GetAccountId();
+				GetSession()->m_muteTime = new_muteAutoMute;
+				LoginDatabase.PExecute("UPDATE account SET mutetime = " UI64FMTD " WHERE id = '%u'", uint64(new_muteAutoMute), account_id);
+				ChatHandler(this).PSendSysMessage(11201, sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME));
+				sWorld.SendWorldTextWithSecurity(AccountTypes(1), 11200, sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME), GetSession()->GetPlayerName());
+				msg_data = "";
+				m_speakCountAutoMute = 0;
+			}
+		}
+	} else {
+		m_speakCountAutoMute = 0;
+		msg_data = "";
+	}
+
+	m_speakTimeAutoMute = currentAutoMute + sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_DELAY);
+}
+
 bool Player::CanSpeak() const
 {
     return  GetSession()->m_muteTime <= time (NULL);
@@ -19204,6 +19283,15 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
 
     Player *rPlayer = sObjectMgr.GetPlayer(receiver);
 
+	// announce afk or dnd message
+    if (rPlayer->isAFK())
+        ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->autoReplyMsg.c_str());
+    else if (rPlayer->isDND())
+	{
+        ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->autoReplyMsg.c_str());
+		return;
+	}
+
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildPlayerChat(&data, CHAT_MSG_WHISPER, text, language);
     rPlayer->GetSession()->SendPacket(&data);
@@ -19221,12 +19309,6 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
         SetAcceptWhispers(true);
         ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
     }
-
-    // announce afk or dnd message
-    if (rPlayer->isAFK())
-        ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->autoReplyMsg.c_str());
-    else if (rPlayer->isDND())
-        ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->autoReplyMsg.c_str());
 }
 
 void Player::PetSpellInitialize()
@@ -20344,7 +20426,7 @@ void Player::UpdateHomebindTime(uint32 time)
     else
     {
         // instance is invalid, start homebind timer
-        m_HomebindTimer = 15000;
+        m_HomebindTimer = sWorld.getConfig(CONFIG_UINT32_HOMEBIND_TIMER);
         // send message to player
         WorldPacket data(SMSG_RAID_GROUP_ONLY, 4+4);
         data << uint32(m_HomebindTimer);
@@ -24188,6 +24270,45 @@ bool Player::IsReferAFriendLinked(Player* target)
 
     return false;
 }
+
+/** World of Warcraft Armory **/
+void Player::WriteWowArmoryDatabaseLog(uint32 type, uint32 data)
+{
+    if (!sWorld.getConfig(CONFIG_BOOL_ARMORY_SUPPORT))
+        return;
+    /*
+        Log types:
+        1 - achievement feed
+        2 - loot feed
+        3 - boss kill feed
+    */
+    uint32 pGuid = GetGUIDLow();
+    sLog.outDetail("WoWArmory: write feed log (guid: %u, type: %u, data: %u", pGuid, type, data);
+    if (type <= 0 || type > 3)    // Unknown type
+    {
+        sLog.outError("WoWArmory: unknown type id: %d, ignore.", type);
+        return;
+    }
+    if (type == 3)    // Do not write same bosses many times - just update counter.
+    {
+        uint8 Difficulty = GetMap()->GetDifficulty();
+        QueryResult *result = CharacterDatabase.PQuery("SELECT counter FROM armory_character_feed_log WHERE guid='%u' AND type=3 AND data='%u' AND difficulty='%u' LIMIT 1", pGuid, data, Difficulty);
+        if (result)
+        {
+            CharacterDatabase.PExecute("UPDATE armory_character_feed_log SET counter=counter+1, date=UNIX_TIMESTAMP(NOW()) WHERE guid='%u' AND type=3 AND data='%u' AND difficulty='%u' LIMIT 1", pGuid, data, Difficulty);
+        }
+        else
+        {
+            CharacterDatabase.PExecute("INSERT INTO armory_character_feed_log (guid, type, data, date, counter, difficulty) VALUES('%u', '%d', '%u', UNIX_TIMESTAMP(NOW()), 1, '%u')", pGuid, type, data, Difficulty);
+        }
+        delete result;
+    }
+    else
+    {
+        CharacterDatabase.PExecute("REPLACE INTO armory_character_feed_log (guid, type, data, date, counter) VALUES('%u', '%d', '%u', UNIX_TIMESTAMP(NOW()), 1)", pGuid, type, data);
+    }
+}
+/** World of Warcraft Armory **/
 
 AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficulty difficulty)
 {

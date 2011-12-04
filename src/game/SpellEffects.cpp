@@ -355,6 +355,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                             damage = 200;
                         break;
                     }
+					case 28524:
+					case 29318:
+					{
+						damage = urand(14000, 15000);
+						break;
+					}
                     case 20253:                             // Intercept (warrior spell trigger)
                     case 61491:
                     {
@@ -473,6 +479,13 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         damage = damage / radius * (radius - dist);
                         break;
                     }
+					// Gargoyle Strike
+					case 51963:
+					{
+						// about +4 base spell dmg per level
+                        damage = (m_caster->getLevel() - 60) * 4 + 60;
+                        break;
+					}
                     // Flame Tsunami (Sartharion encounter)
                     case 57491:
                     {
@@ -547,6 +560,18 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         float distance = unitTarget->GetDistance2d(m_caster);
                         damage *= exp(-distance/(27.5f));
                         break;
+                    }
+					// Mark of the Fallen Champion damage (Saurfang)
+					case 72255:
+                    case 72444:	
+                    case 72445:	
+                    case 72446:	
+					{
+						if (!unitTarget->HasAura(72293))
+							damage = 0;	
+						else
+							unitTarget->CastSpell(unitTarget, 72202, true); // Blood Link	
+						break;	
                     }
                     case 74607:
                     // SPELL_FIERY_COMBUSTION_EXPLODE - Ruby sanctum boss Halion,
@@ -768,6 +793,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                 else if (m_spellInfo->Id == 63675)
                 {
                     int32 heal = damage * 15 / 100;
+					damage = int32(damage / 1.8); //hack damage
                     m_caster->CastCustomSpell(m_caster, 75999, &heal, NULL, NULL, true);
                 }
                 break;
@@ -1289,12 +1315,223 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 20577:                                 // Cannibalize
-                {
+                {	
                     if (unitTarget)
                         m_caster->CastSpell(m_caster, 20578, false, NULL);
 
                     return;
                 }
+				case 66250:                                                             // Pass The Turkey
+                {
+
+						if(!unitTarget)
+							return;
+					if (VehicleKit* Chair = m_caster->GetVehicleKit())
+						if (Unit* Player = Chair->GetPassenger(0))
+										{
+												Player->CastSpell(unitTarget, 66373, true);
+											    Player->CastSpell(unitTarget, 61928, true);
+												Player->CastSpell(unitTarget, 61801, true);
+										   }
+					return;
+				}
+				case 66259:                                                             // Pass The Stuffing
+					{
+						if(!unitTarget)
+							return;
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+										   {
+												Player->CastSpell(unitTarget, 66375, true);
+											    Player->CastSpell(unitTarget, 61927, true);
+												Player->CastSpell(unitTarget, 61800, true);
+										   }
+						return;
+					}
+				case 66260:                                                             // Pass The Pie
+                               {
+						if(!unitTarget)
+							return;
+								   if (VehicleKit* Chair = m_caster->GetVehicleKit())
+									   if (Unit* Player = Chair->GetPassenger(0))
+										   {
+											   Player->CastSpell(unitTarget, 66374, true);
+											   Player->CastSpell(unitTarget, 61926, true);
+												Player->CastSpell(unitTarget, 61799, true);
+										   }
+								   return;
+                               }
+				case 66261:                                                             // Pass The Cranberries
+ 
+					{
+						if(!unitTarget)
+							return;
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+								{
+
+									Player->CastSpell(unitTarget, 66372, true);
+									Player->CastSpell(unitTarget, 61925, true);
+									Player->CastSpell(unitTarget, 61798, true);
+								}
+						return;
+					}
+				case 66262:                                                             // Pass The Sweet Potatoes
+                       
+					{
+						if(!unitTarget)
+							return;
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+								{
+									Player->CastSpell(unitTarget, 66376, true);
+									Player->CastSpell(unitTarget, 61929, true);
+									Player->CastSpell(unitTarget, 61802, true);
+								}
+						return;
+					}
+
+
+				case 61784:
+					{
+						if (!unitTarget)
+							return;
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+	/*******/				{
+								Player->CastSpell(Player, 61807, true);
+								if(Aura* aura1 = Player->GetAura(61804,eff_idx))
+									if(aura1->GetStackAmount()>=5)
+								if(Aura* aura2 = Player->GetAura(61805,eff_idx))
+									if(aura2->GetStackAmount()>=5)
+								if(Aura* aura3 = Player->GetAura(61806,eff_idx))
+									if(aura3->GetStackAmount()>=5)
+								if(Aura* aura4 = Player->GetAura(61807,eff_idx))
+									if(aura4->GetStackAmount()>=4)
+								if(Aura* aura5 = Player->GetAura(61808,eff_idx))
+									if(aura5->GetStackAmount()>=5)
+										Player->CastSpell(Player, 61849, true);
+								if(Chair->GetBase()->GetEntry()!=34812)
+								{
+									Chair->GetBase()->RemoveAura(61801,EFFECT_INDEX_0);
+								}
+
+	/*******/				}
+						return;
+					}
+				case 61785:
+					{
+						if (!unitTarget)
+							return;
+
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+	/*******/				{
+								Player->CastSpell(Player, 61804, true);
+								if(Aura* aura1 = Player->GetAura(61804,eff_idx))
+									if(aura1->GetStackAmount()>=4)
+								if(Aura* aura2 = Player->GetAura(61805,eff_idx))
+									if(aura2->GetStackAmount()>=5)
+								if(Aura* aura3 = Player->GetAura(61806,eff_idx))
+									if(aura3->GetStackAmount()>=5)
+								if(Aura* aura4 = Player->GetAura(61807,eff_idx))
+									if(aura4->GetStackAmount()>=5)
+								if(Aura* aura5 = Player->GetAura(61808,eff_idx))
+									if(aura5->GetStackAmount()>=5)
+										Player->CastSpell(Player, 61849, true);
+								if(Chair->GetBase()->GetEntry()!=34823)
+								{
+									Chair->GetBase()->RemoveAura(61798,EFFECT_INDEX_0);
+								}
+
+	/*******/				}
+						return;
+					}
+				case 61786:
+					{
+						if (!unitTarget)
+							return;
+
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+	/*******/				{
+								Player->CastSpell(Player, 61808, true);
+								if(Aura* aura1 = Player->GetAura(61804,eff_idx))
+									if(aura1->GetStackAmount()>=5)
+								if(Aura* aura2 = Player->GetAura(61805,eff_idx))
+									if(aura2->GetStackAmount()>=5)
+								if(Aura* aura3 = Player->GetAura(61806,eff_idx))
+									if(aura3->GetStackAmount()>=5)
+								if(Aura* aura4 = Player->GetAura(61807,eff_idx))
+									if(aura4->GetStackAmount()>=5)
+								if(Aura* aura5 = Player->GetAura(61808,eff_idx))
+									if(aura5->GetStackAmount()>=4)
+										Player->CastSpell(Player, 61849, true);
+								if(Chair->GetBase()->GetEntry()!=34824)
+								{
+									Chair->GetBase()->RemoveAura(61802,EFFECT_INDEX_0);
+								}
+
+	/*******/				}
+						return;
+					}
+				case 61787:
+					{
+						if (!unitTarget)
+							return;
+
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+										   if (Unit* Player = Chair->GetPassenger(0))
+	/*******/				{
+								Player->CastSpell(Player, 61805, true);
+								if(Aura* aura1 = Player->GetAura(61804,eff_idx))
+									if(aura1->GetStackAmount()>=5)
+								if(Aura* aura2 = Player->GetAura(61805,eff_idx))
+									if(aura2->GetStackAmount()>=4)
+								if(Aura* aura3 = Player->GetAura(61806,eff_idx))
+									if(aura3->GetStackAmount()>=5)
+								if(Aura* aura4 = Player->GetAura(61807,eff_idx))
+									if(aura4->GetStackAmount()>=5)
+								if(Aura* aura5 = Player->GetAura(61808,eff_idx))
+									if(aura5->GetStackAmount()>=5)
+										Player->CastSpell(Player, 61849, true);
+								if(Chair->GetBase()->GetEntry()!=34822)
+								{
+									Chair->GetBase()->RemoveAura(61799,EFFECT_INDEX_0);
+								}
+
+	/*******/				}
+						return;
+					}
+				case 61788:
+					{
+						if (!unitTarget)
+							return;
+
+						if (VehicleKit* Chair = m_caster->GetVehicleKit())
+							if (Unit* Player = Chair->GetPassenger(0))
+	/*******/				{
+								Player->CastSpell(Player, 61806, true);
+								if(Aura* aura1 = Player->GetAura(61804,eff_idx))
+									if(aura1->GetStackAmount()>=5)
+								if(Aura* aura2 = Player->GetAura(61805,eff_idx))
+									if(aura2->GetStackAmount()>=5)
+								if(Aura* aura3 = Player->GetAura(61806,eff_idx))
+									if(aura3->GetStackAmount()>=4)
+								if(Aura* aura4 = Player->GetAura(61807,eff_idx))
+									if(aura4->GetStackAmount()>=5)
+								if(Aura* aura5 = Player->GetAura(61808,eff_idx))
+									if(aura5->GetStackAmount()>=5)
+										Player->CastSpell(Player, 61849, true);
+								if(Chair->GetBase()->GetEntry()!=34819)
+								{
+									Chair->GetBase()->RemoveAura(61800,EFFECT_INDEX_0);
+								}
+
+	/*******/				}
+						return;
+					}
+
                 case 21147:                                 // Arcane Vacuum (Azuregos)
                 case 58694:                                 // Arcane Vacuum (Cyanigosa)
                 {
@@ -1429,6 +1666,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         case 4: spell_id = 24927; break;    // Ghost
                     }
 
+					if (urand(0,5) == 0)
+						m_caster->CastSpell(m_caster, 42966, true);
                     m_caster->CastSpell(m_caster, spell_id, true);
                     return;
                 }
@@ -2965,6 +3204,25 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                   unitTarget->CastSpell(unitTarget, 62295, true);
                   return;
                 }
+				case 66218:
+				{
+					if (VehicleKit* catapult = m_caster->GetVehicleKit())
+					{
+						Unit* Player = catapult->GetPassenger(0);
+						float speedZ = 22.0f;
+						float px, py, pz;
+						// If dest location if present
+					    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+						{
+							px = m_targets.m_destX;
+							py = m_targets.m_destY;
+							pz = m_targets.m_destZ;
+						}
+						catapult->RemoveAllPassengers();
+						Player->CastSpell(Player, 66251, true);
+						Player->GetMotionMaster()->MoveJump(px, py, pz, 10.0f, speedZ);
+					}
+				}
                 case 63984:                                 // Hate to Zero (Ulduar - Yogg Saron)
                 {
                     if (!unitTarget)
@@ -3330,6 +3588,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
 
                 // dummy cast itself ignored by client in logs
+                m_caster->SetPower(POWER_RAGE, m_caster->GetPower(POWER_RAGE) + 150); // Temp hack
                 m_caster->CastCustomSpell(unitTarget,50782,&damage,NULL,NULL,true);
                 return;
             }
@@ -7106,6 +7365,17 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             {
                 int32 count = CalculateDamage(EFFECT_INDEX_2, unitTarget);
                 spell_bonus += int32(count * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100.0f);
+				
+				if (unitTarget->GetTypeId() != TYPEID_UNIT)
+					return;
+
+				ThreatList const& tList = unitTarget->getThreatManager().getThreatList();
+				for (ThreatList::const_iterator itr = tList.begin();itr != tList.end(); ++itr)
+				{
+					Unit* pUnit = unitTarget->GetMap()->GetUnit((*itr)->getUnitGuid());
+					if (pUnit && unitTarget->getThreatManager().getThreat(pUnit))
+						unitTarget->getThreatManager().addThreat(pUnit, 500.0f);
+				}
             }
             break;
         }
@@ -8257,6 +8527,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(47636);
                     return;
                 }
+				case 48610:
+				{
+					if (VehicleKit *seat = m_caster->GetVehicleKit())
+					{
+                        if (Unit *passenger = seat->GetPassenger(0))
+						{
+							passenger->ExitVehicle();
+							((Creature*)m_caster)->ForcedDespawn();
+						}
+					}
+					return;
+				}
                 case 48679:                                 // Banshee's Magic Mirror
                 {
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -8957,6 +9239,50 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+				case 62014:
+				{
+
+                    int32 EMOTE_TEXT_TURKEY_HUNTER = -1999001;
+					int32 EMOTE_TEXT_TURKEY_DOMINATION = -1999002;
+					int32 EMOTE_TEXT_TURKEY_SLAUGHTER = -1999003;
+					int32 EMOTE_TEXT_TURKEY_TRIUMPH = -1999004;
+                       
+					if (unitTarget && unitTarget->GetTypeId() != TYPEID_PLAYER)
+						return;
+					if (Aura* aura = unitTarget->GetAura(62014, EFFECT_INDEX_0))
+						if (aura->GetStackAmount() == 9)
+						{
+							unitTarget->CastSpell(unitTarget, 53791, true);         //Berserker Stance Animation
+                            unitTarget->RemoveAurasDueToSpell(53791);                       //Remove Berserker Stance Aura
+                            m_caster->MonsterWhisper(EMOTE_TEXT_TURKEY_HUNTER, unitTarget, true);
+                            
+						}
+
+						if (Aura* aura = unitTarget->GetAura(62014, EFFECT_INDEX_0))
+							if (aura->GetStackAmount() == 19)
+							{       unitTarget->CastSpell(unitTarget, 53791, true);
+						unitTarget->RemoveAurasDueToSpell(53791);
+						m_caster->MonsterWhisper(EMOTE_TEXT_TURKEY_DOMINATION, unitTarget, true);
+						}
+ 
+						if (Aura* aura = unitTarget->GetAura(62014, EFFECT_INDEX_0))
+							if (aura->GetStackAmount() == 29)
+							{
+								unitTarget->CastSpell(unitTarget, 53791, true);
+								unitTarget->RemoveAurasDueToSpell(53791);
+								m_caster->MonsterWhisper(EMOTE_TEXT_TURKEY_SLAUGHTER, unitTarget, true);
+							}
+							if (Aura* aura = unitTarget->GetAura(62014, EFFECT_INDEX_0))
+								if (aura->GetStackAmount() == 39)
+								{
+									m_caster->MonsterWhisper(EMOTE_TEXT_TURKEY_TRIUMPH , unitTarget, true);
+									unitTarget->CastSpell(unitTarget, 53791, true);
+									unitTarget->RemoveAurasDueToSpell(53791);
+									unitTarget->CastSpell(unitTarget, 62021, true);
+								}
+						return;
+                }
+
                 case 62217:                                 // Unstable Energy (Ulduar: Freya's elder)
                 {
                     uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
@@ -9449,6 +9775,32 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+				case 72257:                                 // Remove Marks of the Fallen Champion
+                {
+                    if (unitTarget)
+                        unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 72380:                                 // Blood Nova (Saurfang)
+                case 72438:
+                case 72439:
+                case 72440:
+                {
+                    // cast Blood Link on Saurfang (script target)
+                    if (unitTarget)
+                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true, 0, 0, m_caster->GetObjectGuid(), m_spellInfo);
+                    return;
+                }
+                case 72409:                                 // Rune of Blood (Saurfang)
+                case 72447:
+                case 72448:
+                case 72449:
+                {
+                    // cast Blood Link on Saurfang (script target)
+                    if (unitTarget)
+                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true, 0, 0, m_caster->GetObjectGuid(), m_spellInfo);
+                    return;
+                }
                 case 72219:
                 case 72551:
                 case 72552:
@@ -9495,6 +9847,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 72702, true);
                     m_caster->CastSpell(m_caster, 72703, true);
                     m_caster->CastSpell(m_caster, 72704, true);
+                    return;
+                }
+				case 72378:                                 // Blood Nova
+                case 73058:
+                {
+                    Powers bloodPower;
+                    bloodPower = m_caster->getPowerType();
+                    m_caster->SetPower(bloodPower, m_caster->GetPower(bloodPower) + 1);
                     return;
                 }
                 case 72864:                                 // Death plague
