@@ -3077,6 +3077,44 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 55046:                             // Ice Shard
+                {
+                    if (unitTarget->GetEntry() != 29639)
+                        return;
+                    if (unitTarget->HasAura(55045))
+                        unitTarget->RemoveAurasDueToSpell(55045);
+
+                    ((Creature*)unitTarget)->ForcedDespawn();
+                    m_caster->CastSpell(m_caster, 55073, true);
+
+                    Creature* pTargetDummy = NULL;
+                    float fRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 29734, true, fRange);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pTargetDummy, u_check);
+
+                    Cell::VisitGridObjects(m_caster, searcher, fRange);
+
+                    if (pTargetDummy)
+                    {
+                        pTargetDummy->setFaction(35);
+                        pTargetDummy->SetPhaseMask(PHASEMASK_ANYWHERE,false); 
+
+                        if (VehicleKit *vehicle = m_caster->GetVehicleKit())
+                        {
+                           if (vehicle->HasEmptySeat(1))
+                              pTargetDummy->EnterVehicle(vehicle, 1);
+                           else if (vehicle->HasEmptySeat(2))
+                              pTargetDummy->EnterVehicle(vehicle, 2);
+                           else if (vehicle->HasEmptySeat(3))
+                              pTargetDummy->EnterVehicle(vehicle, 3);
+                           else 
+                              ((Creature*)pTargetDummy)->ForcedDespawn();
+                        }
+                    }
+
+                    return;
+                }
                 case 55818:                                 // Hurl Boulder
                 {
                     // unclear how many summon min/max random, best guess below

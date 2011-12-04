@@ -182,6 +182,7 @@ bool VehicleKit::AddPassenger(Unit *passenger, int8 seatId)
     {
         switch (m_pBase->GetEntry())
         {
+            case 29625:                                     // Hyldsmeet Proto-Drake
             case 33118:                                     // Ignis (Ulduar)
             case 32934:                                     // Kologarn Right Arm (Ulduar)
             case 30234:                                     // Nexus Lord's Hover Disk (Eye of Eternity, Malygos Encounter)

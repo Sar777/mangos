@@ -2569,6 +2569,9 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
     if (victim)
     {
+        if (victim->GetMaxHealth() < (victim->getLevel() * 8 * (1 + victim->getLevel() / 10.0f)))
+            return;
+
         // handle SPELL_AURA_MOD_KILL_XP_PCT auras
         Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_KILL_XP_PCT);
         for(Unit::AuraList::const_iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
@@ -7049,6 +7052,13 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 void Player::UpdateArea(uint32 newArea)
 {
     m_areaUpdateId    = newArea;
+
+    if (newArea == 4437 && GetVehicle() && (GetVehicle()->GetBase()->GetEntry() == 29709))
+    {
+        GetVehicle()->GetBase()->MonsterTextEmote("The proto-drake smells freedom and flies homeward!",  0, true);
+        GetVehicle()->GetBase()->MonsterTextEmote("The proto-drake smells freedom and flies homeward!",  0, true);
+        GetVehicle()->GetBase()->MonsterMoveWithSpeed(7005.622f, -1752.7811f, 836.239f, 100.0f);
+    }
 
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
