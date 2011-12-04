@@ -4311,6 +4311,42 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 // consume diseases
                 unitTarget->RemoveAurasWithDispelType(DISPEL_DISEASE, m_caster->GetObjectGuid());
             }
+			//Glyph of Scourge Strike
+			else switch (m_spellInfo->Id)
+			{
+				case 55090:
+				case 55265:
+				case 55270:
+				case 55271:
+					if(m_caster->GetDummyAura(58642))
+					{
+						Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
+						for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
+						{
+							if (itr->second->GetSpellProto()->Dispel == DISPEL_DISEASE &&
+								itr->second->GetCasterGuid() == m_caster->GetObjectGuid())
+							if (Aura* aura =itr->second->GetAuraByEffectIndex(EFFECT_INDEX_0))
+							{
+								uint32 countMin = aura->GetAuraMaxDuration();
+								uint32 countMax = GetSpellMaxDuration(aura->GetSpellProto());
+								countMax += 9000;
+								countMax += m_caster->HasAura(49036) ? 3000 : 0; //Epidemic (Rank 1)
+								countMax += m_caster->HasAura(49562) ? 6000 : 0; //Epidemic (Rank 2)
+
+								if (countMin < countMax)
+								{
+									aura->GetHolder()->SetAuraDuration(aura->GetAuraDuration() + 3000);
+									aura->GetHolder()->SetAuraMaxDuration(countMin + 3000);
+									aura->GetHolder()->SendAuraUpdate(false);
+								}
+							}
+						}
+						return;
+					}
+					break;
+				default: 
+					break;
+			}
             break;
         }
     }
@@ -9624,7 +9660,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 //Glyph of Scourge Strike
-                case 69961:
+                /*case 69961:
                 {
                     Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
                     for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
@@ -9648,7 +9684,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         }
                     }
                 return;
-                }
+                }*/
                 case 66336:                                 // Mistress' Kiss (Trial of the Crusader, ->
                 case 67076:                                 // -> Lord Jaraxxus encounter, all difficulties)
                 case 67077:                                 // ----- // -----
