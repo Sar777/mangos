@@ -2310,6 +2310,13 @@ void World::InitWeeklyQuestResetTime()
         CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextWeeklyQuestReset));
     else
         delete result;
+
+    std::string args=sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." );
+    char const* args1=asctime(localtime(&m_NextWeeklyQuestReset));
+    char const* args2="@NextArenaDistributionTime: ";
+    args.append(args2);
+    args.append(args1);
+    sWorld.SetMotd(args);
 }
 
 void World::InitDailyQuestResetTime()
