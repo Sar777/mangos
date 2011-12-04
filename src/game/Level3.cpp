@@ -5548,7 +5548,7 @@ bool ChatHandler::HandleBanHelper(BanMode mode, char* args)
 
     uint32 duration_secs = TimeStringToSecs(duration);
 
-    char* reason = ExtractArg(&args);
+    char* reason = args;//ExtractArg(&args);
     if(!reason)
         return false;
 
