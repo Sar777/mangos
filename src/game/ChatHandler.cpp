@@ -506,8 +506,21 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             sChatLog.ChannelMsg(GetPlayer(), channel, msg);
 
             if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+            {
                 if(Channel *chn = cMgr->GetChannel(channel, _player))
+                {
+                    if ((chn->IsLFG()) && !(_player->isGameMaster()))
+		    {
+		       _player->AutoMute(msg);
+                       if (_player->getLevel() < sWorld.getConfig(CONFIG_INT32_LFG_REQ_LEVEL))
+                       {
+                           SendNotification(LANG_TRIGGER_REQ_LEVEL, sWorld.getConfig(CONFIG_INT32_LFG_REQ_LEVEL));
+                           break;
+                        }
+		    }
                     chn->Say(_player->GetObjectGuid(), msg.c_str(), lang);
+                }
+            }
         } break;
 
         case CHAT_MSG_AFK:

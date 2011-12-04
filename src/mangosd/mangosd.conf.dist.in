@@ -1602,6 +1602,7 @@ DurabilityLossChance.Damage = 0.5
 DurabilityLossChance.Absorb = 0.5
 DurabilityLossChance.Parry  = 0.05
 DurabilityLossChance.Block  = 0.05
+LFG.ReqLevel = 8
 Death.SicknessLevel = 11
 Death.CorpseReclaimDelay.PvP = 1
 Death.CorpseReclaimDelay.PvE = 1
