@@ -7164,6 +7164,18 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         // resting and not in tavern (leave city then); tavern leave handled in CheckAreaExploreAndOutdoor
         SetRestType(REST_TYPE_NO);
 
+    //Add Maze
+    if (zone->ID == 3817)                   // in sanctuary
+    {
+        SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+        if (sWorld.IsFFAPvPRealm())
+            SetFFAPvP(false);
+    }
+    else
+    {
+        RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+    }
+    
     // remove items with area/map limitations (delete only for alive player to allow back in ghost mode)
     // if player resurrected at teleport this will be applied in resurrect code
     if (isAlive())

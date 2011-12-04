@@ -326,6 +326,11 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleLookupTeleCommand(char* args);
         bool HandleLookupTitleCommand(char* args);
 
+	bool HandleMazeGenerateCommand(char* args);
+	bool HandleMazeCleanCommand(char* args);
+	bool MazeAddStaircase(int x, int y, int z, int height);
+	bool MazeAddGameObject(int id, float x, float y, float z, float o);
+	
         bool HandleModifyHPCommand(char* args);
         bool HandleModifyManaCommand(char* args);
         bool HandleModifyRageCommand(char* args);
