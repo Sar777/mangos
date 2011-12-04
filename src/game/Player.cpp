@@ -7050,6 +7050,13 @@ void Player::UpdateArea(uint32 newArea)
 {
     m_areaUpdateId    = newArea;
 
+    if (newArea == 4437 && GetVehicle() && (GetVehicle()->GetBase()->GetEntry() == 29709))
+    {
+        GetVehicle()->GetBase()->MonsterTextEmote("The proto-drake smells freedom and flies homeward!",  0, true);
+        GetVehicle()->GetBase()->MonsterTextEmote("The proto-drake smells freedom and flies homeward!",  0, true);
+        GetVehicle()->GetBase()->MonsterMoveWithSpeed(7005.622f, -1752.7811f, 836.239f, 100.0f);
+    }
+
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
     // FFA_PVP flags are area and not zone id dependent
