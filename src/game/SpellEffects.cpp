@@ -9313,6 +9313,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+				// Shoot Air Rifle
+				case 67533:
+				{
+					if(roll_chance_i(40))
+					{
+						 
+						m_caster->CastSpell(unitTarget, 67532, true);
+						m_caster->CastSpell(m_caster,65576,true); 
+						m_caster->CastSpell(unitTarget,67531,true);
+					}
+					return;
+				}
 				case 62014:
 				{
 
