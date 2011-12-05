@@ -9197,6 +9197,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster,59805,true);
                     return;
                 }
+		case 62168:                  // Algalon - Black Hole Damage
+                {
+		    if (!unitTarget)
+		      return;
+		  
+		    unitTarget->CastSpell(unitTarget, 62169, true);
+		    return;		  
+		}
                 case 62428:                                 // Load into Catapult
                 {
                     if (VehicleKit *seat = m_caster->GetVehicleKit())
