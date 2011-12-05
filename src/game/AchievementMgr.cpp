@@ -1793,6 +1793,33 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 progressType = PROGRESS_HIGHEST;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
+				{
+				Player* plr = GetPlayer();
+				if((plr->GetAura(26274,EFFECT_INDEX_0))&&(achievementCriteria->ID==3829))
+				{
+					change = 1;
+					progressType = PROGRESS_ACCUMULATE;
+					break;
+				}
+				if((plr->GetAura(26157,EFFECT_INDEX_0))&&(achievementCriteria->ID==3826))
+				{
+					change = 1;
+					progressType = PROGRESS_ACCUMULATE;
+					break;
+				}
+				if((plr->GetAura(26272,EFFECT_INDEX_0))&&(achievementCriteria->ID==3827))
+				{
+					change = 1;
+					progressType = PROGRESS_ACCUMULATE;
+					break;
+				}
+				if((plr->GetAura(26273,EFFECT_INDEX_0))&&(achievementCriteria->ID==3828))
+				{
+					change = 1;
+					progressType = PROGRESS_ACCUMULATE;
+					break;
+				}
+				}
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
                 if (!miscvalue1)
