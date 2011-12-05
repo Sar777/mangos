@@ -7730,7 +7730,7 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
         return false;
 
     // Check vampiric bite
-    if (m_spellInfo->Id == 70946 && target->HasAura(70867))
+    if (m_spellInfo->Id == 70946 && ((target->HasAura(70867) || target->HasAura(70871))))
         return false;
 
     // Sindragosa frost bomb hack
