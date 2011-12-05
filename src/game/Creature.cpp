@@ -1509,6 +1509,13 @@ void Creature::SetDeathState(DeathState s)
         m_corpseDecayTimer = m_corpseDelay*IN_MILLISECONDS; // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
         m_respawnTime = time(NULL) + m_respawnDelay;        // respawn delay (spawntimesecs)
 
+	//lose happiness when died and in Arena
+        MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
+	if (mapEntry && mapEntry->map_type == MAP_ARENA && IsPet())
+	    if (IsInWorld() && GetObjectGuid().IsPet())
+	      if (((Pet*)this)->getPetType() == HUNTER_PET)
+		m_corpseDecayTimer = 1800*IN_MILLISECONDS; // 30 min	
+
         // always save boss respawn time at death to prevent crash cheating
         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || IsWorldBoss())
             SaveRespawnTime();
