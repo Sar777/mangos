@@ -3568,6 +3568,8 @@ void Spell::cast(bool skipCheck)
                 AddTriggeredSpell(62148);                  // visual effect
             else if (m_spellInfo->Id == 58672)             // Impale, damage and loose threat effect (Vault of Archavon, Archavon the Stone Watcher)
                 AddPrecastSpell(m_caster->GetMap()->IsRegularDifficulty() ? 58666 : 60882);
+            else if (m_spellInfo->Id == 71265)             // Swarming Shadows DoT (Queen Lana'thel ICC)
+                AddPrecastSpell(71277);
             break;
         }
         case SPELLFAMILY_MAGE:
