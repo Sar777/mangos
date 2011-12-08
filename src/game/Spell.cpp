@@ -7756,7 +7756,7 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
         // /  (T)  \<- target in safty circle
 
         std::list<GameObject*>lObjectList;
-        target->GetGameObjectListWithEntryInGrid(lObjectList, target, uiObjectEntry, target->GetDistance2d(m_caster));
+        target->GetGameObjectListWithEntryInGrid(lObjectList, uiObjectEntry, target->GetDistance2d(m_caster));
         float fTargetX, fTargetY, fTargetZ;
         float fCasterX, fCasterY, fCasterZ;
         target->GetPosition(fTargetX, fTargetY, fTargetZ);
