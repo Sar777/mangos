@@ -2424,6 +2424,11 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 {
     DETAIL_LOG("AchievementMgr::CompletedAchievement(%u)", achievement->ID);
+
+    //not complete achievement if player Gamemaster
+    if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
+        return;
+
     if(achievement->flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID)!=m_completedAchievements.end())
         return;
 
