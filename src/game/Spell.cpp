@@ -8877,6 +8877,37 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
+        case 71075: // Invocation of Blood (V) Move
+        case 71079: // Invocation of Blood (K) Move
+        case 71082: // Invocation of Blood (T) Move
+        {
+            UnitList tempTargetUnitMap;
+            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
+            if (!tempTargetUnitMap.empty())
+            {
+                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
+                {
+                    // target the one with Invocation of Blood aura
+                    if ((*iter)->HasAura(70952) ||
+                        (*iter)->HasAura(70981) ||
+                        (*iter)->HasAura(70982))
+                    {
+                        targetUnitMap.push_back(*iter);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        case 72038: // Empowered Shock Vortex (Blood Council)
+        case 72815:
+        case 72816:
+        case 72817:
+        {
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            targetUnitMap.remove(m_caster);
+            break;
+        }
         case 72378: // Blood Nova (Saurfang)
         case 73058:
         {

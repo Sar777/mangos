@@ -351,7 +351,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //297 1 spell (counter spell school?)
     &Aura::HandleUnused,                                    //298 unused (3.2.2a)
     &Aura::HandleUnused,                                    //299 unused (3.2.2a)
-    &Aura::HandleNoImmediateEffect,                         //300 3 spells, share damage (in percent) with aura owner and aura target. implemented in Unit::DealDamage
+    &Aura::HandleAuraShareDamage,                           //300 3 spells, share damage (in percent) with aura owner and aura target. implemented in Unit::DealDamage
     &Aura::HandleNULL,                                      //301 SPELL_AURA_HEAL_ABSORB 5 spells
     &Aura::HandleUnused,                                    //302 unused (3.2.2a)
     &Aura::HandleNULL,                                      //303 17 spells
@@ -1929,8 +1929,22 @@ void Aura::TriggerSpell()
 //                    case 71110: break;
 //                    // Aura of Darkness
 //                    case 71111: break;
-//                    // Ball of Flames Visual
-//                    case 71706: break;
+                    // Ball of Flames Visual
+                    case 71706:
+                    {
+                        // don't "proc" on heroic
+                        if (triggerTarget->GetMap()->GetDifficulty() <= RAID_DIFFICULTY_25MAN_NORMAL)
+                        {
+                            if (SpellAuraHolderPtr holder = triggerTarget->GetSpellAuraHolder(71756))
+                            {
+                                if (holder->GetStackAmount() <= 1)
+                                    triggerTarget->RemoveSpellAuraHolder(holder);
+                                else
+                                    holder->ModStackAmount(-1);
+                            }
+                        }
+                        break;
+                    }
 //                    // Summon Broken Frostmourne
 //                    case 74081: break;
                     default:
@@ -2604,6 +2618,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 71563:                             // Deadly Precision
                         target->CastSpell(target, 71564, true, NULL, this);
                         return;
+                    case 72087:                             // Kinetic Bomb Knockback
+                        float x, y, z;
+                        target->GetPosition(x, y, z);
+                        target->GetMotionMaster()->Clear(true, true);
+                        target->GetMotionMaster()->MovePoint(0, x, y, z + 3.0f * GetStackAmount());
+                        return;
                     case 72286:                             // Invincible
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 72281, 72282, 72283, 72284, 0);
                         return;
@@ -3267,6 +3287,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 int32 damage = GetModifier()->m_amount;
                 target->CastCustomSpell(target, 69770, &damage, 0, 0, true, 0, this, GetCasterGuid(), GetSpellProto());
+                return;
+            }
+            case 72087:                                     // Kinetic Bomb Knockback
+            {
+                float x, y, z;
+                target->GetPosition(x, y, z);
+                z = target->GetTerrain()->GetHeight(x, y, z, true, MAX_FALL_DISTANCE);
+                target->GetMotionMaster()->Clear();
+                target->GetMotionMaster()->MovePoint(0, x, y, z);
                 return;
             }
         }
@@ -5864,6 +5893,13 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
             else
                 target->getHostileRefManager().ResetThreatRedirection();
             break;
+        case 72059:                                         // Unstable (Kinetic Bomb - Blood Council encounter)
+            if (!apply)
+            {
+                if (target->GetTypeId() == TYPEID_UNIT)
+                    ((Creature*)target)->ForcedDespawn();
+            }
+            break;
         default:
             break;
     }
@@ -6193,6 +6229,11 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                     if (caster && target)
                         caster->CastCustomSpell(target, 63278, 0, &(spell->EffectBasePoints[0]), 0, false, 0, 0, caster->GetObjectGuid() , spell);
                     return;
+                }
+                case 73001:                                   // Shadow Prison
+                {
+                    if (target)
+                        target->CastSpell(target, 72998, true);
                 }
             }
         }
@@ -9330,6 +9371,14 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 68873, true);
                     return;
                 }
+                case 73001:                                   // Shadow Prison (Blood Council)
+                {
+                    // cast dmg spell when moving
+                    if (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->isMoving())
+                        target->CastSpell(target, 72999, true);
+
+                    return;
+                }
 // Exist more after, need add later
                 default:
                     break;
@@ -11987,6 +12036,41 @@ uint32 Aura::CalculateCrowdControlBreakDamage()
         }
     }
     return damageCap;
+}
+
+void Aura::HandleAuraShareDamage(bool apply, bool Real)
+{
+    // Invocation of Blood
+    // not sure if all spells should work like that
+    switch (GetId())
+    {
+        case 70952:
+        case 70981:
+        case 70982:
+        {
+            Unit *pTarget = GetTarget();
+
+            if (!pTarget)
+                return;
+
+            if (apply)
+            {
+                Unit *pCaster = GetCaster();
+
+                if (!pCaster)
+                    return;
+
+                pTarget->SetHealthPercent(pCaster->GetHealthPercent());
+            }
+            else
+            {
+                if (pTarget->isAlive())
+                    pTarget->SetHealth(1);
+            }
+
+            break;
+        }
+    }
 }
 
 bool Aura::IsAffectedByCrowdControlEffect(uint32 damage)

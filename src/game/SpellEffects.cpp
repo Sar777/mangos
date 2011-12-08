@@ -534,6 +534,20 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         damage = std::min(damage, 15000);
                         break;
                     }
+                    // Empowered Flare (Blood Council encounter)
+                    case 71708:
+                    {
+                        // aura doesn't want to proc, so hacked...
+                        if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(71756))
+                        {
+                            if (holder->GetStackAmount() <= 1)
+                                m_caster->RemoveSpellAuraHolder(holder);
+                            else
+                                holder->ModStackAmount(-1);
+                        }
+
+                        break;
+                    }
                     // Defile damage depending from scale.
                     case 72754:
                     case 73708:
@@ -561,17 +575,24 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         damage *= exp(-distance/(27.5f));
                         break;
                     }
-					// Mark of the Fallen Champion damage (Saurfang)
-					case 72255:
+                    // Mark of the Fallen Champion damage (Saurfang)
+                    case 72255:
                     case 72444:	
                     case 72445:	
-                    case 72446:	
-					{
-						if (!unitTarget->HasAura(72293))
-							damage = 0;	
-						else
-							unitTarget->CastSpell(unitTarget, 72202, true); // Blood Link	
-						break;	
+                    case 72446:
+                    {
+                        if (!unitTarget->HasAura(72293))
+                            damage = 0;
+                        else
+                            unitTarget->CastSpell(unitTarget, 72202, true); // Blood Link
+                        break;
+                    }
+                    // Shadow Prison
+                    case 72999:
+                    {
+                        if (Aura *aur = unitTarget->GetDummyAura(m_spellInfo->Id))
+                            damage += aur->GetStackAmount() * aur->GetModifier()->m_amount;
+                          break;
                     }
                     case 74607:
                     // SPELL_FIERY_COMBUSTION_EXPLODE - Ruby sanctum boss Halion,
@@ -3491,6 +3512,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     if (needRemove)
                         unitTarget->RemoveAurasDueToSpell(71340);
+                    break;
+                }
+                case 71718:                                 // Conjure Flame
+                case 72040:                                 // Conjure Empowered Flame
+                {
+                    if (unitTarget)
+                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     break;
                 }
                 case 72202:                                 // Blade power
