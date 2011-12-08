@@ -1897,8 +1897,13 @@ void Aura::TriggerSpell()
                     case 70017:                             // Gunship Cannon Fire
                         trigger_spell_id = 70021;
                         break;
-//                    // Ice Tomb
-//                    case 70157: break;
+                      // Ice Tomb
+                    case 70157:
+                        GetModifier()->m_amount += 1;
+
+                        if (GetModifier()->m_amount == 25)
+                            triggerTarget->CastSpell(triggerTarget, 71665, true);
+                        break;
                     case 70842:                             // Mana Barrier
                     {
                         if (!triggerTarget || triggerTarget->getPowerType() != POWER_MANA)
@@ -3252,6 +3257,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, 68848, true, NULL, this);
                 // Draw Corrupted Soul
                 target->CastSpell(target, 68846, true, NULL, this);
+                return;
+            }
+            case 69766:                                     // Instability (Sindragosa)
+            {
+                // trigger Backlash if aura wears off
+                if (m_removeMode != AURA_REMOVE_BY_EXPIRE)
+                    return;
+
+                int32 damage = GetModifier()->m_amount;
+                target->CastCustomSpell(target, 69770, &damage, 0, 0, true, 0, this, GetCasterGuid(), GetSpellProto());
                 return;
             }
         }
@@ -5964,6 +5979,27 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
 
     switch (GetId())
     {
+        case 70157:                                     // Ice Tomb (Sindragosa)
+        {
+            if (apply)
+            {
+                if (GameObject *pGO = target->SummonGameobject(201722, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, 180))
+                {
+                    pGO->SetSpellId(GetId());
+                    target->AddGameObject(pGO);
+                }
+                if (Creature *pCreature = target->SummonCreature(36980, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 180000))
+                {
+                    pCreature->SetCreatorGuid(target->GetObjectGuid());
+                }
+            }
+            else
+            {
+                if (GameObject *pGo = target->GetGameObject(GetId()))
+                    pGo->Delete();
+            }
+            return;
+        }
         case 71265:                                     // Swarming Shadows (Queen Lana'thel)
         {
             if (apply)
@@ -10717,6 +10753,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 63277:                                 // Shadow Crash (General Vezax - Ulduar)
                 {
                     spellId1 = 65269;
+                    break;
+                }
+                case 70157:                                 // Ice Tomb (Sindragosa)
+                {
+                    spellId1 = 69700;
                     break;
                 }
                 case 70867:                                 // Soul of Blood Qween

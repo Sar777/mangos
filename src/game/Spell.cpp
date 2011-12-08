@@ -7723,6 +7723,70 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
             return false;
     }
 
+    // Checkout if target is behing particular object
+    uint32 uiObjectEntry = 0;
+
+    switch(m_spellInfo->Id)
+    {
+        case 68786:     // Permafrost (Garfrost)
+        case 70336:     // Permafrost Heroic (Garfrost)
+            uiObjectEntry = 196485;
+            break;
+        case 69845:     // Frost Bomb (Sindragosa)
+        case 71053:
+        case 71054:
+        case 71055:
+        case 70127:     // Mystic Buffet (Sindragosa)
+        case 72528:
+        case 72529:
+        case 72530:
+            uiObjectEntry = 201722;
+            break;
+    }
+
+    if (uiObjectEntry)
+    {
+        // Description:
+        // code check out if player is hidden behind GO in circle with diameter equal to GO size
+        // with center placed on the perimeter of GO
+        //     C<- caster
+        //    / \<- cone of spell
+        //   /   \
+        //  / (o) \<- shelter object
+        // /  (T)  \<- target in safty circle
+
+        std::list<GameObject*>lObjectList;
+        target->GetGameObjectListWithEntryInGrid(lObjectList, target, uiObjectEntry, target->GetDistance2d(m_caster));
+        float fTargetX, fTargetY, fTargetZ;
+        float fCasterX, fCasterY, fCasterZ;
+        target->GetPosition(fTargetX, fTargetY, fTargetZ);
+        m_caster->GetPosition(fCasterX, fCasterY, fCasterZ);
+        for (std::list<GameObject*>::iterator itr = lObjectList.begin(); itr != lObjectList.end(); ++itr)
+        {
+            float fDistBlock = m_caster->GetDistance2d(*itr);
+            float fDistVictim = m_caster->GetDistance2d(target);
+            float fDistVictimToBlock = target->GetDistance2d(*itr);
+
+            // quick check
+            if (fDistBlock > fDistVictim)
+                continue;
+
+            float fObjectSize = (*itr)->GetGOInfo()->size;
+
+            // Ice Block in Sindragosa ecounter - size is very small, so we have to use bigger values
+            if (uiObjectEntry == 201722)
+                fObjectSize = 4.0f;
+
+            // not too accurate but fast, good enough for now
+            // small part of ground behind and on sides of the obstacle
+            if (fDistVictimToBlock < fObjectSize + 5.0f &&
+                fDistVictim > fDistBlock + fObjectSize - 2.0f)
+            {
+                return false;
+            }
+        }
+    }
+
     // Check Sated & Exhaustion debuffs
     if (((m_spellInfo->Id == 2825) && (target->HasAura(57724))) ||
         ((m_spellInfo->Id == 32182) && (target->HasAura(57723))))
@@ -7730,14 +7794,6 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
 
     // Check vampiric bite
 	if ((m_spellInfo->SpellIconID == 311)&& target->HasAuraOfDifficulty(70867))
-        return false;
-
-    // Sindragosa frost bomb hack
-    if ((m_spellInfo->Id == 69845
-        || m_spellInfo->Id == 71053
-        || m_spellInfo->Id == 71054	
-        || m_spellInfo->Id == 71055)
-         && target->HasAura(70867))
         return false;
 
     // Check targets for LOS visibility (except spells without range limitations )
