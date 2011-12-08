@@ -2374,6 +2374,32 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
     // update client side value
     SendCriteriaUpdate(criteria->ID,progress);
 
+    
+   // for achievements 1832 & 1833 without criterias
+   if((achievement->ID==346) || (achievement->ID==347))	
+	{
+		AchievementCriteriaEntryList const* cList = sAchievementMgr.GetAchievementCriteriaByAchievement(achievement->ID);
+		uint32 count = 0;
+
+        for(AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+	        {
+            AchievementCriteriaEntry const* criteria = *itr;
+
+            CriteriaProgressMap::const_iterator itrProgress = m_criteriaProgress.find(criteria->ID);
+            if(itrProgress == m_criteriaProgress.end())
+                continue;
+
+            CriteriaProgress const* progress = &itrProgress->second;
+            count ++;
+
+		}
+		if((achievement->ID==347)&&(count>=50))
+			CompletedAchievement(sAchievementStore.LookupEntry(1832));
+		if((achievement->ID==346)&&(count>=25))
+			CompletedAchievement(sAchievementStore.LookupEntry(1833));
+		
+    	}
+
     // nothing do for counter case
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
         return;
