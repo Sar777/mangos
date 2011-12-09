@@ -574,6 +574,20 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         float distance = unitTarget->GetDistance2d(m_caster);
                         damage *= exp(-distance/(27.5f));
                         break;
+                    }                
+                    // Vampiric Bite (Queen Lana'thel)
+                    case 70946:
+                    case 71475:
+                    case 71476:
+                    case 71477:
+                    case 71726:
+                    case 71727:
+                    case 71728:
+                    case 71729:
+                    {
+                        // trigger Presence of the Darkfallen check
+                        unitTarget->CastSpell(unitTarget, 71952, true);
+                        break;
                     }
                     // Mark of the Fallen Champion damage (Saurfang)
                     case 72255:
@@ -9896,6 +9910,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     m_caster->CastSpell(unitTarget, 71480, true);
+                    return;
+                }
+                case 71952:                                 // Presence of the Darkfallen (Queen Lana'thel ICC)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC ||
+                        unitTarget->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                    {
+                        unitTarget->CastSpell(unitTarget, 70995, true);
+                    }
                     return;
                 }
                 case 72034:                                 // Whiteout

@@ -351,7 +351,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //297 1 spell (counter spell school?)
     &Aura::HandleUnused,                                    //298 unused (3.2.2a)
     &Aura::HandleUnused,                                    //299 unused (3.2.2a)
-    &Aura::HandleAuraShareDamage,                           //300 3 spells, share damage (in percent) with aura owner and aura target. implemented in Unit::DealDamage
+    &Aura::HandleNULL,                                      //300 3 spells, share damage (in percent) with aura owner and aura target. implemented in Unit::DealDamage
     &Aura::HandleNULL,                                      //301 SPELL_AURA_HEAL_ABSORB 5 spells
     &Aura::HandleUnused,                                    //302 unused (3.2.2a)
     &Aura::HandleNULL,                                      //303 17 spells
@@ -6035,14 +6035,38 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             }
             return;
         }
-        case 71265:                                     // Swarming Shadows (Queen Lana'thel)
-        {
-            if (apply)
-                target->CastSpell(target, 70871, true); // add the buff same as for the Essence
-            else
-                target->RemoveAurasDueToSpell(70871); // remove the buff
-            break;
-        }
+      case 71530:                                     // Essence of the Blood Queen (Queen Lana'thel)
+      case 71531:
+      case 71532:
+      case 71533:
+      case 71525:
+      case 71473:
+      case 70867:
+      case 70879:
+      case 71265:                                     // Swarming Shadows (Queen Lana'thel)
+      {
+          if (apply)
+          {
+              target->CastSpell(target, 70871, true, 0, this, target->GetObjectGuid()); // add the buff for healing
+
+              if (Unit *pCaster = GetCaster())
+              {
+                  // if we were bitten then we remove Frenzied Bloodthirst aura
+                  SpellAuraHolderPtr holder = pCaster->GetSpellAuraHolder(70877);
+                  if (!holder)
+                      holder = pCaster->GetSpellAuraHolder(71474);
+
+                  if (holder)
+                  {
+                      pCaster->RemoveAurasDueToSpell(70877);
+                      pCaster->CastSpell(pCaster, GetId(), true, 0, 0, holder->GetCasterGuid());
+                  }
+              }
+          }
+          else
+              target->RemoveAurasDueToSpell(70871); // remove the buff
+          break;
+      }
     }
 }
 
@@ -9832,6 +9856,13 @@ void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
             if (uint32 spellId = spellSet->Spells[i])
                 static_cast<Player*>(target)->removeSpell(spellId, false , false, false);
     }
+    // Frenzied Bloodthirst (Queen Lana'thel - ICC encounter)
+    if (GetId() == 70877 || GetId() == 71474)
+    {
+        if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+            target->CastSpell(target, 70923, true); // cast Uncontrollable Frenzy
+        }
+    }
 }
 
 void Aura::HandleAuraOpenStable(bool apply, bool Real)
@@ -12037,40 +12068,16 @@ uint32 Aura::CalculateCrowdControlBreakDamage()
     return damageCap;
 }
 
-void Aura::HandleAuraShareDamage(bool apply, bool Real)
+void Aura::HandleAuraAoECharm(bool apply, bool real)
 {
-    // Invocation of Blood
-    // not sure if all spells should work like that
-    switch (GetId())
-    {
-        case 70952:
-        case 70981:
-        case 70982:
-        {
-            Unit *pTarget = GetTarget();
+    if (!real)
+        return;
 
-            if (!pTarget)
-                return;
-
-            if (apply)
-            {
-                Unit *pCaster = GetCaster();
-
-                if (!pCaster)
-                    return;
-
-                pTarget->SetHealthPercent(pCaster->GetHealthPercent());
-            }
-            else
-            {
-                if (pTarget->isAlive())
-                    pTarget->SetHealth(1);
-            }
-
-            break;
-        }
-    }
+    // Uncontrollable Frenzy
+    if (GetId() == 70923)
+        GetTarget()->CastSpell(GetTarget(), 73015, true);
 }
+
 
 bool Aura::IsAffectedByCrowdControlEffect(uint32 damage)
 {
