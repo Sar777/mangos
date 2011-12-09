@@ -1984,13 +1984,13 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
             return BAN_NOTFOUND;                                // Nobody to ban
     }
 
-	Field* fieldsAccount = resultAccounts->Fetch();
-	uint32 account = fieldsAccount->GetUInt32();
-	if (sAccountMgr.GetSecurity(sObjectMgr.GetPlayerAccountIdByPlayerName(safe_author)) < sAccountMgr.GetSecurity(account))
-	{
-		delete resultAccounts;
-		return BAN_SYNTAX_ERROR;
-	}
+    Field* fieldsAccount = resultAccounts->Fetch();
+    uint32 account = fieldsAccount[0].GetUInt32();
+    if (sAccountMgr.GetSecurity(sObjectMgr.GetPlayerAccountIdByPlayerName(safe_author)) < sAccountMgr.GetSecurity(account))
+    {
+        delete resultAccounts;
+        return BAN_SYNTAX_ERROR;
+    }
 
     ///- Disconnect all affected players (for IP it can be several)
     do
