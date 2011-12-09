@@ -7705,6 +7705,9 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
             m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM )
             return false;
     }
+    //Check target Divine Intervention
+    if (m_spellInfo->Id == 19752 && target->GetTypeId() != TYPEID_PLAYER)
+        return false;
 
     if (target != m_caster && m_caster->GetCharmerOrOwnerGuid() == target->GetObjectGuid())
     {
