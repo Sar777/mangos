@@ -9858,11 +9858,8 @@ void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
     }
     // Frenzied Bloodthirst (Queen Lana'thel - ICC encounter)
     if (GetId() == 70877 || GetId() == 71474)
-    {
         if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
             target->CastSpell(target, 70923, true); // cast Uncontrollable Frenzy
-        }
-    }
 }
 
 void Aura::HandleAuraOpenStable(bool apply, bool Real)
