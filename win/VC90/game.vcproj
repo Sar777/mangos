@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
-<<<<<<< HEAD
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="game"
@@ -4063,5 +4062,4 @@
     </Files>
     <Globals>
     </Globals>
->>>>>>> 753458249374a1c44737d5fa9830c3880f8ff6ce
 </VisualStudioProject>
