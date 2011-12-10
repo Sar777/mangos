@@ -1,7 +1,7 @@
 /*
 * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
 * Copyright (C) 2010 Blueboy
-* Copyright (C) 2011 MangosR2 
+* Copyright (C) 2011 MangosR2
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -721,22 +721,22 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
     std::ostringstream out;
 
     if (!m_combatOrder)
-        out << "Got no combat orders!";
+        out << sObjectMgr.GetPlayerBotString(127, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
     else if (m_combatOrder & ORDERS_TANK)
-        out << "I TANK";
+        out << sObjectMgr.GetPlayerBotString(128, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
     else if (m_combatOrder & ORDERS_ASSIST)
-        out << "I ASSIST " << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
+        out << sObjectMgr.GetPlayerBotString(129, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
     else if (m_combatOrder & ORDERS_HEAL)
-        out << "I HEAL";
+        out << sObjectMgr.GetPlayerBotString(130, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
     if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & ORDERS_SECONDARY))
-        out << " and ";
+        out << sObjectMgr.GetPlayerBotString(131, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
     if (m_combatOrder & ORDERS_PROTECT)
-        out << "I PROTECT " << (m_targetProtect ? m_targetProtect->GetName() : "unknown");
+        out << sObjectMgr.GetPlayerBotString(132, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) << (m_targetProtect ? m_targetProtect->GetName() : "unknown");
     out << ".";
 
     if (m_mgr->m_confDebugWhisper)
     {
-        out << " " << (IsInCombat() ? "I'm in COMBAT! " : "Not in combat. ");
+        out << " " << (IsInCombat() ? sObjectMgr.GetPlayerBotString(133, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) : sObjectMgr.GetPlayerBotString(134, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         out << "Current state is ";
         if (m_botState == BOTSTATE_NORMAL)
             out << "NORMAL";
@@ -1162,7 +1162,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 WorldPacket p;
                 if (!canObeyCommandFrom(*inviter))
                 {
-                    std::string buf = "I can't accept your invite unless you first invite my master ";
+                    std::string buf = sObjectMgr.GetPlayerBotString(126, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
                     buf += GetMaster()->GetName();
                     buf += ".";
                     SendWhisper(buf, *inviter);
@@ -1245,7 +1245,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 }
 
                 ChatHandler ch(m_bot->GetTrader());
-                out.str("");             
+                out.str("");
                 out << sObjectMgr.GetPlayerBotString(17, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
                 uint32 count = 0;
                 for (std::list<std::string>::iterator iter = lsItemsUntradable.begin(); iter != lsItemsUntradable.end(); iter++)
@@ -1279,7 +1279,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (count > 0)
                     ch.SendSysMessage(out.str().c_str());
                 else
-                    ch.SendSysMessage("I have nothing to give you.");
+                    ch.SendSysMessage(sObjectMgr.GetPlayerBotString(137, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
 
                 // calculate how much money bot has
                 // send bot the message
@@ -3800,7 +3800,7 @@ bool PlayerbotAI::HasTool(uint32 TC)
 
             if (m_bot->HasItemTotemCategory(TC))
                 return true;
-            else                
+            else
                 out << sObjectMgr.GetPlayerBotString(39, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
             break;
 
@@ -4596,7 +4596,7 @@ void PlayerbotAI::UseItem(Item *item, uint32 targetFlag, ObjectGuid targetGUID)
             *packet << item_guid;
             *packet << questid;
             *packet << uint32(0);
-            m_bot->GetSession()->QueuePacket(packet); // queue the packet to get around race condition            
+            m_bot->GetSession()->QueuePacket(packet); // queue the packet to get around race condition
             report << sObjectMgr.GetPlayerBotString(42, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) << qInfo->GetTitle();
             TellMaster(report.str());
         }
@@ -4878,7 +4878,7 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream &report, std:
         m_bot->AddItemToBuyBackSlot(item);
 
         ++TotalSold;
-        TotalCost += cost;       
+        TotalCost += cost;
         report << sObjectMgr.GetPlayerBotString(45, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
         MakeItemLink(item, report, true);
         report << sObjectMgr.GetPlayerBotString(46, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
@@ -4905,7 +4905,7 @@ bool PlayerbotAI::Withdraw(const uint32 itemid)
         }
 
         m_bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
-        m_bot->StoreItem(dest, pItem, true);       
+        m_bot->StoreItem(dest, pItem, true);
         report << sObjectMgr.GetPlayerBotString(47, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
         MakeItemLink(pItem, report, true);
 
@@ -4945,6 +4945,7 @@ void PlayerbotAI::BankBalance()
     std::ostringstream report;
 
     report << sObjectMgr.GetPlayerBotString(49, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
+    report << "\n";
     report << sObjectMgr.GetPlayerBotString(50, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
 
     for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; ++slot)
@@ -5257,7 +5258,7 @@ void PlayerbotAI::AddAuction(const uint32 itemid, Creature* aCreature)
         uint32 etime = duration[rand() % 3];
 
         uint32 min = urand(aItem->GetProto()->SellPrice * aItem->GetCount(), aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
-        uint32 max = urand(aItem->GetProto()->SellPrice * aItem->GetCount(), aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);        
+        uint32 max = urand(aItem->GetProto()->SellPrice * aItem->GetCount(), aItem->GetProto()->BuyPrice * aItem->GetCount()) * (aItem->GetProto()->Quality + 1);
 
         out << sObjectMgr.GetPlayerBotString(58, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
         MakeItemLink(aItem, out, true);
@@ -5340,7 +5341,7 @@ void PlayerbotAI::SellGarbage(bool bListNonTrash, bool bDetailTrashSold, bool bV
 
     if (SoldCost > 0)
     {
-        if (bDetailTrashSold)           
+        if (bDetailTrashSold)
             report << sObjectMgr.GetPlayerBotString(60, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) << SoldQuantity << sObjectMgr.GetPlayerBotString(61, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
         else
             report << sObjectMgr.GetPlayerBotString(45, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) << SoldQuantity << sObjectMgr.GetPlayerBotString(62, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
@@ -5420,7 +5421,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     // if message is not from a player in the masters account auto reply and ignore
     if (!canObeyCommandFrom(fromPlayer))
     {
-        std::string msg = "I can't talk to you. Please speak to my master ";
+        std::string msg = sObjectMgr.GetPlayerBotString(125, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
         msg += GetMaster()->GetName();
         SendWhisper(msg, fromPlayer);
         m_bot->HandleEmoteCommand(EMOTE_ONESHOT_NO);
@@ -5864,9 +5865,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             {
                 std::string collout = "";
                 if (m_bot->HasSkill(SKILL_SKINNING))
-                    collout += sObjectMgr.GetPlayerBotString(66, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
+                    collout += sObjectMgr.GetPlayerBotString(74, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
                 // TODO: perhaps change the command syntax, this way may be lacking in ease of use
-                TellMaster(sObjectMgr.GetPlayerBotString(66, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) + collout);
+                TellMaster(sObjectMgr.GetPlayerBotString(70, GetMaster()->GetSession()->GetSessionDbLocaleIndex()) + collout);
                 break;
             }
             if (part == subcommand)
@@ -5976,7 +5977,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         else
         {
             bool hasIncompleteQuests = false;
-            std::ostringstream incomout;            
+            std::ostringstream incomout;
             incomout << sObjectMgr.GetPlayerBotString(80, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
             bool hasCompleteQuests = false;
             std::ostringstream comout;
@@ -6567,7 +6568,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         {
             m_spellsToLearn.clear();
             m_bot->skill(m_spellsToLearn);
-            msg << "My Primary Professions: ";
+            msg << sObjectMgr.GetPlayerBotString(135, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
             for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
             {
                 if (IsPrimaryProfessionSkill(*it))
@@ -6594,7 +6595,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     }
             }
 
-            msg << "\nMy Weapon skills: ";
+            msg << sObjectMgr.GetPlayerBotString(136, GetMaster()->GetSession()->GetSessionDbLocaleIndex());"\nMy Weapon skills: ";
             for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
             {
                 SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
