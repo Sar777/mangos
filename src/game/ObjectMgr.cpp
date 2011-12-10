@@ -7653,6 +7653,80 @@ void ObjectMgr::LoadGameObjectForQuests()
     sLog.outString( ">> Loaded %u GameObjects for quests", count );
 }
 
+void ObjectMgr::LoadPlayerBotLocales()
+{
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry,content_default,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8 FROM locales_playerbot");
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded 0 string templates. DB table locales_playerbot is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        int32 entry = fields[0].GetInt32();
+
+        PlayerBotLocale& data = mPlayerBotLocaleMap[entry];
+
+        if (data.Content.size() > 0)
+        {
+            sLog.outErrorDb("Table locales_playerbot contain data for already loaded entry  %i (from another table?), ignored.", entry);
+            continue;
+        }
+
+        data.Content.resize(1);
+        ++count;
+
+        // 0 -> default, idx in to idx+1
+        data.Content[0] = fields[1].GetCppString();
+
+        for(int i = 1; i < MAX_LOCALE; ++i)
+        {
+            std::string str = fields[i+1].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    // 0 -> default, idx in to idx+1
+                    if ((int32)data.Content.size() <= idx+1)
+                        data.Content.resize(idx+2);
+
+                    data.Content[idx+1] = str;
+                }
+            }
+        }
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u locales templates", count);
+}
+
+const char *ObjectMgr::GetPlayerBotString(int32 entry, int locale_idx) const
+{
+    if(PlayerBotLocale const *msl = GetPlayerBotLocale(entry))
+    {
+        if((int32)msl->Content.size() > locale_idx+1 && !msl->Content[locale_idx+1].empty())
+            return msl->Content[locale_idx+1].c_str();
+        else
+            return msl->Content[0].c_str();
+    }
+}
+
 bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value)
 {
     int32 start_value = min_value;

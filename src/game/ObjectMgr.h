@@ -122,6 +122,11 @@ struct MangosStringLocale
     std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
 };
 
+struct PlayerBotLocale
+{
+    std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
+};
+
 typedef UNORDERED_MAP<uint32,CreatureData> CreatureDataMap;
 typedef CreatureDataMap::value_type CreatureDataPair;
 
@@ -178,6 +183,7 @@ typedef UNORDERED_MAP<int32,MangosStringLocale> MangosStringLocaleMap;
 typedef UNORDERED_MAP<uint32,GossipMenuItemsLocale> GossipMenuItemsLocaleMap;
 typedef UNORDERED_MAP<uint32,PointOfInterestLocale> PointOfInterestLocaleMap;
 typedef UNORDERED_MAP<uint32,uint32> ItemConvertMap;
+typedef UNORDERED_MAP<int32,PlayerBotLocale> PlayerBotLocaleMap;
 
 typedef std::multimap<int32, uint32> ExclusiveQuestGroupsMap;
 typedef std::multimap<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
@@ -776,6 +782,7 @@ class ObjectMgr
         void LoadInstanceTemplate();
         void LoadWorldTemplate();
         void LoadMailLevelRewards();
+        void LoadPlayerBotLocales();
 
         void LoadGossipText();
 
@@ -1000,8 +1007,16 @@ class ObjectMgr
             return &itr->second;
         }
 
+        PlayerBotLocale const* GetPlayerBotLocale(int32 entry) const
+        {
+            PlayerBotLocaleMap::const_iterator itr = mPlayerBotLocaleMap.find(entry);
+            if(itr==mPlayerBotLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+
         const char *GetMangosString(int32 entry, int locale_idx) const;
         const char *GetMangosStringForDBCLocale(int32 entry) const { return GetMangosString(entry,DBCLocaleIndex); }
+        const char *GetPlayerBotString(int32 entry, int locale_idx) const;
         int32 GetDBCLocaleIndex() const { return DBCLocaleIndex; }
         void SetDBCLocaleIndex(uint32 lang) { DBCLocaleIndex = GetIndexForLocale(LocaleConstant(lang)); }
 
@@ -1336,6 +1351,7 @@ class ObjectMgr
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
         DungeonEncounterMap m_DungeonEncounters;
+        PlayerBotLocaleMap mPlayerBotLocaleMap;
 
         // Storage for Conditions. First element (index 0) is reserved for zero-condition (nothing required)
         typedef std::vector<PlayerCondition> ConditionStore;

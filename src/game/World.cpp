@@ -1401,6 +1401,10 @@ void World::SetInitialWorldSettings()
     sLog.outString( ">>> Localization strings loaded" );
     sLog.outString();
 
+    sLog.outString();
+    sLog.outString("Loading Playerbot locales...");
+    sObjectMgr.LoadPlayerBotLocales();
+
     sLog.outString("Loading LFG rewards...");               // After load all static data
     sLFGMgr.LoadRewards();
 

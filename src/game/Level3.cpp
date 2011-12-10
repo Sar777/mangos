@@ -372,6 +372,7 @@ bool ChatHandler::HandleReloadAllLocalesCommand(char* /*args*/)
     HandleReloadLocalesPageTextCommand((char*)"a");
     HandleReloadLocalesPointsOfInterestCommand((char*)"a");
     HandleReloadLocalesQuestCommand((char*)"a");
+    HandleReloadLocalesPlayerbotCommand((char*)"a");
     return true;
 }
 
@@ -444,6 +445,13 @@ bool ChatHandler::HandleReloadGossipMenuCommand(char* /*args*/)
     sObjectMgr.LoadGossipMenus();
     SendGlobalSysMessage("DB tables `gossip_menu` and `gossip_menu_option` reloaded.");
     return true;
+}
+
+bool ChatHandler::HandleReloadLocalesPlayerbotCommand(char* /*args*/)
+{
+     sObjectMgr.LoadPlayerBotLocales();
+     SendGlobalSysMessage("DB tables `playerbot_locale` reloaded.");
+     return true;
 }
 
 bool ChatHandler::HandleReloadGossipScriptsCommand(char* args)
