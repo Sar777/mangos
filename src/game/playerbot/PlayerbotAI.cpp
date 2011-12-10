@@ -6595,7 +6595,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     }
             }
 
-            msg << sObjectMgr.GetPlayerBotString(136, GetMaster()->GetSession()->GetSessionDbLocaleIndex());"\nMy Weapon skills: ";
+            msg << sObjectMgr.GetPlayerBotString(136, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
             for (std::list<uint32>::iterator it = m_spellsToLearn.begin(); it != m_spellsToLearn.end(); ++it)
             {
                 SkillLineEntry const *SkillLine = sSkillLineStore.LookupEntry(*it);
