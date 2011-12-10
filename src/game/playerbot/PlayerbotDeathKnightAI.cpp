@@ -509,13 +509,13 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        ai->TellMaster("I could use some food.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
-        ai->TellMaster("I could use first aid.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(102, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(fItem);
         return;
     }

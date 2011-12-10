@@ -7655,6 +7655,10 @@ void ObjectMgr::LoadGameObjectForQuests()
 
 void ObjectMgr::LoadPlayerBotLocales()
 {
+    // cleanup affected map part for reloading case
+    for (PlayerBotLocaleMap::iterator itr = mPlayerBotLocaleMap.begin(); itr != mPlayerBotLocaleMap.end();)
+        mPlayerBotLocaleMap.erase(itr++);
+
     QueryResult *result = WorldDatabase.PQuery("SELECT entry,content_default,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8 FROM locales_playerbot");
     if (!result)
     {
@@ -7718,12 +7722,23 @@ void ObjectMgr::LoadPlayerBotLocales()
 
 const char *ObjectMgr::GetPlayerBotString(int32 entry, int locale_idx) const
 {
-    if(PlayerBotLocale const *msl = GetPlayerBotLocale(entry))
+    if (PlayerBotLocale const *msl = GetPlayerBotLocale(entry))
     {
         if((int32)msl->Content.size() > locale_idx+1 && !msl->Content[locale_idx+1].empty())
             return msl->Content[locale_idx+1].c_str();
         else
             return msl->Content[0].c_str();
+    }
+}
+
+std::string ObjectMgr::GetPlayerBotStringStr(int32 entry, int locale_idx) const
+{
+    if (PlayerBotLocale const *msl = GetPlayerBotLocale(entry))
+    {
+        if((int32)msl->Content.size() > locale_idx+1 && !msl->Content[locale_idx+1].empty())
+            return std::string(msl->Content[locale_idx+1].c_str());
+        else
+            return std::string(msl->Content[0].c_str());
     }
 }
 

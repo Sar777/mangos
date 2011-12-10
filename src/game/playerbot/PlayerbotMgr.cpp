@@ -469,24 +469,24 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                     Player* const bot = it->second;
 
                     if (bot->GetQuestStatus(quest) == QUEST_STATUS_COMPLETE)
-                        bot->GetPlayerbotAI()->TellMaster("I already completed that quest.");
+                        bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(53, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                     else if (!bot->CanTakeQuest(qInfo, false))
                     {
                         if (!bot->SatisfyQuestStatus(qInfo, false))
-                            bot->GetPlayerbotAI()->TellMaster("I already have that quest.");
+                            bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(54, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                         else
-                            bot->GetPlayerbotAI()->TellMaster("I can't take that quest.");
+                            bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(55, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                     }
                     else if (!bot->SatisfyQuestLog(false))
-                        bot->GetPlayerbotAI()->TellMaster("My quest log is full.");
+                        bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(56, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                     else if (!bot->CanAddQuest(qInfo, false))
-                        bot->GetPlayerbotAI()->TellMaster("I can't take that quest because it requires that I take items, but my bags are full!");
+                        bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(115, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
 
                     else
                     {
                         p.rpos(0);         // reset reader
                         bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(p);
-                        bot->GetPlayerbotAI()->TellMaster("Got the quest.");
+                        bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(116, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
 
                         // build needed items if quest contains any
                         for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; i++)
@@ -695,7 +695,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 Player* const bot = it->second;
                 if (!bot->IsInMap(static_cast<WorldObject *>(pNpc)))
                 {
-                    bot->GetPlayerbotAI()->TellMaster("I'm too far away to sell items!");
+                    bot->GetPlayerbotAI()->TellMaster(sObjectMgr.GetPlayerBotString(117, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                     continue;
                 }
                 else

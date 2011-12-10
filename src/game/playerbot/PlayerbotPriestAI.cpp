@@ -141,17 +141,17 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
     // Heal myself
     if (ai->GetHealthPercent() < 15 && FADE > 0 && !m_bot->HasAura(FADE, EFFECT_INDEX_0))
     {
-        ai->TellMaster("I'm casting fade.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(119, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->CastSpell(FADE, *m_bot);
     }
     else if (ai->GetHealthPercent() < 25 && POWER_WORD_SHIELD > 0 && !m_bot->HasAura(POWER_WORD_SHIELD, EFFECT_INDEX_0))
     {
-        ai->TellMaster("I'm casting pws on myself.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(120, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->CastSpell(POWER_WORD_SHIELD);
     }
     else if (ai->GetHealthPercent() < 35 && DESPERATE_PRAYER > 0)
     {
-        ai->TellMaster("I'm casting desperate prayer.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(121, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->CastSpell(DESPERATE_PRAYER, *m_bot);
     }
     else if (ai->GetHealthPercent() < 80)
@@ -248,7 +248,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget)
             }
             else if (SCREAM > 0 && LastSpellShadowMagic < 3 && ai->GetAttackerCount() >= 3 && ai->GetManaPercent() >= 15)
             {
-                ai->TellMaster("I'm casting scream.");
+                ai->TellMaster(sObjectMgr.GetPlayerBotString(122, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                 ai->CastSpell(SCREAM);
                 LastSpellShadowMagic = LastSpellShadowMagic + 1;
             }
@@ -357,7 +357,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetManaPercent() < 30)
     {
-        ai->TellMaster("I could use a drink.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(103, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
@@ -370,13 +370,13 @@ void PlayerbotPriestAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        ai->TellMaster("I could use some food.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
-        ai->TellMaster("I could use first aid.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(102, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(fItem);
         return;
     }
@@ -440,7 +440,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
         }
         else
         if (ai->CastSpell(RESURRECTION, *master))
-            ai->TellMaster("Resurrecting you, Master.");
+            ai->TellMaster(sObjectMgr.GetPlayerBotString(104, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
     }
 
     BuffPlayer(m_bot);

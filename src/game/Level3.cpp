@@ -450,7 +450,7 @@ bool ChatHandler::HandleReloadGossipMenuCommand(char* /*args*/)
 bool ChatHandler::HandleReloadLocalesPlayerbotCommand(char* /*args*/)
 {
      sObjectMgr.LoadPlayerBotLocales();
-     SendGlobalSysMessage("DB tables `playerbot_locale` reloaded.");
+     SendGlobalSysMessage("DB table `playerbot_locale` reloaded.");
      return true;
 }
 

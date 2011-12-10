@@ -381,7 +381,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetManaPercent() < 40)
     {
-        ai->TellMaster("I could use a drink.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(103, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
@@ -394,13 +394,13 @@ void PlayerbotPaladinAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetHealthPercent() < 40)
     {
-        ai->TellMaster("I could use some food.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
-        ai->TellMaster("I could use first aid.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(102, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(fItem);
         return;
     }
@@ -422,7 +422,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
             {
                 if (ai->CastSpell(REDEMPTION, *tPlayer))
                 {
-                    std::string msg = "Resurrecting ";
+                    std::string msg = sObjectMgr.GetPlayerBotString(118, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
                     msg += tPlayer->GetName();
                     m_bot->Say(msg, LANG_UNIVERSAL);
                     return;

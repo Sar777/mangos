@@ -588,7 +588,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetManaPercent() < 30)
     {
-        ai->TellMaster("I could use a drink.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(103, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
@@ -603,13 +603,13 @@ void PlayerbotDruidAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        ai->TellMaster("I could use some food.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
-        ai->TellMaster("I could use first aid.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(102, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(fItem);
         return;
     }
@@ -670,7 +670,7 @@ void PlayerbotDruidAI::DoNonCombatActions()
         }
         else
         if (ai->CastSpell(REVIVE, *master))
-            ai->TellMaster("Resurrecting you, Master.");
+            ai->TellMaster(sObjectMgr.GetPlayerBotString(103, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
     }
 
     BuffPlayer(m_bot);

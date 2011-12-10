@@ -430,14 +430,14 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     if (pItem == NULL && CONJURE_WATER && ai->GetBaseManaPercent() >= 48)
     {
-        ai->TellMaster("I'm conjuring some water.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(114, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->CastSpell(CONJURE_WATER, *m_bot);
         ai->SetIgnoreUpdateTime(3);
         return;
     }
     else if (pItem != NULL && ai->GetManaPercent() < 30)
     {
-        ai->TellMaster("I could use a drink.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(103, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
@@ -446,7 +446,7 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     if (pItem == NULL && CONJURE_FOOD && ai->GetBaseManaPercent() >= 48)
     {
-        ai->TellMaster("I'm conjuring some food.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->CastSpell(CONJURE_FOOD, *m_bot);
         ai->SetIgnoreUpdateTime(3);
     }
@@ -459,13 +459,13 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     if (pItem != NULL && ai->GetHealthPercent() < 30)
     {
-        ai->TellMaster("I could use some food.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(pItem);
         return;
     }
     else if (pItem == NULL && fItem != NULL && !m_bot->HasAura(RECENTLY_BANDAGED, EFFECT_INDEX_0) && ai->GetHealthPercent() < 70)
     {
-        ai->TellMaster("I could use first aid.");
+        ai->TellMaster(sObjectMgr.GetPlayerBotString(102, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
         ai->UseItem(fItem);
         return;
     }

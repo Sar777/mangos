@@ -502,7 +502,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* pItem = ai->FindDrink();
         if (pItem)
         {
-            ai->TellMaster("I could use a drink.");
+            ai->TellMaster(sObjectMgr.GetPlayerBotString(103, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
             ai->UseItem(pItem);
             return;
         }
@@ -514,7 +514,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* pItem = ai->FindFood();
         if (pItem)
         {
-            ai->TellMaster("I could use some food.");
+            ai->TellMaster(sObjectMgr.GetPlayerBotString(101, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
             ai->UseItem(pItem);
             return;
         }
@@ -525,7 +525,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* fItem = ai->FindBandage();
         if (fItem)
         {
-            ai->TellMaster("I could use first aid.");
+            ai->TellMaster(sObjectMgr.GetPlayerBotString(102, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
             ai->UseItem(fItem);
             return;
         }
@@ -560,7 +560,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             }
             if (ai->CastSpell(summonSpellId))
             {
-                ai->TellMaster("Summoning favorite demon...");
+                ai->TellMaster(sObjectMgr.GetPlayerBotString(123, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
                 m_isTempImp = false;
                 return;
             }
@@ -570,7 +570,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             if (m_demonOfChoice != DEMON_IMP)
                 m_isTempImp = true;
 
-            ai->TellMaster("Summoning Imp...");
+            ai->TellMaster(sObjectMgr.GetPlayerBotString(124, GetMaster()->GetSession()->GetSessionDbLocaleIndex()));
             return;
         }
     }
