@@ -4261,6 +4261,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Shackle Undead
             if (spellproto->SpellIconID == 27)
                 return DIMINISHING_DISORIENT;
+            //Psychic Scream
+            if (spellproto->SpellFamilyFlags.test<CF_PRIEST_PSYCHIC_SCREAM>())
+                return DIMINISHING_FEAR_CHARM_BLIND;
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
