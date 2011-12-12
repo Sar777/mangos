@@ -1900,7 +1900,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 71053:
                 case 71054:
                 case 71055:
-                    radius = 35;
+                    radius = 50;
                     break;
                 case 72350:                                 // Fury of Frostmourne
                 case 72351:                                 // Fury of Frostmourne
