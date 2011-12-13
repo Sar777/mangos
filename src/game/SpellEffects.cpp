@@ -605,7 +605,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     case 72999:
                     {
                         if (Aura *aur = unitTarget->GetDummyAura(m_spellInfo->Id))
-                            damage += (aur->GetStackAmount() - 1) * aur->GetModifier()->m_amount;
+                            damage += aur->GetModifier()->m_amount;
                           break;
                     }
                     case 74607:
