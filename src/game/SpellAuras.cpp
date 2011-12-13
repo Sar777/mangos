@@ -2620,8 +2620,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 72087:                             // Kinetic Bomb Knockback
                         float x, y, z;
                         target->GetPosition(x, y, z);
-                        target->GetMotionMaster()->Clear(true, true);
-                        target->GetMotionMaster()->MovePoint(0, x, y, z + 3.0f * GetStackAmount());
+                        target->GetMotionMaster()->Clear();
+                        target->GetMotionMaster()->MovePoint(0, x, y, z + 6.0f * GetStackAmount());
                         return;
                     case 72286:                             // Invincible
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 72281, 72282, 72283, 72284, 0);
