@@ -6276,7 +6276,7 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 {
                     if (target)
                         target->CastSpell(target, 72998, true);
-                    return;
+                    break;
                 }
                 case 64217:                                 // Overcharged (spell from Emalon adds)
                 {
