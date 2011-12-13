@@ -700,6 +700,8 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
         case 66271:                                         // Carrying Seaforium (IoC)
         case 66406:                                         // Snobolled! (Trial of the Crusader, Gormok the Impaler encounter)
         case 68377:                                         // Carrying Huge Seaforium (IoC)
+        case 72998:                                         // Shadow Prison (ICC Blood Prince Council)
+        case 72999:                                         // Shadow Prison (ICC Blood Prince Council)
         case 71010:                                         // Web Wrap (Icecrown Citadel, trash mob Nerub'ar Broodkeeper)
         case 72219:                                         // Gastric Bloat 10 N
         case 72551:                                         // Gastric Bloat 10 H
