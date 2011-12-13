@@ -6274,8 +6274,13 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 }
                 case 73001:                                   // Shadow Prison
                 {
-                    if (target)
-                        target->CastSpell(target, 72998, true);
+                    if (apply)
+                    {
+                        if (target)
+                            target->CastSpell(target, 72998, true);
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(72998);
                     break;
                 }
                 case 64217:                                 // Overcharged (spell from Emalon adds)
