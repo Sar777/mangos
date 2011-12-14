@@ -2109,6 +2109,7 @@ void World::BanWpeUser()
     if (!getConfig(CONFIG_BOOL_BANWPEUSER_ENABLE))
         return;
 
+    debug_log("Auto-ban: Start check");
     CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
 
     /////////////////
@@ -2116,6 +2117,8 @@ void World::BanWpeUser()
     ///////////////
 
     CharacterDatabase.PExecute("INSERT INTO temp_ban_wpe (guid) (SELECT guid FROM character_queststatus WHERE (quest=24549 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24548 AND status=1))");
+
+    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid IN (SELECT item FROM character_inventory WHERE guid IN (SELECT guid FROM temp_ban_wpe) AND item_template = 49623)");
 
     CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE (quest=24549) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
 
@@ -2154,6 +2157,8 @@ void World::BanWpeUser()
 
     CharacterDatabase.PExecute("INSERT INTO temp_ban_wpe (guid) (SELECT guid FROM character_queststatus WHERE (quest=24743 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24545 AND status=1))");
 
+    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid IN (SELECT item FROM character_inventory WHERE guid IN (SELECT guid FROM temp_ban_wpe) AND item_template = 49888)");
+
     CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE (quest=24743) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
 
     CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE (item_template=49888) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
@@ -2182,6 +2187,7 @@ void World::BanWpeUser()
     }
     delete resultSE;
     CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+    debug_log("Auto-ban: Complete check");
 }
 
 /// Display a shutdown message to the user(s)
