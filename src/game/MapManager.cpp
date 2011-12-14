@@ -164,74 +164,30 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
     if(!entry)
         return false;
 
-    const char *mapName = entry->name[player->GetSession()->GetSessionDbcLocale()];
-
-    if(entry->IsDungeon())
+    // hacky check of Icecrown Citadel difficulty
+    // can access heroic only with raid leader having Lich King killed on given difficulty
+    if (sWorld.getConfig(CONFIG_BOOL_INSTANCE_ENTER_ICC_ACHIEV))
     {
-        if (entry->IsRaid())
+        if (mapid == 631)
         {
-            // GMs can avoid raid limitations
-            if(!player->isGameMaster() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_RAID))
+            if (Group *pGroup= player->GetGroup())
             {
-                // can only enter in a raid group
-                Group* group = player->GetGroup();
-                if (!group || !group->isRaidGroup())
+                Difficulty diff = pGroup->GetRaidDifficulty();
+                if ((diff == RAID_DIFFICULTY_10MAN_HEROIC || diff == RAID_DIFFICULTY_25MAN_HEROIC) && !player->isGameMaster())
                 {
-                    // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
-                    // TODO: this is not a good place to send the message
-                    player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", mapName);
-                    DEBUG_LOG("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), mapName);
-                    return false;
-                }
-            }
-        }
-        // hacky check of Icecrown Citadel difficulty
-        // can access heroic only with raid leader having Lich King killed on given difficulty
-        if (sWorld.getConfig(CONFIG_BOOL_INSTANCE_ENTER_ICC_ACHIEV))
-        {
-            if (mapid == 631)
-            {
-                if (Group *pGroup= player->GetGroup())
-                {
-                    Difficulty diff = pGroup->GetRaidDifficulty();
+                    Player *pLeader = sObjectMgr.GetPlayer(pGroup->GetLeaderGuid());
+                    uint32 achievId = diff == RAID_DIFFICULTY_10MAN_HEROIC ? 4530 : 4597;
 
-                    if ((diff == RAID_DIFFICULTY_10MAN_HEROIC || diff == RAID_DIFFICULTY_25MAN_HEROIC) && !player->isGameMaster())
+                    if (!pLeader || !pLeader->GetAchievementMgr().HasAchievement(achievId))
                     {
-                        Player *pLeader = sObjectMgr.GetPlayer(pGroup->GetLeaderGuid());
-                        uint32 achievId = diff == RAID_DIFFICULTY_10MAN_HEROIC ? 4530 : 4597;
-
-                        if (!pLeader || !pLeader->GetAchievementMgr().HasAchievement(achievId))
-                        {
-                            // "You must have the Lich King defeated first..." will be shown
-                            player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, diff);
-                            return false;
-                        }
+                        // "You must have the Lich King defeated first..." will be shown
+                        player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, diff);
+                        return false;
                     }
                 }
             }
         }
-
-        //The player has a heroic mode and tries to enter into instance which has no a heroic mode
-        MapDifficultyEntry const* mapDiff = GetMapDifficultyData(entry->MapID,player->GetDifficulty(entry->map_type == MAP_RAID));
-        if (!mapDiff)
-        {
-            bool isRegularTargetMap = player->GetDifficulty(entry->IsRaid()) == REGULAR_DIFFICULTY;
-
-            //Send aborted message
-            // FIX ME: what about absent normal/heroic mode with specific players limit...
-            player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, isRegularTargetMap ? DUNGEON_DIFFICULTY_NORMAL : DUNGEON_DIFFICULTY_HEROIC);
-            return false;
-        }
-
-        // TODO: move this to a map dependent location
-        /*if(i_data && i_data->IsEncounterInProgress())
-        {
-            DEBUG_LOG("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
-            player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-            return(false);
-        }*/
     }
-
     return true;
 }
 
