@@ -63,7 +63,7 @@ enum LogType
 const int LogType_count = int(LogError) +1;
 
 Log::Log() :
-    raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
+    raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL), banWpeLogfile(NULL),
     dberLogfile(NULL), m_colored(false), m_includeTime(false), m_gmlog_per_account(false)
 {
     Initialize();
@@ -262,6 +262,7 @@ void Log::Initialize()
     dberLogfile = openLogFile("DBErrorLogFile",NULL,"a");
     raLogfile = openLogFile("RaLogFile",NULL,"a");
     worldLogfile = openLogFile("WorldLogFile","WorldLogTimestamp","a");
+    banWpeLogfile = openLogFile("BanWpeLogFile",NULL,"a");
 
     // Main log file settings
     m_includeTime  = sConfig.GetBoolDefault("LogTime", false);
@@ -741,6 +742,23 @@ void Log::outCharDump( const char * str, uint32 account_id, uint32 guid, const c
     {
         fprintf(charLogfile, "== START DUMP == (account: %u guid: %u name: %s )\n%s\n== END DUMP ==\n",account_id,guid,name,str );
         fflush(charLogfile);
+    }
+}
+
+void Log::outBanWpeUser(const char * str, ... )
+{
+    if (!str)
+        return;
+
+    if (banWpeLogfile)
+    {
+        va_list ap;
+        outTimestamp(banWpeLogfile);
+        va_start(ap, str);
+        vfprintf(banWpeLogfile, str, ap);
+        fprintf(banWpeLogfile, "\n" );
+        va_end(ap);
+        fflush(banWpeLogfile);
     }
 }
 

@@ -764,7 +764,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "list",           SEC_ADMINISTRATOR,  true,  NULL,                                           "", listCommandTable     },
         { "lookup",         SEC_MODERATOR,      true,  NULL,                                           "", lookupCommandTable   },
         { "modify",         SEC_MODERATOR,      false, NULL,                                           "", modifyCommandTable   },
-	{ "maze",	    SEC_GAMEMASTER,     true,  NULL,                                       "", mazeCommandTable     },
+        { "maze",	    SEC_GAMEMASTER,     true,  NULL,                                           "", mazeCommandTable     },
         { "npc",            SEC_MODERATOR,      false, NULL,                                           "", npcCommandTable      },
         { "pool",           SEC_GAMEMASTER,     true,  NULL,                                           "", poolCommandTable     },
         { "pdump",          SEC_ADMINISTRATOR,  true,  NULL,                                           "", pdumpCommandTable    },

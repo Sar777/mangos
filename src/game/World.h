@@ -377,15 +377,16 @@ enum eConfigBoolValues
     CONFIG_BOOL_RAID_FLAGS_UNIQUE,
     CONFIG_BOOL_ANTICHEAT_ENABLE,
     CONFIG_BOOL_ANTICHEAT_WARDEN,
-	CONFIG_BOOL_RESETCOOLDOWN_ENABLE,
+    CONFIG_BOOL_RESETCOOLDOWN_ENABLE,
     CONFIG_BOOL_ALLOW_FLIGHT_ON_OLD_MAPS,
-	CONFIG_BOOL_ARMORY_SUPPORT,
+    CONFIG_BOOL_ARMORY_SUPPORT,
+    CONFIG_BOOL_BANWPEUSER_ENABLE,
     CONFIG_BOOL_LFG_ENABLE,
     CONFIG_BOOL_LFR_ENABLE,
     CONFIG_BOOL_LFG_DEBUG_ENABLE,
     CONFIG_BOOL_LFR_EXTEND,
     CONFIG_BOOL_LFG_ONLYLASTENCOUNTER,
-	CONFIG_BOOL_AUTOMUTE_ENABLE,
+    CONFIG_BOOL_AUTOMUTE_ENABLE,
     CONFIG_BOOL_PLAYERBOT_DISABLE,
     CONFIG_BOOL_PLAYERBOT_DEBUGWHISPER,
     CONFIG_BOOL_PLAYERBOT_SHAREDBOTS,
@@ -587,6 +588,7 @@ class World
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
+        void BanWpeUser();
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
         static uint8 GetExitCode() { return m_ExitCode; }

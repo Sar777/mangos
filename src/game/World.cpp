@@ -470,9 +470,9 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_PERCENT,       "Rate.Drop.Item.Percent",       1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_COUNT,       "Rate.Drop.Item.Count",       1.0f);
 
-	setConfig(CONFIG_BOOL_DROP_ITEM_LEVEL_ENABLE,       "Drop.ItemLevel.Enable", false);
-	setConfig(CONFIG_UINT32_RATE_DROP_ITEM_LEVEL,       "Drop.ItemLevel", 200);
-	setConfig(CONFIG_UINT32_RATE_DROP_ITEM_COUNT_SMALL_ITEM_LEVEL, "Drop.Count.Item.SmallLevel", 10);
+    setConfig(CONFIG_BOOL_DROP_ITEM_LEVEL_ENABLE,       "Drop.ItemLevel.Enable", false);
+    setConfig(CONFIG_UINT32_RATE_DROP_ITEM_LEVEL,       "Drop.ItemLevel", 200);
+    setConfig(CONFIG_UINT32_RATE_DROP_ITEM_COUNT_SMALL_ITEM_LEVEL, "Drop.Count.Item.SmallLevel", 10);
 
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_POOR,       "Rate.Drop.Item.Poor",       1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_NORMAL,     "Rate.Drop.Item.Normal",     1.0f);
@@ -546,7 +546,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_ANTICHEAT_GMLEVEL,        "Anticheat.GmLevel",0);
     setConfig(CONFIG_BOOL_ANTICHEAT_WARDEN,              "Anticheat.Warden", false);
 
-	setConfig(CONFIG_BOOL_RESETCOOLDOWN_ENABLE,              "ResetCooldown.Enable", false);
+    setConfig(CONFIG_BOOL_RESETCOOLDOWN_ENABLE,              "ResetCooldown.Enable", false);
 
     setConfigMinMax(CONFIG_UINT32_COMPRESSION, "Compression", 1, 1, 9);
     setConfig(CONFIG_BOOL_ADDON_CHANNEL, "AddonChannel", true);
@@ -599,8 +599,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_UINT32_CHARACTERS_PER_REALM, "CharactersPerRealm", 10, 1, 10);
 
-	setConfig(CONFIG_BOOL_HOMEBIND_ENABLE,  "HomeBind.Enable", false);
-	setConfig(CONFIG_UINT32_HOMEBIND_TIMER, "HomeBind.Timer",   1000);
+    setConfig(CONFIG_BOOL_HOMEBIND_ENABLE,  "HomeBind.Enable", false);
+    setConfig(CONFIG_UINT32_HOMEBIND_TIMER, "HomeBind.Timer",   1000);
 
     // must be after CONFIG_UINT32_CHARACTERS_PER_REALM
     setConfigMin(CONFIG_UINT32_CHARACTERS_PER_ACCOUNT, "CharactersPerAccount", 50, getConfig(CONFIG_UINT32_CHARACTERS_PER_REALM));
@@ -642,6 +642,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_PLAYERBOT_SHAREDBOTS, "PlayerbotAI.SharedBots", true);
 
+    setConfig(CONFIG_BOOL_BANWPEUSER_ENABLE, "BanWpeUser.Enable", false);
 
     setConfig(CONFIG_BOOL_LFG_ENABLE, "LFG.Enable", false);
     setConfig(CONFIG_BOOL_LFR_ENABLE, "LFR.Enable", false);
@@ -650,8 +651,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_LFG_ONLYLASTENCOUNTER, "LFG.OnlyLastEncounterForCompleteDungeon", false);
     setConfigMinMax(CONFIG_UINT32_LFG_MAXKICKS, "LFG.MaxKicks", 5, 1, 10);
   
-	setConfig(CONFIG_BOOL_AUTOMUTE_ENABLE, "AutoMute.Enable",false);
-	setConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_COUNT, "AutoMute.MessageCount", 5);
+    setConfig(CONFIG_BOOL_AUTOMUTE_ENABLE, "AutoMute.Enable",false);
+    setConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_COUNT, "AutoMute.MessageCount", 5);
     setConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_DELAY, "AutoMute.MessageDelay", 10);
     setConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME, "AutoMute.MuteTime", 30);
 
@@ -1647,7 +1648,10 @@ void World::Update(uint32 diff)
 
     /// Handle daily quests reset time
     if (m_gameTime > m_NextDailyQuestReset)
+    {
         ResetDailyQuests();
+        BanWpeUser();
+    }
 
     /// Handle weekly quests reset time
     if (m_gameTime > m_NextWeeklyQuestReset)
@@ -2098,6 +2102,49 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
         m_ShutdownTimer = time;
         ShutdownMsg(true);
     }
+}
+
+void World::BanWpeUser()
+{
+    if (!getConfig(CONFIG_BOOL_BANWPEUSER_ENABLE))
+        return;
+
+    /////////////////
+    //Shadowmourne//
+    ///////////////
+
+    CharacterDatabase.PExecute("INSERT INTO temp_ban_wpe (guid) (SELECT guid FROM character_queststatus WHERE (quest=24549 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24548 AND status=1))");
+
+    CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE (quest=24549) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
+
+    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE (item_template=49623) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
+
+    CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE (achievement=4623) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account FROM characters WHERE guid IN (SELECT guid FROM temp_ban_wpe)");
+    if (result)
+    {
+        do {
+            Field *fields = result->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+            uint32 acc = fields[1].GetUInt32();
+            if (sAccountMgr.GetSecurity(acc) == SEC_PLAYER)
+            {
+                QueryResult *result2 = LoginDatabase.PQuery("SELECT username FROM account WHERE id='%u'", acc);
+                if (result2)
+                {
+                    Field *fields2 = result2->Fetch();
+                    std::string accname  = fields2[0].GetCppString();
+                    sWorld.BanAccount(BAN_ACCOUNT, accname, TimeStringToSecs("-1d"), "Wpe User(Shadowmourne)", "auto-ban(WPE - Wotlk)");
+                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadowmourne)", acc, accname.c_str(), guid);
+                }
+                delete result2;
+            }
+
+        } while (result->NextRow());
+    }
+    delete result;
+    CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
 }
 
 /// Display a shutdown message to the user(s)

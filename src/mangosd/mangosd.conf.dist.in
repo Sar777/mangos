@@ -371,6 +371,7 @@ WorldLogFile = ""
 WorldLogTimestamp = 0
 DBErrorLogFile = "DBErrors.log"
 CharLogFile = "Char.log"
+BanWpeLogFile = "BanWpe.log"
 CharLogTimestamp = 0
 CharLogDump = 0
 GmLogFile = ""
@@ -989,6 +990,7 @@ Raid.MinLevel = 10
 CheckGOInPath = 0
 CrowdControlHPBase = 0.1
 ResetCooldown.Enable = 0
+BanWpeUser.Enable = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
