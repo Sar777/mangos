@@ -2109,6 +2109,8 @@ void World::BanWpeUser()
     if (!getConfig(CONFIG_BOOL_BANWPEUSER_ENABLE))
         return;
 
+    CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+
     /////////////////
     //Shadowmourne//
     ///////////////
