@@ -21,7 +21,6 @@
 *.log
 #win
 win/*
-src/bindings/*
 
 #
 # Top-level generic files
