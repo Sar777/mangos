@@ -1228,8 +1228,11 @@ bool TerrainInfo::CheckPathAccurate(float srcX, float srcY, float srcZ, float& d
         MaNGOS::NormalizeMapCoord(tstX);
         MaNGOS::NormalizeMapCoord(tstY);
 
-        if (tstZ <= INVALID_HEIGHT)
-            break;
+        if (tstZ <= INVALID_HEIGHT || fabs(tstZ-prevZ)>=10.0f) //deep under surface or in front of a pit (10.0f ????)
+        {
+            ++errorsCount;
+             break;
+        }
         tstZ += 0.5f;
 
         if (!CheckPath(prevX, prevY, prevZ, tstX, tstY, tstZ))
