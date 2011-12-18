@@ -1286,7 +1286,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 uint32 copper = m_bot->GetMoney();
                 out.str("");
                 out << "I have |cff00ff00" << Cash(copper) << "|r";
-                SendWhisper(out.str().c_str(), *(m_bot->GetTrader()));
+                SendWhisper(out.str(), *(m_bot->GetTrader()));
             }
             return;
         }
@@ -6299,7 +6299,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
 
             delete result;
         }
-        SendWhisper(detectout.str().c_str(), fromPlayer);
+        SendWhisper(detectout.str(), fromPlayer);
     }
 
     // Handle class & professions training:
