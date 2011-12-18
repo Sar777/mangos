@@ -24479,6 +24479,8 @@ bool Player::CheckTransferPossibility(uint32 mapId)
                 return false;
             return true;
         }
+		if(mapId == 13) 
+			return true;
         return false;
     }
 
