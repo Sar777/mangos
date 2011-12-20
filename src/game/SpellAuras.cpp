@@ -7753,6 +7753,10 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_METAMORPHOSIS:
             spellId1 = 54817;
             spellId2 = 54879;
+            if (target->GetTypeId() == TYPEID_PLAYER)      // Spell 54817 have same category as main form spell and share cooldown
+                ((Player*)target)->RemoveSpellCooldown(54817);
+            if (target->GetTypeId() == TYPEID_PLAYER)      // Spell 54879 have same category as main form spell and share cooldown
+                ((Player*)target)->RemoveSpellCooldown(54879);
             break;
         case FORM_SPIRITOFREDEMPTION:
             spellId1 = 27792;
