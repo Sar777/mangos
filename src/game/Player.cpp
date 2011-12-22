@@ -3990,8 +3990,10 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
         m_resetTalentsCost = cost;
         m_resetTalentsTime = time(NULL);
     }
-
-    //FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
+	GetPet()->resetTalentsForAllPetsOf(this,GetPet());
+    
+    
+	//FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
     RemovePet(PET_SAVE_REAGENTS);
     /* when prev line will dropped use next line
     if (Pet* pet = GetPet())
@@ -4000,7 +4002,7 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
             pet->Unsummon(PET_SAVE_REAGENTS, this);
     }
     */
-    return true;
+	return true;
 }
 
 Mail* Player::GetMail(uint32 id)
