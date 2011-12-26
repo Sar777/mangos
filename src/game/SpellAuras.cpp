@@ -3305,6 +3305,29 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastCustomSpell(target, 69770, &damage, 0, 0, true, 0, this, GetCasterGuid(), GetSpellProto());
                 return;
             }
+            case 70308:                                     // Mutated Transformation (Putricide)
+            {
+                uint32 entry = 37672;
+
+                if (target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
+                    target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                {
+                    entry = 38285;
+                }
+
+                if (Creature *pAbomination = target->SummonCreature(entry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+                {
+                    target->CastSpell(pAbomination, 46598, true);
+                    pAbomination->CastSpell(pAbomination, 70405, true);
+                }
+
+                return;
+            }
+            case 70955:                                     // Unbound Plague Bounce Protection (Putricide)
+            {
+                target->CastSpell(target, 70917, true); // Search Periodic
+                return;
+            }
             case 72087:                                     // Kinetic Bomb Knockback
             {
                 float x, y, z;
@@ -5925,6 +5948,19 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
                     ((Creature*)target)->ForcedDespawn();
             }
             break;
+        case 72451:                                         // Mutated Plague (Putricide)
+        case 72463:
+        case 72671:
+        case 72672:
+            if (!apply)
+            {
+                if (Unit *pCaster = GetCaster())
+                {
+                    if (pCaster->isAlive())
+                        target->CastSpell(pCaster, GetModifier()->m_amount, true); // cast healing spell
+                }
+            }
+            break;
         default:
             break;
     }
@@ -5956,18 +5992,15 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             case 66:                                        // Invisibility
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 32612, true, NULL, this);
-
                 return;
             case 28522:                                     // Icebolt (Naxxramas: Sapphiron)
                 if (target->HasAura(45776))                 // Should trigger/remove some kind of iceblock
                     // not sure about ice block spell id
                     target->RemoveAurasDueToSpell(45776);
-
                 return;
             case 42783:                                     // Wrath of the Astrom...
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
                     target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(SpellEffectIndex(GetEffIndex()+1)), true);
-
                 return;
             case 46221:                                     // Animal Blood
                 if (target->GetTypeId() == TYPEID_PLAYER && m_removeMode == AURA_REMOVE_BY_DEFAULT && target->IsInWater())
@@ -5976,7 +6009,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     // Spawn Blood Pool
                     target->CastSpell(target->GetPositionX(), target->GetPositionY(), position_z, 63471, true);
                 }
-
                 return;
             case 51121:                                     // Urom Clocking Bomb
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -5989,17 +6021,14 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (Unit* pCaster = GetCaster())
                         pCaster->CastSpell(target, GetSpellProto()->EffectTriggerSpell[GetEffIndex()], true, NULL, this);
                 }
-
                 return;
             case 52658:                                     // Ionar Static Overload Explode (N)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 53337, true);
-
                 return;
             case 59795:                                     // Ionar Static Overload Explode (H)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 59798, true);
-
                 return;
             case 63018:                                     // Searing Light (Ulduar: XT-002)
             case 65121:                                     // Searing Light (h) (Ulduar: XT-002)
@@ -6008,7 +6037,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (pCaster->HasAura(GetModifier()->m_amount))
                         pCaster->CastSpell(target, 64210, true);
                 }
-
                 return;
             case 63024:                                     // Gravity Bomb (Ulduar: XT-002)
             case 64234:                                     // Gravity Bomb (h) (Ulduar: XT-002)
@@ -6018,7 +6046,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (pCaster->HasAura(GetModifier()->m_amount))
                         pCaster->CastSpell(target, spellId, true);
                 }
-
                 return;
             case 66083:                                     // Lightning Arrows (Trial of the Champion encounter)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -6026,12 +6053,17 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (Unit* pCaster = GetCaster())
                         pCaster->CastSpell(pCaster, 66085, true, NULL, this);
                 }
-
+                return;
+            case 70405:                                     // Mutated Transformation (Putricide)
+            case 72508:
+            case 72509:
+            case 72510:
+                if (target->GetTypeId() == TYPEID_UNIT)
+                    ((Creature*)target)->ForcedDespawn();
                 return;
             case 71441:                                     // Unstable Ooze Explosion (Icecrown Citadel encounter)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 67375, true, NULL, this);
-
                 return;
             default:
                 break;
@@ -6578,6 +6610,36 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         // Void Shifted
         else if (spellProto->Id == 54361 || spellProto->Id == 59743)
             target->CastSpell(target, 54343, true, NULL, NULL, GetCasterGuid());
+    }
+
+    // Unbound Plague (Putricide)
+    switch (GetId())
+    {
+        case 70911:
+        case 72854:
+        case 72855:
+        case 72856:
+        {
+            if (apply)
+            {
+                target->CastSpell(target, 70955, true); // Bounce Protection
+                if (Unit *pCaster = GetCaster())
+                {
+                    if (SpellAuraHolderPtr holder = pCaster->GetSpellAuraHolder(GetId()))
+                    {
+                        GetHolder()->SetAuraDuration(holder->GetAuraDuration());
+                        GetHolder()->RefreshHolder();
+                        pCaster->RemoveAurasDueToSpell(GetId());
+                    }
+                }
+            }
+            else
+            {
+                target->RemoveAurasDueToSpell(70917); // remove Search Periodic
+                target->CastSpell(target, 70953, true); // Plague Sickness
+            }
+            break;
+        }
     }
 }
 
@@ -10232,6 +10294,10 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
         case 67108:                                         // Nether Power (ToC: Lord Jaraxxus)
         case 71564:                                         // Deadly Precision
         case 74396:                                         // Fingers of Frost
+        case 70672:                                         // Gaseous Bloat (Putricide)
+        case 72455:
+        case 72832:
+        case 72833:
             m_stackAmount = m_spellProto->StackAmount;
             break;
     }
@@ -10964,14 +11030,14 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     break;
                 }
                 case 69674:                                 // Mutated Infection
+                case 71224:
+                case 73022:
+                case 73023:
                 {
                     if (!apply)
                     {
-                        if (m_removeMode == AURA_REMOVE_BY_DISPEL)
-                        {
-                            cast_at_remove = true;
-                            spellId1 = 69706;
-                        }
+                        cast_at_remove = true;
+                        spellId1 = (GetSpellProto() ? GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) : 0);
                     }
                     break;
                 }
