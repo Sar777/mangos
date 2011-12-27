@@ -3319,6 +3319,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 {
                     target->CastSpell(pAbomination, 46598, true);
                     pAbomination->CastSpell(pAbomination, 70405, true);
+                    target->EnterVehicle(pAbomination->GetVehicleKit(), 0);
                 }
 
                 return;
@@ -8454,9 +8455,16 @@ void Aura::PeriodicTick()
                     case 67298:
                         pCaster->CastSpell(target, 65952, true);
                         break;
-					// Boiling Blood (Saurfang)
-					case 72385:
-					case 72441:
+                    case 70911:                                  // Unbound Plague (Putricide)
+                    case 72854:
+                    case 72855:
+                    case 72856:
+                        m_modifier.m_miscvalue += 1; // store ticks number in miscvalue
+                        m_modifier.m_amount = m_modifier.m_baseamount * pow(2.7f, m_modifier.m_miscvalue * 0.223f);
+                    break;
+                    // Boiling Blood (Saurfang)
+                    case 72385:
+                    case 72441:
                     case 72442:
                     case 72443:	
                         target->CastSpell(target, 72202, true); // Blood Link
