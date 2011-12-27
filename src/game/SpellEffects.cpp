@@ -10125,6 +10125,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->NearTeleportTo(fPosX, fPosY, fPosZ+1.0f, -unitTarget->GetOrientation(), false);
                     return;
                 }
+                case 70920:                                 // Unbound Plague Search Effect
+                {
+                    // don't pass the plague for the first 5 seconds
+                    if (m_caster->GetDummyAura(70955))
+                        return;
+
+                    if (unitTarget)
+                    {
+                        m_caster->CastSpell(unitTarget, 70911, true);   // apply Plague to new target
+                        m_caster->RemoveAurasDueToSpell(70911);         // remove Plague from the previous target
+                    }
+                    return;
+                }
                 case 70360:                                 // Eat Ooze (Putricide)
                 {
                     if (!unitTarget)
