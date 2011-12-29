@@ -476,6 +476,10 @@ Aura::~Aura()
 {
 }
 
+ObjectGuid const& Aura::GetCastItemGuid() const { return GetHolder() ? GetHolder()->GetCastItemGuid() : ObjectGuid::Null; }
+
+ObjectGuid const& Aura::GetCasterGuid() const { return GetHolder() ? GetHolder()->GetCasterGuid() : ObjectGuid::Null; }
+
 void Aura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, SpellAuraHolderPtr holder, Unit *target,Unit *caster, Item* castItem)
 {
     m_isAreaAura = true;
@@ -2312,6 +2316,8 @@ void Aura::TriggerSpell()
             }
             case 71340:
             {
+                if (GetAuraTicks() < 6)
+                    return;
                 triggerTarget->CastSpell(triggerTarget, 71341, true);
                 break;
             }
@@ -3318,8 +3324,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if (Creature *pAbomination = target->SummonCreature(entry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
                 {
                     target->CastSpell(pAbomination, 46598, true);
-                    pAbomination->CastSpell(pAbomination, 70405, true);
-                    target->EnterVehicle(pAbomination->GetVehicleKit(), 0);
+                    pAbomination->CastSpell(pAbomination, 70405, true);                    
                 }
 
                 return;
