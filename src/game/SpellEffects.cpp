@@ -3489,6 +3489,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, true);
                     return;
                 }
+                case 66218:                                 // Launch - set position
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (VehicleKit* vehicleKit = unitTarget->GetVehicleKit())
+                    {
+                        vehicleKit->SetDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, unitTarget->GetOrientation(),  m_targets.GetSpeed(), m_targets.GetElevation());
+                    }
+                    return;
+                }
                 case 66390:                                 // Read Last Rites
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -4875,7 +4886,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
 
         MaNGOS::NormalizeMapCoord(x);
         MaNGOS::NormalizeMapCoord(y);
-        m_caster->UpdateGroundPositionZ(x,y,z);
+        m_caster->UpdateAllowedPositionZ(x,y,z);
 
         m_caster->CastSpell(x, y, z, spellInfo, true, NULL, NULL, m_originalCasterGUID);
         return;
@@ -5215,7 +5226,10 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
         {
             if (caster->HasSpell(aur->GetSpellProto()->EffectTriggerSpell[0]))
             {
-               duration *= 2.0f;
+                // do not exceed 2 hours duration (cause of ApplyAura effect triggered twiceapplied twice)
+                if(duration < 2 * HOUR * IN_MILLISECONDS)
+                    duration *= 2.0f; // Increase duration by 2x
+
                aur->GetModifier()->m_amount *= 1.3f;
             }
         }
@@ -9487,17 +9501,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 		}
                 case 62428:                                 // Load into Catapult
                 {
-                    if (VehicleKit *seat = m_caster->GetVehicleKit())
-                    {
-                        if (Unit *passenger = seat->GetPassenger(0))
-                        {
-                            if (Unit *demolisher = m_caster->GetVehicle()->GetBase())
-                            {
-                                passenger->EnterVehicle(demolisher->GetVehicleKit(), 3);
-                                demolisher->CastSpell(demolisher, 62340, true);
-                            }
-                        }
-                    }
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    m_caster->CastSpell(m_caster, 62340, true);
                     return;
                 }
                 case 62524:                                 // Attuned to Nature 2 Dose Reduction

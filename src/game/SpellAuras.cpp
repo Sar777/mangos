@@ -9924,11 +9924,17 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
     }
     else
     {
+
+        if (caster->GetVehicle() && caster->GetVehicle() == target->GetVehicleKit())
+        {
+            if (m_removeMode == AURA_REMOVE_BY_STACK)
+                caster->GetVehicle()->RemovePassenger(caster, false);
+            else
+                caster->ExitVehicle();
+        }
+
         // some SPELL_AURA_CONTROL_VEHICLE auras have a dummy effect on the player - remove them
         caster->RemoveAurasDueToSpell(GetId());
-
-        if (caster->GetVehicle() == target->GetVehicleKit())
-            caster->ExitVehicle();
     }
 }
 
@@ -12213,8 +12219,9 @@ uint32 Aura::CalculateCrowdControlBreakDamage()
         return 0;
 
     // auras with this attribute not have damage cap
-    if (GetSpellProto()->AttributesEx & SPELL_ATTR_EX_BREAKABLE_BY_ANY_DAMAGE
-        && GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE)
+    if (GetSpellProto()->AttributesEx & SPELL_ATTR_EX_BREAKABLE_BY_ANY_DAMAGE &&
+        (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE ||
+        GetSpellProto()->Attributes & SPELL_ATTR_BREAKABLE_BY_DAMAGE))
         return 0;
 
     // Damage cap for CC effects
