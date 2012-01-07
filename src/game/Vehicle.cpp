@@ -313,7 +313,7 @@ bool VehicleKit::AddPassenger(Unit *passenger, int8 seatId)
     if (seatInfo->m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE_FORCED)
     {
         uint32 delay = seatInfo->m_exitMaxDuration * IN_MILLISECONDS;
-        m_pBase->AddEvent(new PassengerEjectEvent(passenger), delay);
+        m_pBase->AddEvent(new PassengerEjectEvent(seatId,*m_pBase), delay);
         DEBUG_LOG("Vehicle::AddPassenger eject event for %s added, delay %u",passenger->GetObjectGuid().GetString().c_str(), delay);
     }
 
@@ -566,28 +566,20 @@ void VehicleKit::SetDestination(float x, float y, float z, float o, float speed,
 
 bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    if (m_passenger && m_passenger->IsInWorld())
+    if (!m_vehicle.GetVehicleInfo())
+        return true;
+
+    VehicleKit* pVehicle = m_vehicle.GetVehicleKit();
+
+    if (!pVehicle)
+        return true;
+
+    Unit* passenger = pVehicle->GetPassenger(m_seatId);
+
+    if (passenger && passenger->IsInWorld() && passenger->hasUnitState(UNIT_STAT_ON_VEHICLE))
     {
-        if (!m_passenger->GetVehicle())
-            return true;
-
-        Unit* vehicle = m_passenger->GetVehicle()->GetBase();
-
-        uint32 controlSpell = 0;
-        Unit::AuraList const& controlAuras = vehicle->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE);
-        for(Unit::AuraList::const_iterator i = controlAuras.begin(); i != controlAuras.end(); ++i)
-        {
-            if ((*i)->GetCasterGuid() == m_passenger->GetObjectGuid())
-            {
-                controlSpell = (*i)->GetId();
-                break;
-            }
-        }
-
-        if (controlSpell)
-        {
-            vehicle->RemoveAurasByCasterSpell(controlSpell, m_passenger->GetObjectGuid());
-        }
+        if (!m_vehicle.RemoveSpellsCausingAuraByCaster(SPELL_AURA_CONTROL_VEHICLE, passenger->GetObjectGuid()))
+            passenger->ExitVehicle();
     }
     return true;
 }
