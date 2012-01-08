@@ -2282,11 +2282,68 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
 
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
+            {
+                if(!miscvalue1)
+                    continue;
+                // miscvalue2==1 Any kill
+                // miscvalue2==2 Kill with XP
+                if(!miscvalue2)
+                    continue;
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 107:               // Creature kills
+                    {
+                        // Criterias: maybe in wrong places
+                        // 4948 - Beasts        4949 - Demon
+                        // 4950 - Dragonkin     4951 - Elemental
+                        // 4952 - Giant         4953 - HUmanoid
+                        // 4954 - Mechanical    4955 - Undead
+                        // 4956 - Unspecified   4957 - Totems
+                        if( (achievementCriteria->ID==4948 && miscvalue1==CREATURE_TYPE_BEAST) ||
+                            (achievementCriteria->ID==4949 && miscvalue1==CREATURE_TYPE_DEMON) ||
+                            (achievementCriteria->ID==4950 && miscvalue1==CREATURE_TYPE_DRAGONKIN) ||
+                            (achievementCriteria->ID==4951 && miscvalue1==CREATURE_TYPE_ELEMENTAL) ||
+                            (achievementCriteria->ID==4952 && miscvalue1==CREATURE_TYPE_GIANT) ||
+                            (achievementCriteria->ID==4953 && miscvalue1==CREATURE_TYPE_HUMANOID) ||
+                            (achievementCriteria->ID==4954 && miscvalue1==CREATURE_TYPE_MECHANICAL) ||
+                            (achievementCriteria->ID==4955 && miscvalue1==CREATURE_TYPE_UNDEAD) ||
+                            (achievementCriteria->ID==4956 && miscvalue1==CREATURE_TYPE_NOT_SPECIFIED) ||
+                            (achievementCriteria->ID==4957 && miscvalue1==CREATURE_TYPE_TOTEM) )
+                            break;
+                        continue;
+                    }
+                    case 108:               // Critters kills
+                    {
+                        // Criteria 4958
+                        if(miscvalue1!=CREATURE_TYPE_BEAST && miscvalue1!=CREATURE_TYPE_CRITTER)
+                            continue;
+                        break;
+                    }
+                    case 1197:              // Total kills
+                    {
+                        break;
+                    }
+                    case 1198:              // Total kills that grant experience or honor
+                    {
+                        if(miscvalue2!=2)
+                            continue;
+                        break;
+                    }
+                    default:
+                    {
+                        continue;
+                    }
+                }
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
             case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
                 break;                                   // Not implemented yet :(
         }
