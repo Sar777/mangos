@@ -80,6 +80,15 @@ enum BG_SA_GraveYardStatus
     BG_SA_GRAVE_STATUS_HORDE_OCCUPIED    = 4    // Captured by the Horde, not clickable by anyone
 };
 
+enum BG_SA_Spells
+{
+    BG_SA_END_OF_ROUND                  = 52459, // Achievement Criteria
+    BG_SA_PLANT_SEAFORIUM_CHARGE        = 60937, // Spell doesnt exist(Achievement Criteria)
+    BG_SA_STORM_THE_BEACH               = 65246, // Spell doesnt exist(Achievement Criteria)
+    BG_SA_STORM_THE_BEACH_TIMER1        = 23748, // Achievement TimerAssetID (Criteria 1)
+    BG_SA_STORM_THE_BEACH_TIMER2        = 21702  // Achievement TimerAssetID (Criteria 2)
+};
+
 enum BG_SA_Timers
 {
     BG_SA_ROUNDLENGTH                   = 600000,

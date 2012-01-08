@@ -201,10 +201,8 @@ void BattleGroundSA::Update(uint32 diff)
                 RoundScores[0].time = BG_SA_ROUNDLENGTH;
 
                 for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                {
                     if (Player *plr = sObjectMgr.GetPlayer(itr->first))
-                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 52459);
-                }
+                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, BG_SA_END_OF_ROUND);
 
                 ResetBattle(0, defender);
             }
@@ -214,10 +212,8 @@ void BattleGroundSA::Update(uint32 diff)
                 RoundScores[1].winner = GetDefender();
 
                 for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                {
                     if (Player *plr = sObjectMgr.GetPlayer(itr->first))
-                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 52459);
-                }
+                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, BG_SA_END_OF_ROUND);
 
                 if (RoundScores[0].winner == GetDefender())
                     EndBattleGround(GetDefender());
@@ -272,7 +268,14 @@ void BattleGroundSA::Update(uint32 diff)
             for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
             {
                 if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+                {
                     plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
+                    if(plr->GetTeam()!=GetDefender())
+                    {
+                        plr->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,BG_SA_STORM_THE_BEACH_TIMER1);
+                        plr->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,BG_SA_STORM_THE_BEACH_TIMER2);
+                    }
+                }
             }
         }
         else
@@ -323,6 +326,18 @@ void BattleGroundSA::StartingEventCloseDoors()
 
 void BattleGroundSA::StartingEventOpenDoors()
 {
+   for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+    {
+        if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+        {
+            if(plr->GetTeam()!=GetDefender())
+            {
+                plr->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,BG_SA_STORM_THE_BEACH_TIMER1);
+                plr->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,BG_SA_STORM_THE_BEACH_TIMER2);
+            }
+         }
+    }
+
     // runs just in 1st phase
     SpawnEvent(SA_EVENT_ADD_NPC, 0, true);
     SpawnEvent(SA_EVENT_ADD_BOMB_B, (GetDefender() == ALLIANCE ? BG_SA_GRAVE_STATUS_HORDE_OCCUPIED : BG_SA_GRAVE_STATUS_ALLY_OCCUPIED), true);
@@ -616,7 +631,7 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
 
     // Seaforium Charge Explosion
     if (doneBy == 52408)
-        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 60937);
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, BG_SA_PLANT_SEAFORIUM_CHARGE);
 
     uint32 type = NULL;
     switch (target_obj->GetEntry())
@@ -805,6 +820,13 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
                     SendMessageToAll(defender == HORDE ? LANG_BG_SA_ALLIANCE_END_1ROUND : LANG_BG_SA_HORDE_END_1ROUND, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL);
                     SendWarningToAll(LANG_BG_SA_END_1ROUND);
                     RewardHonorToTeam(150, (teamIndex == 0) ? ALLIANCE : HORDE);
+                    for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                    {
+                        if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+                        {
+                            plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, BG_SA_STORM_THE_BEACH);
+                        }
+                    }
                     ResetBattle(player->GetTeam(), GetDefender());
                 }
                 else // Victory at second round
@@ -812,6 +834,13 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
                     RoundScores[1].winner = GetDefender() == ALLIANCE ? HORDE : ALLIANCE;
                     SendMessageToAll(defender == HORDE ? LANG_BG_SA_ALLIANCE_END_2ROUND : LANG_BG_SA_HORDE_END_2ROUND, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL);
                     RewardHonorToTeam(150, (teamIndex == 0) ? ALLIANCE : HORDE);
+                    for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                    {
+                        if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+                        {
+                            plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, BG_SA_STORM_THE_BEACH);
+                        }
+                    }
                     EndBattleGround(player->GetTeam());
                 }
             }
