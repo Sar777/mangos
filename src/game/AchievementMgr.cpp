@@ -1798,11 +1798,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1)
                     continue;
 
+                BattleGround* bg = GetPlayer()->GetBattleGround();
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 207:                       // Save The Day
                     {
-                        BattleGround* bg = GetPlayer()->GetBattleGround();
                         if (!bg || !unit)
                             continue;
 
@@ -1824,7 +1824,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     }
                     case 1259:                      // Not So Fast (WS)
                     {
-                        BattleGround* bg = GetPlayer()->GetBattleGround();
                         if (!bg || !unit)
                             continue;
                         if (bg->GetTypeID(true) != BATTLEGROUND_WS)
@@ -1837,7 +1836,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     case 1764:                      // Drop It (SotA)
                     case 2190:                      // Drop It Now (SotA)
                     {
-                        BattleGround* bg = GetPlayer()->GetBattleGround();
                         if (!bg || !unit)
                             continue;
                         if (bg->GetTypeID(true) != BATTLEGROUND_SA)
@@ -1845,13 +1843,44 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         if(!unit->HasAura(52418))
                             continue;
                         break;
-
+                    }
+                    case 1109:                      // 5v5 Honorable Kills
+                    {
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if(bg->GetArenaType()!=ARENA_TYPE_5v5)
+                            continue;
+                        break;
+                    }
+                    case 1110:                      // 3v3 Honorable Kills
+                    {
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if(bg->GetArenaType()!=ARENA_TYPE_3v3)
+                            continue;
+                        break;
+                    }
+                    case 1111:                      // 2v2 Honorable Kills
+                    {
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if(bg->GetArenaType()!=ARENA_TYPE_2v2)
+                            continue;
+                        break;
                     }
                     default:
                     {
                         // those requirements couldn't be found in the dbc
                         AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                        if(!data || !data->Meets(GetPlayer(),unit))
+                        if(!data)
+                            continue;
+                        if(!data->Meets(GetPlayer(),unit))
                             continue;
                         break;
                     }
@@ -2005,8 +2034,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             (achievementCriteria->ID==5493 && GetPlayer()->GetMapId()==1) ||
                             (achievementCriteria->ID==5494 && GetPlayer()->GetMapId()==530) ||
                             (achievementCriteria->ID==5495 && GetPlayer()->GetMapId()==571) )
-                            continue;
-                        break;
+                            break;
+                        continue;
                     }
                     case 382:                   // BattleGround Honorable Kills
                     {
@@ -2020,8 +2049,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             (achievementCriteria->ID==5502 && GetPlayer()->GetMapId()==566) ||
                             (achievementCriteria->ID==5503 && GetPlayer()->GetMapId()==607) ||
                             (achievementCriteria->ID==13260 && GetPlayer()->GetMapId()==628) )
-                            continue;
-                        break;
+                            break;
+                        continue;
                     }
                     case 1112:                  // Eye of the Storm Honorable Kills
                     {
@@ -2047,6 +2076,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     {
                         //Criteria 5509
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_WS))
+                            continue;
+                        break;
+                    }
+                    case 1261:                  // G.N.E.R.D. Rage
+                    {
+                        if(!GetPlayer()->HasAura(48890))
                             continue;
                         break;
                     }
@@ -2094,14 +2129,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         break;
                     }
-                    default:
-                    {
-                        continue;
-                    }
                 }
                 change = 1;
-               progressType = PROGRESS_ACCUMULATE;
-               break;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
@@ -2128,7 +2159,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 {
                     if(!data)
                         continue;
-
                     if(!data->Meets(GetPlayer(),unit))
                         continue;
                 }
@@ -2143,52 +2173,87 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         break;
                     }
-                    case 1261:
+                    case 233:                   // Bloodthirsty Berserker
                     {
-                        if(!GetPlayer()->HasAura(48890))
+                        if(!bg || !GetPlayer()->HasAura(24378))
                             continue;
                         break;
+                    }
+                    case 1488:                  // World Killing Blows
+                    {
+                        // Criterias:
+                        // 5512 - Eastern Kingdoms
+                        // 5530 - Kalimdor
+                        // 5531 - Burning Crusade Areas
+                        // 5532 - Northrend
+                        if(bg)
+                            continue;
+                        if( (achievementCriteria->ID==5512 && GetPlayer()->GetMapId()==0) ||
+                            (achievementCriteria->ID==5530 && GetPlayer()->GetMapId()==1) ||
+                            (achievementCriteria->ID==5531 && GetPlayer()->GetMapId()==530) ||
+                            (achievementCriteria->ID==5532 && GetPlayer()->GetMapId()==571) )
+                            break;
+                        continue;
+                    }
+                    case 1490:                  // Arena Killing Blows
+                    {
+                        // Criterias:
+                        // 5533 - Nagrand Arena
+                        // 5534 - Blade's Edge Arena
+                        // 5535 - Ruins of Lordaeron
+                        // 9165 - Dalaran Sewers
+                        // 9166 - Ring of Valor
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if( (achievementCriteria->ID==5533 && GetPlayer()->GetMapId()==559) ||
+                            (achievementCriteria->ID==5534 && GetPlayer()->GetMapId()==562) ||
+                            (achievementCriteria->ID==5535 && GetPlayer()->GetMapId()==572) ||
+                            (achievementCriteria->ID==9165 && GetPlayer()->GetMapId()==617) ||
+                            (achievementCriteria->ID==9166 && GetPlayer()->GetMapId()==618) )
+                            break;
+                        continue;
+                    }
+                    case 1491:                  // Battleground Killing Blows
+                    {
+                        // Including 6 Criterias:
+                        // 5436(AV), 5537(AB), 5538(WS), 5539(EY), 5540(SA), 13224(IC)
+                        if(!bg)
+                            continue;
+                        if( (achievementCriteria->ID==5436 && GetPlayer()->GetMapId()==30) ||
+                            (achievementCriteria->ID==5537 && GetPlayer()->GetMapId()==529) ||
+                            (achievementCriteria->ID==5538 && GetPlayer()->GetMapId()==489) ||
+                            (achievementCriteria->ID==5539 && GetPlayer()->GetMapId()==566) ||
+                            (achievementCriteria->ID==5540 && GetPlayer()->GetMapId()==607) ||
+                            (achievementCriteria->ID==13224 && GetPlayer()->GetMapId()==628) )
+                            break;
+                        continue;
+                    }
+                    case 1492:                  // 2v2 Arena Killing Blows
+                    case 1493:                  // 3v3 Arena Killing Blows
+                    case 1494:                  // 5v5 Arena Killing Blows
+                    {
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if( (achievementCriteria->ID==5441 && bg->GetArenaType()==ARENA_TYPE_2v2) ||
+                            (achievementCriteria->ID==5442 && bg->GetArenaType()==ARENA_TYPE_3v3) ||
+                            (achievementCriteria->ID==5443 && bg->GetArenaType()==ARENA_TYPE_5v5) )
+                            break;
+                        continue;
                     }
                     case 3856:                  // Demolition Derby (alliance)
                     case 4256:                  // Demolition Derby (horde)
                     {
-                        switch(achievementCriteria->ID)
-                        {
-                            // Glaive Thrower
-                            case 11497:
-                            case 12178:
-                            {
-                                if(miscvalue2!=34802)
-                                    continue;
-                                break;
-                            }
-                            // Demolisher
-                            case 11498:
-                            case 12179:
-                            {
-                                if(miscvalue2!=34775)
-                                    continue;
-                                break;
-                            }
-                            // Catapult
-                            case 11500:
-                            case 12181:
-                            {
-                                if(miscvalue2!=34793)
-                                    continue;
-                                break;
-                            }
-                            // Siege Engine
-                            case 11501:
-                            case 12182:
-                            {
-                                if(miscvalue2!=34776)
-                                    continue;
-                                break;
-                            }
-                            default:
-                                continue;
-                        }
+                        uint32 AcCrID = achievementCriteria->ID;
+                        if( ((AcCrID==11497 || AcCrID==12178) && miscvalue2==34802) ||  // Glaive Thrower
+                            ((AcCrID==11498 || AcCrID==12179) && miscvalue2==34775) ||  // Demolisher
+                            ((AcCrID==11500 || AcCrID==12181) && miscvalue2==34793) ||  // Catapult
+                            ((AcCrID==11501 || AcCrID==12182) && miscvalue2==34776) )   // Siege Engine
+                            break;
+                        continue;
                     }
                 }
 
