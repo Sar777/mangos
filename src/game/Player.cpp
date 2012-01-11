@@ -14703,8 +14703,16 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
 
     if (pQuest->IsDaily())
     {
+        int32 m_dailyquestCount = 0;
+        for(uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+            if (GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
+                ++m_dailyquestCount;
+        if (m_dailyquestCount==0)
+            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY,1);
+
         SetDailyQuestStatus(quest_id);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST, 1);
+
     }
 
     if (pQuest->IsWeekly())
@@ -21584,8 +21592,15 @@ void Player::SetMonthlyQuestStatus(uint32 quest_id)
 
 void Player::ResetDailyQuestStatus()
 {
+    int32 m_dailyquestCount=0;
     for(uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    {
+        if(GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
+            ++m_dailyquestCount;
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,0);
+    }
+    if(m_dailyquestCount==0)
+        GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY,ACHIEVEMENT_CRITERIA_CONDITION_UNK1);
 
     // DB data deleted in caller
     m_DailyQuestChanged = false;
@@ -22051,6 +22066,8 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
     // honor can be in PvP and !PvP (racial leader) cases
     RewardHonor(pVictim,1);
 
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1, 0, pVictim);
+
     // xp and reputation only in !PvP case
     if(!PvP)
     {
@@ -22063,7 +22080,11 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
         // normal creature (not pet/etc) can be only in !PvP case
         if (pVictim->GetTypeId()==TYPEID_UNIT)
             if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(pVictim->GetEntry()))
+            {
                 KilledMonster(normalInfo, pVictim->GetObjectGuid());
+                if(uint32 normalType = normalInfo->type)
+                    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp<1 ? 1 : 2);
+            }
     }
 }
 

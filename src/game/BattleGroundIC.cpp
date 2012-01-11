@@ -446,8 +446,11 @@ void BattleGroundIC::HandleKillUnit(Creature *creature, Player *killer)
     }
 
     if (creature->IsVehicle())
-        // must be killing blow
+    {
         killer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 68357);
+        // must be killing blow
+        killer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1, creature->GetEntry());
+    }
 }
 
 void BattleGroundIC::HandleKillPlayer(Player* player, Player* killer)

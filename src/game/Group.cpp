@@ -2023,11 +2023,21 @@ void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
             if(!pGroupGuy->IsAtGroupRewardDistance(pVictim))
                 continue;                               // member (alive or dead) or his corpse at req. distance
 
+            if (pVictim->GetTypeId()==TYPEID_UNIT)
+                if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(pVictim->GetEntry()))
+                    if(uint32 normalType = normalInfo->type)
+                        pGroupGuy->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp<1 ? 1 : 2);
+
             RewardGroupAtKill_helper(pGroupGuy, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp);
         }
 
         if(player_tap)
         {
+            if (pVictim->GetTypeId()==TYPEID_UNIT)
+                if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(pVictim->GetEntry()))
+                    if(uint32 normalType = normalInfo->type)
+                        player_tap->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp<1 ? 1 : 2);
+            player_tap->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1, 0, pVictim);
             // member (alive or dead) or his corpse at req. distance
             if(player_tap->IsAtGroupRewardDistance(pVictim))
                 RewardGroupAtKill_helper(player_tap, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp);

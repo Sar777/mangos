@@ -533,6 +533,7 @@ void BattleGround::Update(uint32 diff)
                         plr->GetSession()->SendPacket(&status);
 
                         plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
+                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA,plr->GetMapId(),GetArenaType());
                     }
 
                 //Announce Arena starting
@@ -969,7 +970,7 @@ void BattleGround::EndBattleGround(Team winner)
                 if (member)
                 {
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->personal_rating);
-                    plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, 1);
+                    plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, plr->GetMapId(),GetArenaType());
                 }
 
                 winner_arena_team->MemberWon(plr,loser_rating);
@@ -2037,7 +2038,7 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
         UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
 
-        killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1);
+        //killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1);
         //killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, 1, 0, killer);
         killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, 1);
 
