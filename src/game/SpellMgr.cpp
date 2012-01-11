@@ -4514,3 +4514,6 @@ uint32 GetProcFlag(SpellEntry const* spellInfo)
 
     return EventProcFlag;
 }
+
+ClassFamilyMask const ClassFamilyMask::Null = ClassFamilyMask();
+
