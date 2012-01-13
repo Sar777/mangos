@@ -2007,6 +2007,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
             {
+                if(!miscvalue1)
+                    continue;
                 BattleGround* bg=GetPlayer()->GetBattleGround();
 
                 switch(achievementCriteria->referredAchievement)
