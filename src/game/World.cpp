@@ -2134,7 +2134,7 @@ void World::BanWpeUser()
             Field *fields = result->Fetch();
             uint32 guid = fields[0].GetUInt32();
             uint32 accId = fields[1].GetUInt32();
-            if (sAccountMgr.GetSecurity(acc) < SEC_MODERATOR)
+            if (sAccountMgr.GetSecurity(accId) < SEC_MODERATOR)
             {
                 std::string accname;
                 if (sAccountMgr.GetName(accId, accname))
@@ -2167,7 +2167,7 @@ void World::BanWpeUser()
             Field *fields = resultSE->Fetch();
             uint32 guid = fields[0].GetUInt32();
             uint32 accId = fields[1].GetUInt32();
-            if (sAccountMgr.GetSecurity(acc) < SEC_MODERATOR)
+            if (sAccountMgr.GetSecurity(accId) < SEC_MODERATOR)
             {
                 std::string accname;
                 if (sAccountMgr.GetName(accId, accname))

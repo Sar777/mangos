@@ -567,20 +567,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                             holder->SetAuraDuration(500);
                         break;
                     }
-                    // Empowered Flare (Blood Council encounter)
-                    case 71708:
-                    {
-                        // aura doesn't want to proc, so hacked...
-                        if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(71756))
-                        {
-                            if (holder->GetStackAmount() <= 1)
-                                m_caster->RemoveSpellAuraHolder(holder);
-                            else
-                                holder->ModStackAmount(-1);
-                        }
-
-                        break;
-                    }
                     // Bone Storm
                     case 69075:
                     case 70834:
@@ -652,32 +638,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         for (uint32 i = 1; i <= stack; ++i)
                             damage += extraDamage * i;
 
-                        break;
-                    }
-                    // Vampiric Bite (Queen Lana'thel)
-                    case 70946:
-                    case 71475:
-                    case 71476:
-                    case 71477:
-                    case 71726:
-                    case 71727:
-                    case 71728:
-                    case 71729:
-                    {
-                        // trigger Presence of the Darkfallen check
-                        unitTarget->CastSpell(unitTarget, 71952, true);
-                        break;
-                    }
-                    // Mark of the Fallen Champion damage (Saurfang)
-                    case 72255:
-                    case 72444:
-                    case 72445:
-                    case 72446:
-                    {
-                        if (!unitTarget->HasAura(72293))
-                            damage = 0;
-                        else
-                            unitTarget->CastSpell(unitTarget, 72202, true); // Blood Link
                         break;
                     }
                     // Mutated Plague (Putricide)
@@ -796,14 +756,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                                     break;
                             }
                         }
-                        break;
-                    }
-                    // Shadow Prison
-                    case 72999:
-                    {
-                        if (Aura *aur = unitTarget->GetDummyAura(m_spellInfo->Id))
-                            damage += (aur->GetStackAmount() - 1) * aur->GetModifier()->m_amount;
-
                         break;
                     }
                     case 74607:
@@ -10059,14 +10011,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_ATTACK_UNARMED);
                         return;
                     }
-                    return;
-                }
-                case 67533:                                 // Shoot Air Rifle
-                {
-                    if (!unitTarget)
-                        return;
-
-                    m_caster->CastSpell(unitTarget, 67532, true);
                     return;
                 }
                 case 68861:                                 // Consume Soul (ICC FoS: Bronjahm)

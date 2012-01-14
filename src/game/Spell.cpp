@@ -1883,8 +1883,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 72769:                                 // Scent of Blood (Saurfang)
                 case 72771:
                 case 72934:                                 // Blood infusion credit
-				case 72769:                                 // Scent of Blood (Saurfang)
-                case 72771:
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
                 case 69845:                                 // Sindragosa Frost bomb (hack!)
@@ -9343,41 +9341,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
 
             break;
-        }
-        case 72385:                                     // Boiling Blood
-        case 72441:
-        case 72442:
-        case 72443:
-        {
-            UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-            if (!tempTargetUnitMap.empty())
-            {
-                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
-                {
-                    if (!(*iter)->GetObjectGuid().IsPlayer())
-                        continue;
-
-                    if ((*iter) == m_caster->getVictim())
-                        continue;
-
-                    targetUnitMap.push_back((*iter));
-                }
-            }
-
-            if (!targetUnitMap.empty())
-            {
-                UnitList::iterator i = targetUnitMap.begin();
-                Unit *pTmp;
-
-                advance(i, urand(0, targetUnitMap.size() - 1));
-                pTmp = *i;
-                targetUnitMap.clear();
-                targetUnitMap.push_back(pTmp);
-            }
-
-            break;
-        }
+        }       
         case 71336:                                     // Pact of the Darkfallen
         {
             UnitList tempTargetUnitMap;

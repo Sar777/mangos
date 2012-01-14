@@ -3356,8 +3356,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
         }
->>>>>>> a3f54269046bc96c39c7400b4609c306706e891f
-
         // Living Bomb
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellProto()->SpellFamilyFlags.test<CF_MAGE_LIVING_BOMB>())
         {
