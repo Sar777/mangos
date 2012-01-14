@@ -2073,6 +2073,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         //Criteria 5508
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_AB))
                             continue;
+                        break;
                     }
                     case 1115:                  // Warsong Gulch Honorable Kills
                     {
