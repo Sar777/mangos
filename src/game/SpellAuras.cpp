@@ -1942,7 +1942,7 @@ void Aura::TriggerSpell()
 
                         if (triggerTarget->GetPower(POWER_MANA) < -damage)
                         {
-                            damage = -triggerTarget->GetPower(POWER_MANA);
+                            damage = -int32(triggerTarget->GetPower(POWER_MANA));
                             triggerTarget->RemoveAurasDueToSpell(auraId);
                         }
 
@@ -2640,6 +2640,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             caster->CastSpell(caster, 68899, false);
                         }
                         return;
+                    case 69152:                             // Gaseous Blight (Festergut)
+                        target->RemoveAurasDueToSpell(69126); // previous gas state
+                        return;
+                    case 69154:                             // Gaseous Blight (Festergut)
+                        target->RemoveAurasDueToSpell(69152); // previous gas state
+                        return;
                     case 71342:                             // Big Love Rocket
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 71344, 71345, 71346, 71347, 0);
                         return;
@@ -3330,7 +3336,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if (Creature *pAbomination = target->SummonCreature(entry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
                 {
                     target->CastSpell(pAbomination, 46598, true);
-                    pAbomination->CastSpell(pAbomination, 70405, true);                    
+                    pAbomination->CastSpell(pAbomination, 70405, true);
                 }
 
                 return;
@@ -3350,7 +3356,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
         }
-
         // Living Bomb
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellProto()->SpellFamilyFlags.test<CF_MAGE_LIVING_BOMB>())
         {
@@ -6004,15 +6009,18 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             case 66:                                        // Invisibility
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 32612, true, NULL, this);
+
                 return;
             case 28522:                                     // Icebolt (Naxxramas: Sapphiron)
                 if (target->HasAura(45776))                 // Should trigger/remove some kind of iceblock
                     // not sure about ice block spell id
                     target->RemoveAurasDueToSpell(45776);
+
                 return;
             case 42783:                                     // Wrath of the Astrom...
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
                     target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(SpellEffectIndex(GetEffIndex()+1)), true);
+
                 return;
             case 46221:                                     // Animal Blood
                 if (target->GetTypeId() == TYPEID_PLAYER && m_removeMode == AURA_REMOVE_BY_DEFAULT && target->IsInWater())
@@ -6021,6 +6029,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     // Spawn Blood Pool
                     target->CastSpell(target->GetPositionX(), target->GetPositionY(), position_z, 63471, true);
                 }
+
                 return;
             case 51121:                                     // Urom Clocking Bomb
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -6033,14 +6042,17 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (Unit* pCaster = GetCaster())
                         pCaster->CastSpell(target, GetSpellProto()->EffectTriggerSpell[GetEffIndex()], true, NULL, this);
                 }
+
                 return;
             case 52658:                                     // Ionar Static Overload Explode (N)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 53337, true);
+
                 return;
             case 59795:                                     // Ionar Static Overload Explode (H)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 59798, true);
+
                 return;
             case 63018:                                     // Searing Light (Ulduar: XT-002)
             case 65121:                                     // Searing Light (h) (Ulduar: XT-002)
@@ -6049,6 +6061,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (pCaster->HasAura(GetModifier()->m_amount))
                         pCaster->CastSpell(target, 64210, true);
                 }
+
                 return;
             case 63024:                                     // Gravity Bomb (Ulduar: XT-002)
             case 64234:                                     // Gravity Bomb (h) (Ulduar: XT-002)
@@ -6058,6 +6071,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (pCaster->HasAura(GetModifier()->m_amount))
                         pCaster->CastSpell(target, spellId, true);
                 }
+
                 return;
             case 66083:                                     // Lightning Arrows (Trial of the Champion encounter)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -6065,6 +6079,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (Unit* pCaster = GetCaster())
                         pCaster->CastSpell(pCaster, 66085, true, NULL, this);
                 }
+
                 return;
             case 70405:                                     // Mutated Transformation (Putricide)
             case 72508:
@@ -6073,9 +6088,8 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (target->GetTypeId() == TYPEID_UNIT)
                     ((Creature*)target)->ForcedDespawn();
                 return;
-            case 71441:                                     // Unstable Ooze Explosion (Icecrown Citadel encounter)
-                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-                    target->CastSpell(target, 67375, true, NULL, this);
+            case 71441:                                     // Unstable Ooze Explosion (Rotface)
+                target->CastSpell(target, 67375, true);
                 return;
             default:
                 break;
@@ -6136,7 +6150,8 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
           else
               target->RemoveAurasDueToSpell(70871); // remove the buff
           break;
-      }
+       }
+        return;
     }
 }
 
@@ -6640,8 +6655,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     if (SpellAuraHolderPtr holder = pCaster->GetSpellAuraHolder(GetId()))
                     {
                         GetHolder()->SetAuraDuration(holder->GetAuraDuration());
-                        GetHolder()->RefreshHolder();
-                        pCaster->RemoveAurasDueToSpell(GetId());
+                        GetHolder()->SendAuraUpdate(false);
                     }
                 }
             }
@@ -6650,6 +6664,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 target->RemoveAurasDueToSpell(70917); // remove Search Periodic
                 target->CastSpell(target, 70953, true); // Plague Sickness
             }
+
             break;
         }
     }
@@ -8445,6 +8460,20 @@ void Aura::PeriodicTick()
                         }
                         break;
                     }
+                    case 70672: // Gaseous Bloat (Putricide)
+                    case 72455:
+                    case 72832:
+                    case 72833:
+                    {
+                        // drop 1 stack
+                        if (GetHolder()->ModStackAmount(-1))
+                        {
+                            target->RemoveAurasDueToSpell(GetId());
+                            return;
+                        }
+
+                        break;
+                    }
                     case 74562: // SPELL_FIERY_COMBUSTION - Ruby sanctum boss Halion, added mark (74567, dummy) every tick
                     {
                         target->CastSpell(target, 74567, true, NULL, NULL, GetCasterGuid());
@@ -8471,20 +8500,21 @@ void Aura::PeriodicTick()
                     case 67298:
                         pCaster->CastSpell(target, 65952, true);
                         break;
-                    case 70911:                                  // Unbound Plague (Putricide)
+                    // Unbound Plague (Putricide)
+                    case 70911:
                     case 72854:
                     case 72855:
                     case 72856:
                         m_modifier.m_miscvalue += 1; // store ticks number in miscvalue
                         m_modifier.m_amount = m_modifier.m_baseamount * pow(2.7f, m_modifier.m_miscvalue * 0.223f);
-                    break;
+                        break;
                     // Boiling Blood (Saurfang)
                     case 72385:
                     case 72441:
                     case 72442:
-                    case 72443:	
+                    case 72443:
                         target->CastSpell(target, 72202, true); // Blood Link
-						break;
+                        break;
                     default:
                         break;
                 }
@@ -9541,6 +9571,12 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 68873, true);
                     return;
                 }
+                case 70069:                                   // Ooze Flood Periodic Trigger (Rotface)
+                {
+                    if (target)
+                        target->CastSpell(target, spell->CalculateSimpleValue(GetEffIndex()), true);
+                    return;
+                }
                 case 73001:                                   // Shadow Prison (Blood Council)
                 {
                     // cast dmg spell when moving
@@ -9549,7 +9585,7 @@ void Aura::PeriodicDummyTick()
 
                     return;
                 }
-// Exist more after, need add later
+                // Exist more after, need add later
                 default:
                     break;
             }
@@ -10325,9 +10361,6 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
         case 71564:                                         // Deadly Precision
         case 74396:                                         // Fingers of Frost
         case 70672:                                         // Gaseous Bloat (Putricide)
-        case 72455:
-        case 72832:
-        case 72833:
             m_stackAmount = m_spellProto->StackAmount;
             break;
     }
