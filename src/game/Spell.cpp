@@ -1748,8 +1748,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 69048:                                 // Mirrored Soul (FoS)
                 case 69140:                                 // Coldflame (Icecrown Citadel, Lord Marrowgar encounter)
                 case 69674:                                 // Mutated Infection
-                case 70920:                                 // Unbound Plague Search Effect (Putricide)
-                case 71224:                                 // Mutated Infection (Rotface)
+                case 71224:
                 case 72091:                                 // Frozen Orb (Vault of Archavon, Toravon encounter, normal)
                 case 73022:                                 // Mutated Infection (heroic)
                 case 73023:                                 // Mutated Infection (heroic)
@@ -1765,7 +1764,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 67755:                                 // -> Anub'arak encounter, 10 and 10 heroic)
                 case 68509:                                 // Penetrating Cold (10 man heroic)
                 case 69278:                                 // Gas spore - 10
-                case 70341:                                 // Slime Puddle (Putricide)
                 case 71336:                                 // Pact of the Darkfallen
                 case 71390:                                 // Pact of the Darkfallen
                 case 63476:                                 // Icicle (Hodir - 10)
@@ -8826,8 +8824,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
-        case 68921:
-        case 69049: // Soulstorm (Forge of Souls - Bronjahm)
+        case 68921: case 69049: // Soulstorm (Forge of Souls - Bronjahm)
         {
             UnitList tmpUnitMap;
             FillAreaTargets(tmpUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
@@ -8914,109 +8911,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
-        case 70346: // Slime Puddle
-        case 72868:
-        case 72869:
-        {
-            radius = 5.0f;
-
-            if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(70347))
-                radius += holder->GetStackAmount() * 0.2f;
-
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-            break;
-        }
-        case 70127: // Mystic Buffet (Sindragosa)
-        case 72528:
-        case 72529:
-        case 72530:
-        {
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-            targetUnitMap.remove(m_caster);
-            break;
-        }
-        case 70402: // Mutated Transformation (Putricide)
-        case 72511:
-        case 72512:
-        case 72513:
-        {
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
-            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
-            {
-                if ((*itr) && (*itr)->GetObjectGuid().IsVehicle())
-                    itr = targetUnitMap.erase(itr);
-                else
-                    ++itr;
-            }
-            break;
-        }
-        case 70447: // Volatile Ooze Adhesive (Putricide)
-        case 72836:
-        case 72837:
-        case 72838:
-        case 70672: // Gaseous Bloat (Putricide)
-        case 72455:
-        case 72832:
-        case 72833:
-        {
-            targetUnitMap.push_back(m_targets.getUnitTarget());
-            break;
-        }
-        case 70701: // Expunged Gas (Putricide)
-        {
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
-            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
-            {
-                if ((*itr) && (*itr)->GetObjectGuid().IsVehicle())
-                    itr = targetUnitMap.erase(itr);
-                else
-                    ++itr;
-            }
-            break;
-        }
-        case 70911: // Unbound Plague (Putricide)
-        case 72854:
-        case 72855:
-        case 72856:
-        {
-            if (m_targets.getUnitTarget())
-                targetUnitMap.push_back(m_targets.getUnitTarget());
-            break;
-        }
-        case 70920: // Unbound Plague Search Effect (Putricide)
-        {
-            UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
-            for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
-            {
-                // target only other players which dont have Mutated Transformation aura on self
-                if ((*iter) && (*iter)->GetTypeId() == TYPEID_PLAYER &&
-                    (*iter) != m_caster && !(*iter)->GetDummyAura(70308))
-                {
-                    targetUnitMap.push_back(*iter);
-                }
-            }
-            // random 1 target
-            if (!targetUnitMap.empty())
-            {
-                // remove random units from the map
-                while (targetUnitMap.size() > 1)
-                {
-                    uint32 poz = urand(0, targetUnitMap.size()-1);
-                    for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
-                    {
-                        if (!*itr) continue;
-
-                        if (!poz)
-                        {
-                            targetUnitMap.erase(itr);
-                            break;
-                        }
-                    }
-                }
-            }
-            break;
-        }
         case 71075: // Invocation of Blood (V) Move
         case 71079: // Invocation of Blood (K) Move
         case 71082: // Invocation of Blood (T) Move
@@ -9036,26 +8930,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
                         break;
                     }
                 }
-            }
-            break;
-        }
-        case 72873: // Malleable Goo (Putricide)
-        case 72874:
-        case 72550:
-        case 72458:
-        case 72549:
-        case 70853:
-        case 72297:
-        case 72548:
-        {
-            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
-            targetUnitMap.remove(m_caster);
-            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
-            {
-                if ((*itr) && (*itr)->GetObjectGuid().IsVehicle())
-                    itr = targetUnitMap.erase(itr);
-                else
-                    ++itr;
             }
             break;
         }
@@ -9173,22 +9047,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         {
             FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE, GetAffectiveCaster());
             targetUnitMap.remove(m_caster);
-            break;
-        }
-        case 72454:                                 // Mutated Plague (Putricide)
-        case 72464:
-        case 72506:
-        case 72507:
-        {
-            radius = DEFAULT_VISIBILITY_INSTANCE;
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE, GetAffectiveCaster());
-            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
-            {
-                if ((*itr) && (*itr)->GetObjectGuid().IsVehicle())
-                    itr = targetUnitMap.erase(itr);
-                else
-                    ++itr;
-            }
             break;
         }
         case 74960:                                     // Infrigidate
