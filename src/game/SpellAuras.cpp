@@ -3317,24 +3317,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastCustomSpell(target, 69770, &damage, 0, 0, true, 0, this, GetCasterGuid(), GetSpellProto());
                 return;
             }
-            case 70308:                                     // Mutated Transformation (Putricide)
-            {
-                uint32 entry = 37672;
-
-                if (target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
-                    target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                {
-                    entry = 38285;
-                }
-
-                if (Creature *pAbomination = target->SummonCreature(entry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
-                {
-                    target->CastSpell(pAbomination, 46598, true);
-                    pAbomination->CastSpell(pAbomination, 70405, true);                    
-                }
-
-                return;
-            }
             case 70955:                                     // Unbound Plague Bounce Protection (Putricide)
             {
                 target->CastSpell(target, 70917, true); // Search Periodic
@@ -8471,16 +8453,9 @@ void Aura::PeriodicTick()
                     case 67298:
                         pCaster->CastSpell(target, 65952, true);
                         break;
-                    case 70911:                                  // Unbound Plague (Putricide)
-                    case 72854:
-                    case 72855:
-                    case 72856:
-                        m_modifier.m_miscvalue += 1; // store ticks number in miscvalue
-                        m_modifier.m_amount = m_modifier.m_baseamount * pow(2.7f, m_modifier.m_miscvalue * 0.223f);
-                    break;
-                    // Boiling Blood (Saurfang)
-                    case 72385:
-                    case 72441:
+					// Boiling Blood (Saurfang)
+					case 72385:
+					case 72441:
                     case 72442:
                     case 72443:	
                         target->CastSpell(target, 72202, true); // Blood Link
