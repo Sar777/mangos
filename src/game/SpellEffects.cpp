@@ -7787,17 +7787,17 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             {
                 int32 count = CalculateDamage(EFFECT_INDEX_2, unitTarget);
                 spell_bonus += int32(count * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100.0f);
-				
-				if (unitTarget->GetTypeId() != TYPEID_UNIT)
-					return;
 
-				ThreatList const& tList = unitTarget->getThreatManager().getThreatList();
-				for (ThreatList::const_iterator itr = tList.begin();itr != tList.end(); ++itr)
-				{
-					Unit* pUnit = unitTarget->GetMap()->GetUnit((*itr)->getUnitGuid());
-					if (pUnit && unitTarget->getThreatManager().getThreat(pUnit))
-						unitTarget->getThreatManager().addThreat(pUnit, 500.0f);
-				}
+                if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                {
+                    ThreatList const& tList = unitTarget->getThreatManager().getThreatList();
+                    for (ThreatList::const_iterator itr = tList.begin();itr != tList.end(); ++itr)
+                    {
+                        Unit* pUnit = unitTarget->GetMap()->GetUnit((*itr)->getUnitGuid());
+                        if (pUnit && unitTarget->getThreatManager().getThreat(pUnit))
+                            unitTarget->getThreatManager().addThreat(pUnit, 500.0f);
+                    }
+                }
             }
             break;
         }
