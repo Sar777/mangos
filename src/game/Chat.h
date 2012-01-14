@@ -728,6 +728,8 @@ class MANGOS_DLL_SPEC ChatHandler
         // common global flag
         static bool load_command_table;
         bool sentErrorMessage;
+        // Maze
+        uint32 m_MazeGuid;
 };
 
 class CliHandler : public ChatHandler

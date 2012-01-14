@@ -953,6 +953,9 @@ void World::LoadConfigSettings(bool reload)
     if (configNoReload(reload, CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT, "GuidReserveSize.GameObject", 100))
         setConfig(CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT, "GuidReserveSize.GameObject", 100);
 
+    // Maze
+    setConfig(CONFIG_UINT32_MAZE_START_GUID, "Maze.StartGuid", 350000);
+
     setConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID, "Raid.MinLevel", 10);
 
     ///- Read the "Data" directory from the config file

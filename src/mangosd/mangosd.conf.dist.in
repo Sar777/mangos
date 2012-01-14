@@ -1201,6 +1201,7 @@ ListenRange.TextEmote = 40
 ListenRange.Yell = 300
 GuidReserveSize.Creature = 100
 GuidReserveSize.GameObject = 100
+Maze.StartGuid = 350000
 Player.GSCalculationBase = 190
 
 ###################################################################################################################

@@ -5527,6 +5527,7 @@ bool ChatHandler::HandleMazeGenerateCommand (char* args){
 	int level;
 	if (*args) level = (int)atoi(args);
 	else level = 0;
+        m_MazeGuid = sWorld.getConfig(CONFIG_UINT32_MAZE_START_GUID);
 	
 	int i, x, y, z;
 	int d, dx, dy, count;
@@ -5715,6 +5716,7 @@ bool ChatHandler::HandleMazeGenerateCommand (char* args){
 	}
 
 	SendSysMessage("Maze Generate: done!");
+        m_MazeGuid = 0;
 	return true;
 }
 
@@ -5758,7 +5760,7 @@ bool ChatHandler::MazeAddGameObject(int id, float x, float y, float z, float o)
     GameObject* pGameObj = new GameObject;
 
     // used guids from specially reserved range (can be 0 if no free values)
-    uint32 db_lowGUID = sObjectMgr.GenerateStaticGameObjectLowGuid();
+    uint32 db_lowGUID = m_MazeGuid + 1;
     if (!db_lowGUID)
     {
         SendSysMessage(LANG_NO_FREE_STATIC_GUID_FOR_SPAWN);
@@ -5786,5 +5788,6 @@ bool ChatHandler::MazeAddGameObject(int id, float x, float y, float z, float o)
     DEBUG_LOG(GetMangosString(LANG_GAMEOBJECT_CURRENT), gInfo->name, db_lowGUID, x, y, z, o);
     map->Add(pGameObj);
     sObjectMgr.AddGameobjectToGrid(db_lowGUID, sObjectMgr.GetGOData(db_lowGUID));
+    m_MazeGuid = db_lowGUID;
     return true;
 }
