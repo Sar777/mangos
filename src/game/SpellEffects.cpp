@@ -978,7 +978,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                 else if (m_spellInfo->Id == 63675)
                 {
                     int32 heal = damage * 15 / 100;
-					damage = int32(damage / 1.8); //hack damage
+                    damage -= unitTarget->GetSpellDamageReduction(damage);
                     m_caster->CastCustomSpell(m_caster, 75999, &heal, NULL, NULL, true);
                 }
                 break;
