@@ -2133,23 +2133,19 @@ void World::BanWpeUser()
         do {
             Field *fields = result->Fetch();
             uint32 guid = fields[0].GetUInt32();
-            uint32 acc = fields[1].GetUInt32();
-            if (sAccountMgr.GetSecurity(acc) == SEC_PLAYER)
+            uint32 accId = fields[1].GetUInt32();
+            if (sAccountMgr.GetSecurity(acc) < SEC_MODERATOR)
             {
-                QueryResult *result2 = LoginDatabase.PQuery("SELECT username FROM account WHERE id='%u'", acc);
-                if (result2)
+                std::string accname;
+                if (sAccountMgr.GetName(accId, accname))
                 {
-                    Field *fields2 = result2->Fetch();
-                    std::string accname  = fields2[0].GetCppString();
                     sWorld.BanAccount(BAN_ACCOUNT, accname, TimeStringToSecs("-1d"), "Wpe User(Shadowmourne)", "auto-ban(WPE - Wotlk)");
-                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadowmourne)", acc, accname.c_str(), guid);
+                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadowmourne)", accId, accname.c_str(), guid);
                 }
-                delete result2;
             }
-
         } while (result->NextRow());
+        delete result;
     }
-    delete result;
     CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
 
     //////////////////
@@ -2170,23 +2166,19 @@ void World::BanWpeUser()
         do {
             Field *fields = resultSE->Fetch();
             uint32 guid = fields[0].GetUInt32();
-            uint32 acc = fields[1].GetUInt32();
-            if (sAccountMgr.GetSecurity(acc) == SEC_PLAYER)
+            uint32 accId = fields[1].GetUInt32();
+            if (sAccountMgr.GetSecurity(acc) < SEC_MODERATOR)
             {
-                QueryResult *resultSE1 = LoginDatabase.PQuery("SELECT username FROM account WHERE id='%u'", acc);
-                if (resultSE1)
+                std::string accname;
+                if (sAccountMgr.GetName(accId, accname))
                 {
-                    Field *fields2 = resultSE1->Fetch();
-                    std::string accname  = fields2[0].GetCppString();
                     sWorld.BanAccount(BAN_ACCOUNT, accname, TimeStringToSecs("-1d"), "Wpe User(Shadow's Edge)", "auto-ban(WPE - Wotlk)");
-                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadow's Edge)", acc, accname.c_str(), guid);
+                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadow's Edge)", accId, accname.c_str(), guid);
                 }
-                delete resultSE1;
             }
-
-        } while (result->NextRow());
+        } while (resultSE->NextRow());
+        delete resultSE;
     }
-    delete resultSE;
     CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
     debug_log("Auto-ban: Complete check");
 }
