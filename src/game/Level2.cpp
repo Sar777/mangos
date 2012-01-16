@@ -5527,7 +5527,7 @@ bool ChatHandler::HandleMazeGenerateCommand (char* args){
 	int level;
 	if (*args) level = (int)atoi(args);
 	else level = 0;
-        m_MazeGuid = sWorld.getConfig(CONFIG_UINT32_MAZE_START_GUID);
+        m_MazeGuid = sWorld.getConfig(CONFIG_INT32_MAZE_START_GUID);
 	
 	int i, x, y, z;
 	int d, dx, dy, count;

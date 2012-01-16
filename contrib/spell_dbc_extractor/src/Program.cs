@@ -15,16 +15,8 @@ namespace spell_dbc_extractor
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Spell.dbc to spell_dbc extractor based on code from TOM_RUS (http://mywowtools.googlecode.com/svn/trunk)");
-            if (args.Length < 1)
-            {
-                Console.WriteLine("Please specify spell number!");
-                Console.WriteLine("example: spell_dbc_extractor Spell.dbc 7744");
-                return;
-            }
-
             string fileName = "Spell.dbc";
-            uint    spellNum = Convert.ToUInt32(args[0]);
+            uint    spellNum = 69065; //Convert.ToUInt32(args[0]);
             bool found = false;
 
             if (!File.Exists(fileName))

@@ -1506,6 +1506,17 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage *damageInfo, int32 damage, S
     if(!this->isAlive() || !pVictim->isAlive())
         return;
 
+    // Hack, not CalculateSpellDamage
+    switch (spellInfo->Id)
+    {
+        case 71341:                         // Pact of the Darkfallen
+        case 72999:                         // Shadow Prisen
+            damageInfo->damage = damage;
+            return;
+        default:
+            break;
+    }
+
     // Check spell crit chance
     bool crit = IsSpellCrit(pVictim, spellInfo, damageSchoolMask, attackType);
 

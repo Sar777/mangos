@@ -2321,11 +2321,14 @@ void Aura::TriggerSpell()
                 triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &mana, NULL, NULL, true, NULL, this);
                 return;
             }
-            case 71340:
-            {
-                if (GetAuraTicks() < 6)
+            case 71340:                                     // Pact of the Darkfallen
+            {                
+                if (GetAuraTicks() < 2)
                     return;
-                triggerTarget->CastSpell(triggerTarget, 71341, true);
+                int32 bp0 = 5090;
+                if (GetAuraTicks() > 5)
+                    bp0 += 5090 * 20 / 100;
+                triggerTarget->CastCustomSpell(triggerTarget, 71341, &bp0, NULL, NULL, true);
                 break;
             }
         }
