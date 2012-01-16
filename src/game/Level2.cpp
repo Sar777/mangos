@@ -5458,6 +5458,14 @@ const int MAZE_MAP_ID = 13;
 
 bool ChatHandler::HandleMazeCleanCommand(char* args)
 {
+    if (Player* player = m_session->GetPlayer())
+    {
+        if (player->GetMapId() != 13)
+        {
+            SendSysMessage("Teleport in mapid 13");
+            return true;
+        }
+    }
     Map* map = sMapMgr.FindMap(MAZE_MAP_ID);
     if (!map){
         SendSysMessage("Maze Clean: Map (id 13) does not exist.");
@@ -5523,6 +5531,14 @@ int getRandomBoxId(){
 	bool maze[xSteps+1][ySteps+1][zSteps+1];
 
 bool ChatHandler::HandleMazeGenerateCommand (char* args){
+        if (Player* player = m_session->GetPlayer())
+        {
+            if (player->GetMapId() != 13)
+            {
+                SendSysMessage("Teleport in mapid 13");
+                return true;
+            }
+        }
 	SendSysMessage("Maze Generate: start working, 'some lags was occured!'");
 	int level;
 	if (*args) level = (int)atoi(args);
