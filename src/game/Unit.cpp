@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1570,8 +1570,8 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage *damageInfo, int32 damage, S
         break;
     }
 
-    // only from players
-    if (GetTypeId() == TYPEID_PLAYER)
+    // only from players and their pets
+    if (GetTypeId() == TYPEID_PLAYER || GetObjectGuid().IsPet())
     {
         uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damage, damageSchoolMask);
         damage -= pVictim->GetSpellDamageReduction(reduction_affected_damage);
@@ -3474,7 +3474,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
             return SPELL_MISS_NONE;
 
         // Check for immune
-        if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
+        if (IsSpellCauseDamage(spell) && pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
             return SPELL_MISS_IMMUNE;
     }
     else if (IsPositiveSpell(spell->Id) && IsFriendlyTo(pVictim))
@@ -5433,10 +5433,15 @@ void Unit::RemoveAura(Aura* aura, AuraRemoveMode mode)
 
 void Unit::RemoveAllAuras(AuraRemoveMode mode /*= AURA_REMOVE_BY_DEFAULT*/)
 {
-    while (!m_spellAuraHolders.empty())
+    for(SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
-        SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin();
-        RemoveSpellAuraHolder(iter->second,mode);
+        if (!iter->second->IsDeleted())
+        {
+            RemoveSpellAuraHolder(iter->second,mode);
+            iter = m_spellAuraHolders.begin();
+        }
+        else
+            ++iter;
     }
 }
 
@@ -8307,6 +8312,14 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo)
 
 bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
+    if (!spellInfo)
+        return false;
+
+    // in case of trigger spells, check not current spell, but triggered (/dev/rsa)
+    if (spellInfo->Effect[index] == SPELL_EFFECT_TRIGGER_SPELL)
+        if (SpellEntry const* triggeredSpellInfo = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[index]))
+            return ((Unit*)this)->IsImmuneToSpell(triggeredSpellInfo);
+
     //If m_immuneToEffect type contain this effect type, IMMUNE effect.
     uint32 effect = spellInfo->Effect[index];
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];

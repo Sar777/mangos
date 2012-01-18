@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1006,7 +1006,7 @@ void Aura::ApplyModifier(bool apply, bool Real)
     GetHolder()->SetInUse(false);
 }
 
-ClassFamilyMask const& Aura::GetAuraSpellClassMask() const { return  (GetHolder() && !GetHolder()->IsDeleted()) ? GetHolder()->GetSpellProto()->GetEffectSpellClassMask(m_effIndex) : ClassFamilyMask::Null; }
+ClassFamilyMask const& Aura::GetAuraSpellClassMask() const { return  GetHolder() ? GetHolder()->GetSpellProto()->GetEffectSpellClassMask(m_effIndex) : ClassFamilyMask::Null; }
 
 bool Aura::isAffectedOnSpell(SpellEntry const *spell) const
 {
@@ -1875,7 +1875,18 @@ void Aura::TriggerSpell()
 //                    // Draw Magic
 //                    case 58185: break;
 //                    // Food
-//                    case 58886: break;
+                    case 58886:
+                    {
+                        if (!m_modifier.m_amount)
+                            return;
+
+                        uint32 randomBuff[5] = {57288, 57139, 57111, 57286, 57291};
+
+                        trigger_spell_id = urand(0,1) ? 58891 : randomBuff[urand(0,4)];
+                        m_modifier.m_amount = 0;
+
+                        break;
+                    }
 //                    // Shadow Sickle
 //                    case 59103: break;
 //                    // Time Bomb
@@ -8455,7 +8466,7 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (IsSpellCauseDamage(spellProto) && target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             // some auras remove at specific health level or more
@@ -8697,7 +8708,7 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (IsSpellCauseDamage(spellProto) && target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             uint32 absorb=0;
@@ -8930,7 +8941,7 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (IsSpellCauseDamage(spellProto) && target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             // ignore non positive values (can be result apply spellmods to aura damage
@@ -9073,7 +9084,7 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (IsSpellCauseDamage(spellProto) && target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             int32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;

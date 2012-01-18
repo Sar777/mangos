@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2009-2011 MaNGOS <http://getmangos.com/>
+* Copyright (C) 2009-2012 MaNGOS <http://getmangos.com/>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -22,4 +22,54 @@
 
 #include "../../dep/tbb/include/tbb/scalable_allocator.h"
 
-#endif
+void* operator new(size_t sz)
+{
+    void *res = scalable_malloc(sz);
+
+    if (res == NULL)
+        throw std::bad_alloc();
+
+    return res;
+}
+
+void* operator new[](size_t sz)
+{
+    void *res = scalable_malloc(sz);
+
+    if (res == NULL)
+        throw std::bad_alloc();
+
+    return res;
+}
+
+void operator delete(void* ptr) throw()
+{
+    scalable_free(ptr);
+}
+
+void operator delete[](void* ptr) throw()
+{
+    scalable_free(ptr);
+}
+
+void* operator new(size_t sz, const std::nothrow_t&) throw()
+{
+    return scalable_malloc(sz);
+}
+
+void* operator new[](size_t sz, const std::nothrow_t&) throw()
+{
+    return scalable_malloc(sz);
+}
+
+void operator delete(void* ptr, const std::nothrow_t&) throw()
+{
+    scalable_free(ptr);
+}
+
+void operator delete[](void* ptr, const std::nothrow_t&) throw()
+{
+    scalable_free(ptr);
+}
+
+#endif // !USE_STANDARD_MALLOC

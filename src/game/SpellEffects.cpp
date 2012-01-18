@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11055,10 +11055,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 64380:                                 // Shattering Throw
                 {
-                    if (!unitTarget || !unitTarget->isAlive())
+                    if (!unitTarget || !unitTarget->isAlive() || unitTarget->HasAura(64382))
                         return;
-                    // remove immunity effects
-                    m_caster->CastSpell(unitTarget, 39897, true);
+
+                    // remove unvulnerability effects
+                    unitTarget->RemoveAurasAtMechanicImmunity(IMMUNE_BY_UNVULNERABILITY_MASK,0);
                     break;
                 }
             }

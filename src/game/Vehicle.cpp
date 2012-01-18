@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ VehicleInfo::VehicleInfo(VehicleEntry const* entry) :
 {
 }
 
-VehicleKit::VehicleKit(Unit* base) : m_pBase(base), m_uiNumFreeSeats(0)
+VehicleKit::VehicleKit(Unit* base) : m_uiNumFreeSeats(0), m_pBase(base)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEAT; ++i)
     {
@@ -338,9 +338,9 @@ void VehicleKit::RemovePassenger(Unit *passenger, bool dismount)
     seat->second.passenger = NULL;
     passenger->clearUnitState(UNIT_STAT_ON_VEHICLE);
 
-    float px, py, pz, po;
+    float px, py, pz/*, po*/;		/* po can be used, but not at the moment*/
     m_pBase->GetClosePoint(px, py, pz, m_pBase->GetObjectBoundingRadius(), 2.0f, M_PI_F);
-    po = m_pBase->GetOrientation();
+    /*po = m_pBase->GetOrientation();*/
 
     passenger->m_movementInfo.ClearTransportData();
     passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
@@ -492,7 +492,7 @@ VehicleSeatEntry const* VehicleKit::GetSeatInfo(Unit* passenger)
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
         if (Unit *_passenger = itr->second.passenger)
-            if (_passenger = passenger)
+            if (_passenger == passenger)
                 return itr->second.seatInfo;
     }
     return NULL;
@@ -503,7 +503,7 @@ int8 VehicleKit::GetSeatId(Unit* passenger)
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
         if (Unit *_passenger = itr->second.passenger)
-            if (_passenger = passenger)
+            if (_passenger == passenger)
                 return itr->first;
     }
     return -1;
@@ -514,12 +514,12 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     if (!passenger)
         return;
 
-    float ox, oy, oz, oo;
+    float ox, oy, oz/*, oo*/; /* oo can be used, but not at the moment*/
 
     Unit* base = m_pBase->GetVehicle() ? m_pBase->GetVehicle()->GetBase() : m_pBase;
 
     base->GetPosition(ox, oy, oz);
-    oo = base->GetOrientation();
+    /*oo = base->GetOrientation();*/
 
     passenger->m_movementInfo = base->m_movementInfo;
 
