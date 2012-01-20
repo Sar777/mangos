@@ -511,13 +511,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 {
                     if ((chn->IsLFG()) && !(_player->isGameMaster()))
 		    {
-		       _player->AutoMute(msg);
                        if (_player->getLevel() < sWorld.getConfig(CONFIG_INT32_LFG_REQ_LEVEL))
                        {
                            SendNotification(LANG_TRIGGER_REQ_LEVEL, sWorld.getConfig(CONFIG_INT32_LFG_REQ_LEVEL));
                            break;
                         }
 		    }
+                    if (!_player->AutoMute(&msg))
+                        break;
                     chn->Say(_player->GetObjectGuid(), msg.c_str(), lang);
                 }
             }
