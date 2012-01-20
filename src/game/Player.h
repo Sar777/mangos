@@ -2237,7 +2237,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***               AUTOMUTE SYSTEM                     ***/
         /*********************************************************/
 
-		void AutoMute(std::string msg);
+        void AutoMute(std::string msg);
+        std::string msg_data;
 
         /*********************************************************/
         /*** REFER-A-FRIEND SYSTEM ***/

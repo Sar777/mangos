@@ -19230,55 +19230,56 @@ void Player::UpdateSpeakTime()
 /***               AUTOMUTE SYSTEM                     ***/
 /*********************************************************/
 
-std::string msg_data;
-void Player::AutoMute(std::string msg)
+bool Player::AutoMute(std::string *msg)
 {
+    if (!sWorld.getConfig(CONFIG_BOOL_AUTOMUTE_ENABLE))
+        return true;
+
     // ignore chat spam protection for GMs in any mode
     if(GetSession()->GetSecurity() > SEC_PLAYER)
-        return;
-	
-	if (!sWorld.getConfig(CONFIG_BOOL_AUTOMUTE_ENABLE))
-		return;
+        return true;
 
-	if (msg == "")
-		return;
+    if (*msg == "")
+        return true;
 
-	if (msg_data != msg)
-	{
-		msg_data = msg;
-		m_speakCountAutoMute = 1;
-		return;
-	}
+    if (msg_data != *msg)
+    {
+        msg_data = *msg;
+        m_speakCountAutoMute = 1;
+        return true;
+    }
 
     time_t currentAutoMute = time (NULL);
-	if (m_speakTimeAutoMute >= currentAutoMute)
-	{
-		uint32 max_countAutoMute = sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_COUNT);
-		if(!max_countAutoMute)
-		    return;
-		++m_speakCountAutoMute;
-		if (m_speakCountAutoMute >= max_countAutoMute && msg_data == msg)
-		{
-			// prev ent overwrite mute time, if message send just before mutes set, for example.
-			uint32 timeMute = sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME);
-			time_t new_muteAutoMute = currentAutoMute + (timeMute * 60);
-			if (GetSession()->m_muteTime < new_muteAutoMute)
-			{
-				uint32 account_id = GetSession()->GetAccountId();
-				GetSession()->m_muteTime = new_muteAutoMute;
-				LoginDatabase.PExecute("UPDATE account SET mutetime = " UI64FMTD " WHERE id = '%u'", uint64(new_muteAutoMute), account_id);
-				ChatHandler(this).PSendSysMessage(11201, sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME));
-				sWorld.SendWorldTextWithSecurity(AccountTypes(1), 11200, sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME), GetSession()->GetPlayerName());
-				msg_data = "";
-				m_speakCountAutoMute = 0;
-			}
-		}
-	} else {
-		m_speakCountAutoMute = 0;
-		msg_data = "";
-	}
+    if (m_speakTimeAutoMute >= currentAutoMute)
+    {
+        uint32 max_countAutoMute = sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_COUNT);
+        if(!max_countAutoMute)
+            return true;
 
-	m_speakTimeAutoMute = currentAutoMute + sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_DELAY);
+        ++m_speakCountAutoMute;
+        if (m_speakCountAutoMute >= max_countAutoMute)
+        {
+            // prev ent overwrite mute time, if message send just before mutes set, for example.
+            uint32 timeMute = sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME);
+            time_t new_muteAutoMute = currentAutoMute + (timeMute * 60);
+            if (GetSession()->m_muteTime < new_muteAutoMute)
+            {
+                uint32 account_id = GetSession()->GetAccountId();
+                GetSession()->m_muteTime = new_muteAutoMute;
+                LoginDatabase.PExecute("UPDATE account SET mutetime = " UI64FMTD " WHERE id = '%u'", uint64(new_muteAutoMute), account_id);
+                ChatHandler(this).PSendSysMessage(11201, sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME));
+                sWorld.SendWorldTextWithSecurity(AccountTypes(1), 11200, sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MUTE_TIME), GetSession()->GetPlayerName());
+                msg_data = "";
+                m_speakCountAutoMute = 0;
+                return false;
+            }
+        }
+    } else {
+        m_speakCountAutoMute = 0;
+        msg_data = "";
+    }
+    m_speakTimeAutoMute = currentAutoMute + sWorld.getConfig(CONFIG_UINT32_AUTOMUTE_MESSAGE_DELAY);
+    return true;
 }
 
 bool Player::CanSpeak() const
