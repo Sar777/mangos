@@ -3412,6 +3412,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
     // without adding to cast type slot
     // will not show cast bar but will show effects at casting time etc
 
+    if (!m_targets)
+        return;
     if (m_spellInfo->speed > 0.0f && GetCastTime())
     {
         Unit* procTarget = m_targets.getUnitTarget();
