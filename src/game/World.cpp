@@ -958,7 +958,7 @@ void World::LoadConfigSettings(bool reload)
         setConfig(CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT, "GuidReserveSize.GameObject", 100);
 
     // Maze
-    setConfig(CONFIG_INT32_MAZE_START_GUID, "Maze.StartGuid", 350000);
+    setConfig(CONFIG_UINT32_MAZE_START_GUID, "Maze.StartGuid", 350000);
 
     setConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID, "Raid.MinLevel", 10);
 
