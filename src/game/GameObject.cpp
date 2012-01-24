@@ -234,48 +234,24 @@ void GameObject::Update(uint32 update_diff, uint32 diff)
 
             // search for players in radius
             std::list<Player*> pointPlayers;
+
             MaNGOS::AnyPlayerInObjectRangeCheck u_check(this, radius);
             MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> checker(pointPlayers, u_check);
             Cell::VisitWorldObjects(this, checker, radius);
 
-            // remove players which are not in range anymore
-            for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
-            {
-                PlayerSet::iterator itr, next;
-                for (itr = m_capturePlayers[team].begin(); itr != m_capturePlayers[team].end(); itr = next)
-                {
-                    next = itr;
-                    ++next;
-                    if (std::find(pointPlayers.begin(), pointPlayers.end(), (*itr)) == pointPlayers.end() || !(*itr)->IsWorldPvPActive())
-                    {
-                        // player left capture point zone
-                        (*itr)->SendUpdateWorldState(info->capturePoint.worldState1, 0);
-                        m_capturePlayers[team].erase((*itr));
-                    }
-                }
-            }
+            // refill the player sets at every tick
+            m_capturePlayers[BG_TEAM_ALLIANCE].clear();
+            m_capturePlayers[BG_TEAM_HORDE].clear();
 
-            // add new players which are in range
             for (std::list<Player*>::iterator itr = pointPlayers.begin(); itr != pointPlayers.end(); ++itr)
             {
                 if (!(*itr)->IsWorldPvPActive()) // TODO: Should stealthed/invisible/flying players also get quest objective complete if team member wins tower?
                     continue;
 
-                BattleGroundTeamIndex team;
                 if (((Player*)(*itr))->GetTeam() == ALLIANCE)
-                    team = BG_TEAM_ALLIANCE;
+                    m_capturePlayers[BG_TEAM_ALLIANCE].insert((*itr));
                 else if (((Player*)(*itr))->GetTeam() == HORDE)
-                    team = BG_TEAM_HORDE;
-                else
-                    continue;
-
-                if (m_capturePlayers[team].insert((*itr)).second)
-                {
-                    // player entered capture point zone
-                    (*itr)->SendUpdateWorldState(info->capturePoint.worldState1, 1);
-                    (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, (uint32)m_captureTicks);
-                    (*itr)->SendUpdateWorldState(info->capturePoint.worldState3, info->capturePoint.neutralPercent);
-                }
+                    m_capturePlayers[BG_TEAM_HORDE].insert((*itr));
             }
 
             // return if there are not enough players capturing the point
@@ -1791,7 +1767,7 @@ void GameObject::Use(Unit* user)
             }
 
             // send world state if integer of capture ticks change
-            if ((uint32)m_captureTicks != oldTicks)
+            if (m_captureTicks != (float)oldTicks)
                 for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
                     for (PlayerSet::iterator itr = m_capturePlayers[team].begin(); itr != m_capturePlayers[team].end(); ++itr)
                     {
