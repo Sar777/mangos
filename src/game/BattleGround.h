@@ -251,6 +251,8 @@ enum VehicleTypes
     VEHICLE_IC_CATAPULT = 3,
 };
 
+#define BG_TEAMS_COUNT  2
+
 enum BattleGroundStartingEvents
 {
     BG_STARTING_EVENT_NONE  = 0x00,
