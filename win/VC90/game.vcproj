@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="game"
 	ProjectGUID="{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
 	RootNamespace="game"
 	Keyword="Win32Proj"
+<<<<<<< HEAD
 	TargetFrameworkVersion="196613"
+=======
+	TargetFrameworkVersion="0"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 	>
 	<Platforms>
 		<Platform
@@ -48,7 +55,11 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /Zm200"
 				Optimization="0"
+<<<<<<< HEAD
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\game;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+=======
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
@@ -103,7 +114,11 @@
 			/>
 		</Configuration>
 		<Configuration
+<<<<<<< HEAD
 			Name="Release|Win32"
+=======
+			Name="Debug|x64"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
@@ -125,6 +140,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+<<<<<<< HEAD
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -136,6 +152,21 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
+=======
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP /bigobj /Zm200"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
+				StringPooling="false"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="pchdef.h"
@@ -156,7 +187,11 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+<<<<<<< HEAD
 				PreprocessorDefinitions="NDEBUG"
+=======
+				PreprocessorDefinitions="_DEBUG"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				Culture="1033"
 			/>
 			<Tool
@@ -164,6 +199,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+<<<<<<< HEAD
+=======
+				AdditionalDependencies=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib .\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				OutputFile=".\game__$(PlatformName)_$(ConfigurationName)\game.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -184,7 +223,11 @@
 			/>
 		</Configuration>
 		<Configuration
+<<<<<<< HEAD
 			Name="Debug_NoPCH|Win32"
+=======
+			Name="Release|Win32"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
@@ -209,6 +252,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+<<<<<<< HEAD
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\src\game;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
@@ -221,6 +265,19 @@
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
+=======
+				AdditionalOptions="/MP /Zm200"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SECURE_SCL=0"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="1"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="pchdef.h"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				PrecompiledHeaderFile=".\game__$(PlatformName)_$(ConfigurationName)\game.pch"
 				AssemblerListingLocation=".\game__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\game__$(PlatformName)_$(ConfigurationName)\"
@@ -231,13 +288,21 @@
 				DebugInformationFormat="3"
 				CallingConvention="0"
 				CompileAs="0"
+<<<<<<< HEAD
+=======
+				ForcedIncludeFiles="pchdef.h"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+<<<<<<< HEAD
 				PreprocessorDefinitions="_DEBUG"
+=======
+				PreprocessorDefinitions="NDEBUG"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				Culture="1033"
 			/>
 			<Tool
@@ -265,7 +330,11 @@
 			/>
 		</Configuration>
 		<Configuration
+<<<<<<< HEAD
 			Name="Debug|x64"
+=======
+			Name="Release|x64"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
@@ -292,6 +361,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /bigobj /Zm200"
+<<<<<<< HEAD
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\src\game;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
@@ -300,6 +370,15 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+=======
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SECURE_SCL=0"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="0"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="pchdef.h"
@@ -320,7 +399,11 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+<<<<<<< HEAD
 				PreprocessorDefinitions="_DEBUG"
+=======
+				PreprocessorDefinitions="NDEBUG"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				Culture="1033"
 			/>
 			<Tool
@@ -349,7 +432,11 @@
 			/>
 		</Configuration>
 		<Configuration
+<<<<<<< HEAD
 			Name="Release|x64"
+=======
+			Name="Debug_NoPCH|Win32"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
@@ -371,6 +458,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+<<<<<<< HEAD
 				TargetEnvironment="3"
 			/>
 			<Tool
@@ -386,6 +474,22 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="pchdef.h"
+=======
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
+				StringPooling="false"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				PrecompiledHeaderFile=".\game__$(PlatformName)_$(ConfigurationName)\game.pch"
 				AssemblerListingLocation=".\game__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\game__$(PlatformName)_$(ConfigurationName)\"
@@ -396,14 +500,21 @@
 				DebugInformationFormat="3"
 				CallingConvention="0"
 				CompileAs="0"
+<<<<<<< HEAD
 				ForcedIncludeFiles="pchdef.h"
+=======
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+<<<<<<< HEAD
 				PreprocessorDefinitions="NDEBUG"
+=======
+				PreprocessorDefinitions="_DEBUG"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				Culture="1033"
 			/>
 			<Tool
@@ -411,7 +522,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+<<<<<<< HEAD
 				AdditionalDependencies=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib .\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+=======
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				OutputFile=".\game__$(PlatformName)_$(ConfigurationName)\game.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -460,7 +574,11 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /bigobj"
 				Optimization="0"
+<<<<<<< HEAD
 				AdditionalIncludeDirectories="..\..\src\game;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+=======
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
@@ -1121,7 +1239,11 @@
 				>
 			</File>
 			<File
+<<<<<<< HEAD
 				RelativePath="..\..\src\game\warden\WaypointManager.h"
+=======
+				RelativePath="..\..\src\game\WaypointManager.h"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				>
 			</File>
 			<File
@@ -2074,7 +2196,11 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
+<<<<<<< HEAD
 				Name="Release|Win32"
+=======
+				Name="Debug|x64"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -2083,7 +2209,11 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
+<<<<<<< HEAD
 				Name="Debug|x64"
+=======
+				Name="Release|Win32"
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -2108,6 +2238,7 @@
 	</Files>
 	<Globals>
 	</Globals>
+<<<<<<< HEAD
 =======
     ProjectType="Visual C++"
     Version="9,00"
@@ -4140,4 +4271,6 @@
     <Globals>
     </Globals>
 >>>>>>> parent of 62fb43d... implement WorldPvP from Xfurry with stfx corrects.
+=======
+>>>>>>> 46bd065b6184f50203db5f496b91616b6acbfcb3
 </VisualStudioProject>
