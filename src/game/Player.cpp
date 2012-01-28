@@ -14808,6 +14808,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
                 {
                     Item* item = StoreNewItem( dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
                     SendNewItem(item, pQuest->RewItemCount[i], true, false);
+                    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, itemId, pQuest->RewItemCount[i]);
                 }
             }
         }
