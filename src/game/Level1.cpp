@@ -130,6 +130,7 @@ bool ChatHandler::HandleAnnounceCommand(char* args)
     return true;
 }
 
+//global nameannounce
 bool ChatHandler::HandleNameAnnounceCommand(char* args)
 {
   int32 strid = 0;
@@ -137,22 +138,22 @@ bool ChatHandler::HandleNameAnnounceCommand(char* args)
     if(!*args)
         return false;
 
-    switch(m_session->GetSecurity()) {
-      case SEC_MODERATOR:
+    switch(m_session->GetSecurity())
+    {
+    case SEC_MODERATOR:
         strid = LANG_SYSTEMMESSAGE_MODERATOR;
         break;
-      case SEC_GAMEMASTER:
+    case SEC_GAMEMASTER:
         strid = LANG_SYSTEMMESSAGE_GAMEMASTER;
         break;
-      case SEC_ADMINISTRATOR:
-       strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
+    case SEC_ADMINISTRATOR:
+        strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
         break;
-      default:
+    default:
         return false;
     }
 
     sWorld.SendWorldText(strid, m_session->GetPlayerName(), args);
-
     return true;
 }
 
