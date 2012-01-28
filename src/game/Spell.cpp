@@ -7840,6 +7840,10 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
         m_spellInfo->EffectImplicitTargetB[eff] == TARGET_ALL_RAID_AROUND_CASTER)
         return true;
 
+    // Check target Grip of Agony
+    if (m_spellInfo->Id == 70572 && (target->GetTypeId() == TYPEID_PLAYER || target->GetObjectGuid().IsPet()))
+        return false;
+
     // Check targets for LOS visibility (except spells without range limitations )
     switch(m_spellInfo->Effect[eff])
     {
