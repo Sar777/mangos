@@ -703,6 +703,7 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
         case 72998:                                         // Shadow Prison (ICC Blood Prince Council)
         case 72999:                                         // Shadow Prison (ICC Blood Prince Council)
         case 71010:                                         // Web Wrap (Icecrown Citadel, trash mob Nerub'ar Broodkeeper)
+        case 71265:                                         // Swarming Shadows (Lanathel)
         case 72219:                                         // Gastric Bloat 10 N
         case 72551:                                         // Gastric Bloat 10 H
         case 72552:                                         // Gastric Bloat 25 N

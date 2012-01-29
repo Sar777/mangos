@@ -1509,7 +1509,6 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage *damageInfo, int32 damage, S
     // Hack, not CalculateSpellDamage
     switch (spellInfo->Id)
     {
-        case 71341:                         // Pact of the Darkfallen
         case 72999:                         // Shadow Prisen
             damageInfo->damage = damage;
             return;
@@ -7428,6 +7427,17 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
      // Custom scripted damage
     switch(spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch(spellProto->Id)
+            {
+                case 71341: // Pact of the Darkfallen (Lanathel)
+                    // dont get any damage done mods
+                    DoneTotalMod = 1.0f;
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             // Ice Lance
