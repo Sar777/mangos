@@ -2763,6 +2763,18 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
     uint32 max_value = GetCriteriaProgressMaxCounter(criteria);
 
+    //Statistics for Dungeons & Raids Bosses slains have maxCounter = 1
+    //But need count every creature killing
+    if (//achievement->categoryId == 14807 ||     // Dungeons & Raids (parent category)   //Need??
+        achievement->categoryId == 14821 ||     // Classic
+        achievement->categoryId == 14822 ||     // The Burning Crusade
+        achievement->categoryId == 14823 ||     // Wrath of the Lich King
+        achievement->categoryId == 14963 ||     // Secrets of Ulduar
+        achievement->categoryId == 15021 ||     // Call of the Crusade
+        achievement->categoryId == 15062 )      // Fall of the Lich King
+            max_value = 0;
+
+
     if (!max_value)
         max_value = std::numeric_limits<uint32>::max();
 
