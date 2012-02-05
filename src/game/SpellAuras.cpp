@@ -6372,6 +6372,25 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                         GetHolder()->ModStackAmount(20);
                     return;
                 }
+                case 64217:                                 // Overcharged (spell from Emalon adds)
+                {
+                    if (GetHolder()->GetStackAmount() > 11)
+                    {
+                        target->CastSpell(target, 64219, true);
+                        target->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    }
+                    return;
+                }
+                case 69438:                                 // Sample Satisfaction
+                {
+                    if(target->GetTypeId() == TYPEID_UNIT)
+                        if(urand(0,100) <= 20)     //20% chance
+                        {
+                            target->CastSpell(target, 71507, true);
+                            target->RemoveAurasDueToSpell(69438);
+                        }
+                    return;
+                }
                 case 73001:                                   // Shadow Prison
                 {
                     if (apply)
@@ -6382,15 +6401,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                     else
                         target->RemoveAurasDueToSpell(72998);
                     break;
-                }
-                case 64217:                                 // Overcharged (spell from Emalon adds)
-                {
-                    if (GetHolder()->GetStackAmount() > 11)
-                    {
-                        target->CastSpell(target, 64219, true);
-                        target->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    }
-                    return;
                 }
             }
         }
