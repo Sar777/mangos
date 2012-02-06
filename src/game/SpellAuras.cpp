@@ -6383,12 +6383,10 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 }
                 case 69438:                                 // Sample Satisfaction
                 {
-                    if(target->GetTypeId() == TYPEID_UNIT)
-                        if(urand(0,100) <= 20)     //20% chance
-                        {
-                            target->CastSpell(target, 71507, true);
-                            target->RemoveAurasDueToSpell(69438);
-                        }
+                    //Hack
+                    m_isPeriodic = true;
+                    m_modifier.periodictime = 60*IN_MILLISECONDS;
+                    m_periodicTimer = m_modifier.periodictime;
                     return;
                 }
                 case 73001:                                   // Shadow Prison
@@ -9719,6 +9717,16 @@ void Aura::PeriodicDummyTick()
                         bp0 = GetModifier()->m_amount;
                         caster->CastCustomSpell(target, 69398, &bp0, 0, 0, true);
                     }
+                    return;
+                }
+                case 69438:                                 // Sample Satisfaction
+                {
+                    if(target->GetTypeId() == TYPEID_UNIT)
+                        if(urand(0,100) <= 5)     //5% chance
+                        {
+                            target->CastSpell(target, 71507, true);
+                            target->RemoveAurasDueToSpell(69438);
+                        }
                     return;
                 }
                 case 70069:                                   // Ooze Flood Periodic Trigger (Rotface)
