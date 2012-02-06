@@ -3567,6 +3567,8 @@ void Spell::cast(bool skipCheck)
             // Stoneskin
             if (m_spellInfo->Id == 20594)
                 AddTriggeredSpell(65116);                   // Stoneskin - armor 10% for 8 sec
+            else if (m_spellInfo->Id == 45102)             // Romantic Picnic
+                AddTriggeredSpell(45123); //TO DO: Remove this hack after spell effects implement
             // Chaos Bane strength buff
             else if (m_spellInfo->Id == 71904)
                 AddTriggeredSpell(73422);
