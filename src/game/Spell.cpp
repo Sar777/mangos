@@ -3580,6 +3580,8 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(69832);                    // cast "cluster" before silence and pacify
             else if (m_spellInfo->Id == 58672)             // Impale, damage and loose threat effect (Vault of Archavon, Archavon the Stone Watcher)
                 AddPrecastSpell(m_caster->GetMap()->IsRegularDifficulty() ? 58666 : 60882);
+            else if (m_spellInfo->Id == 70192)
+                    AddUnitTarget(m_caster, EFFECT_INDEX_1);
             else if (m_spellInfo->Id == 71265)             // Swarming Shadows DoT (Queen Lana'thel ICC)
                 AddPrecastSpell(71277);
             else if (m_spellInfo->Id == 70923)             // Uncontrollable Frenzy (Queen Lana'thel ICC)
