@@ -6372,6 +6372,23 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                         GetHolder()->ModStackAmount(20);
                     return;
                 }
+                case 64217:                                 // Overcharged (spell from Emalon adds)
+                {
+                    if (GetHolder()->GetStackAmount() > 11)
+                    {
+                        target->CastSpell(target, 64219, true);
+                        target->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    }
+                    return;
+                }
+                case 69438:                                 // Sample Satisfaction
+                {
+                    //Hack
+                    m_isPeriodic = true;
+                    m_modifier.periodictime = 60*IN_MILLISECONDS;
+                    m_periodicTimer = m_modifier.periodictime;
+                    return;
+                }
                 case 73001:                                   // Shadow Prison
                 {
                     if (apply)
@@ -6382,15 +6399,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                     else
                         target->RemoveAurasDueToSpell(72998);
                     break;
-                }
-                case 64217:                                 // Overcharged (spell from Emalon adds)
-                {
-                    if (GetHolder()->GetStackAmount() > 11)
-                    {
-                        target->CastSpell(target, 64219, true);
-                        target->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    }
-                    return;
                 }
             }
         }
@@ -9711,6 +9719,16 @@ void Aura::PeriodicDummyTick()
                         bp0 = GetModifier()->m_amount;
                         caster->CastCustomSpell(target, 69398, &bp0, 0, 0, true);
                     }
+                    return;
+                }
+                case 69438:                                 // Sample Satisfaction
+                {
+                    if(target->GetTypeId() == TYPEID_UNIT)
+                        if(urand(0,100) <= 5)     //5% chance
+                        {
+                            target->CastSpell(target, 71507, true);
+                            target->RemoveAurasDueToSpell(69438);
+                        }
                     return;
                 }
                 case 70069:                                   // Ooze Flood Periodic Trigger (Rotface)

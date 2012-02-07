@@ -1640,6 +1640,16 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 if (achievementCriteria->use_item.itemID != miscvalue1)
                     continue;
+                //some hardcoded achievement
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 1291:
+                    {
+                        if(!GetPlayer()->HasAura(45123))
+                            continue;
+                        break;
+                    }
+                }
                 // possible additional requirements
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
                 if (data && !data->Meets(GetPlayer(), unit, miscvalue1))
