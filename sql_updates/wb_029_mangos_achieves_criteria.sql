@@ -42,3 +42,4 @@ replace into achievement_criteria_requirement values(4071,16,8,0);
 replace into achievement_criteria_requirement values(4071,6,4395,0);
 replace into achievement_criteria_requirement values(5787,16,8,0);
 replace into achievement_criteria_requirement values(5787,6,4395,0);
+delete from achievement_criteria_requirement where criteria_id=4227 and type=5;
