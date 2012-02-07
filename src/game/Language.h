@@ -1038,6 +1038,7 @@ enum MangosStrings
     // Use for custom patches             11000-11999
     LANG_COMMAND_FRIEND                 = 11133,
     LANG_COMMAND_FRIEND_ERROR           = 11134,
+
     LANG_BAN_ACCOUNT_ANNOUNCE           = 17890,
     LANG_PERMBAN_ACCOUNT_ANNOUNCE       = 17891,
     LANG_BAN_CHARACTER_ANNOUNCE         = 17892,
