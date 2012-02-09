@@ -8851,19 +8851,19 @@ void Aura::PeriodicTick()
 
             if (pCaster->HasAura(32386))   //Shadow Embrace Rank 1
                 if (Aura *aura = pCaster->GetAura(60448, EFFECT_INDEX_0))
-                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*2)) / 100.0f;
+                    damageInfo.damage -= uint32(damageInfo.damage*(aura->GetStackAmount()*2)) / 100.0f;
             if (pCaster->HasAura(32388))    //Shadow Embrace Rank 2
                 if (Aura *aura = pCaster->GetAura(60465, EFFECT_INDEX_0))
-                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*4)) / 100.0f;
+                    damageInfo.damage -= uint32(damageInfo.damage*(aura->GetStackAmount()*4)) / 100.0f;
             if (pCaster->HasAura(32389))    //Shadow Embrace Rank 3
                 if (Aura *aura = pCaster->GetAura(60466, EFFECT_INDEX_0))
-                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*6)) / 100.0f;
+                    damageInfo.damage -= uint32(damageInfo.damage*(aura->GetStackAmount()*6)) / 100.0f;
             if (pCaster->HasAura(32390))    //Shadow Embrace Rank 4
                 if (Aura *aura = pCaster->GetAura(60467, EFFECT_INDEX_0))
-                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*8)) / 100.0f;
+                    damageInfo.damage -= uint32(damageInfo.damage*(aura->GetStackAmount()*8)) / 100.0f;
             if (pCaster->HasAura(32391))    //Shadow Embrace Rank 5
                 if (Aura *aura = pCaster->GetAura(32391, EFFECT_INDEX_0))
-                    pdamage -= uint32(pdamage*(aura->GetStackAmount()*10)) / 100.0f;
+                    damageInfo.damage -= uint32(damageInfo.damage*(aura->GetStackAmount()*10)) / 100.0f;
 
             // This method can modify pdamage
             bool isCrit = IsCritFromAbilityAura(pCaster, damageInfo.damage);
