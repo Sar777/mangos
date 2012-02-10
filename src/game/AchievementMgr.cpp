@@ -1507,40 +1507,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM:
-            {
                 // speedup for non-login case
                 if(miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
                     continue;
-
-                //specific for "+1" counter
-                switch(miscvalue1)
-                {
-                    case 43016:                 //Dalaran Cooking Award
-                    case 21100:                 //Coin of Ancestry
-                    //Statictics
-                    //Emblems and Badges need implement in code
-                    case 41596:                 //Dalaran Jewelcrafter's Token
-                    case 45624:                 //Emblem of Conquest
-                    case 29434:                 //Badge of Justice
-                    case 40752:                 //Emblem of Heroism
-                    case 40753:                 //Emblem of Valor
-                    case 49426:                 //Emblem of Frost
-                    case 47241:                 //Emblem of Triumph
-                    {
-                        //miscvalue2 - count
-                        change=miscvalue2;
-                        progressType = PROGRESS_ACCUMULATE;
-                        break;
-                    }
-                    default:
-                    {
-                        change = GetPlayer()->GetItemCount(achievementCriteria->own_item.itemID, true);
-                        progressType = PROGRESS_HIGHEST;
-                        break;
-                    }
-                }
+                change = GetPlayer()->GetItemCount(achievementCriteria->own_item.itemID, true);
+                progressType = PROGRESS_HIGHEST;
                 break;
-            }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
             {
                 //miscvalue1 - mapID
