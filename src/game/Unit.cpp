@@ -7631,9 +7631,12 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
     // Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit = SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto));
 
-    // very ugly hack for 71708 and 71756
+    // very ugly hack for 71708(and Difficulties) and 71756
     // no idea how this should work, but mod shouldn't affect this spell...
-    if (spellProto->Id == 71708)
+    if (spellProto->Id == 71708 ||
+        spellProto->Id == 72785 ||
+        spellProto->Id == 72786 ||
+        spellProto->Id == 72787)
         DoneAdvertisedBenefit = 0;
 
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties

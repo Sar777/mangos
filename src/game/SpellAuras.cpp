@@ -1966,21 +1966,6 @@ void Aura::TriggerSpell()
 //                    // Aura of Darkness
 //                    case 71111: break;
                     // Ball of Flames Visual
-                    case 71706:
-                    {
-                        // don't "proc" on heroic
-                        if (triggerTarget->GetMap()->GetDifficulty() <= RAID_DIFFICULTY_25MAN_NORMAL)
-                        {
-                            if (SpellAuraHolderPtr holder = triggerTarget->GetSpellAuraHolder(71756))
-                            {
-                                if (holder->GetStackAmount() <= 1)
-                                    triggerTarget->RemoveSpellAuraHolder(holder);
-                                else
-                                    holder->ModStackAmount(-1);
-                            }
-                        }
-                        break;
-                    }
 //                    // Summon Broken Frostmourne
 //                    case 74081: break;
                     default:

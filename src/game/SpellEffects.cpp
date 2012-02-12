@@ -535,6 +535,9 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     }
                     // Empowered Flare (Blood Council encounter)
                     case 71708:
+                    case 72785:
+                    case 72786:
+                    case 72787:
                     {
                         // aura doesn't want to proc, so hacked...
                         if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(71756))
