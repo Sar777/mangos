@@ -43,3 +43,21 @@ replace into achievement_criteria_requirement values(4071,6,4395,0);
 replace into achievement_criteria_requirement values(5787,16,8,0);
 replace into achievement_criteria_requirement values(5787,6,4395,0);
 delete from achievement_criteria_requirement where criteria_id=4227 and type=5;
+
+-- ICC instance special criterias
+replace into achievement_criteria_requirement values(12777,18,0,0);
+replace into achievement_criteria_requirement values(13079,18,0,0);
+replace into achievement_criteria_requirement values(13080,18,0,0);
+replace into achievement_criteria_requirement values(13081,18,0,0);
+replace into achievement_criteria_requirement values(12776,18,0,0);
+replace into achievement_criteria_requirement values(12995,18,0,0);
+replace into achievement_criteria_requirement values(12997,18,0,0);
+replace into achievement_criteria_requirement values(12998,18,0,0);
+replace into achievement_criteria_requirement values(12778,18,0,0);
+replace into achievement_criteria_requirement values(13035,18,0,0);
+replace into achievement_criteria_requirement values(13036,18,0,0);
+replace into achievement_criteria_requirement values(13037,18,0,0);
+replace into achievement_criteria_requirement values(12971,18,0,0);
+replace into achievement_criteria_requirement values(12978,18,0,0);
+replace into achievement_criteria_requirement values(12979,18,0,0);
+replace into achievement_criteria_requirement values(12980,18,0,0);
