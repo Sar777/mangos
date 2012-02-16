@@ -1408,39 +1408,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         break;
                     }
-                    case 4537:          // I've Gone Made and Mess (Deathbringer Saurfang ICC)
-                    case 4613:
-                    {
-                        InstanceData *instance = GetPlayer()->GetInstanceData();
-                        // If not instance
-                        if(!instance)
-                            continue;
-
-                        // Only if in instance.cpp checks true
-                        if(!(instance->CheckAchievementCriteriaMeet(12778, NULL, NULL, 0) ||
-                             instance->CheckAchievementCriteriaMeet(13035, NULL, NULL, 0) ||
-                             instance->CheckAchievementCriteriaMeet(13036, NULL, NULL, 0) ||
-                             instance->CheckAchievementCriteriaMeet(13037, NULL, NULL, 0)))
-                            continue;
-                        break;
-                    }
-
-                    case 4579:          // Portal Jockey (Valthiria Dreamwalker ICC)
-                    case 4619:
-                    {
-                        InstanceData *instance = GetPlayer()->GetInstanceData();
-                        // If not instance
-                        if(!instance)
-                            continue;
-
-                        // Only if in instance.cpp checks true
-                        if(!(instance->CheckAchievementCriteriaMeet(12978, NULL, NULL, 0) ||
-                             instance->CheckAchievementCriteriaMeet(12971, NULL, NULL, 0) ||
-                             instance->CheckAchievementCriteriaMeet(12979, NULL, NULL, 0) ||
-                             instance->CheckAchievementCriteriaMeet(12980, NULL, NULL, 0)))
-                            continue;
-                        break;
-                    }
                     default:
                     {
                         // those requirements couldn't be found in the dbc
