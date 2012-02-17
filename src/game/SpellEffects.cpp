@@ -10359,6 +10359,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 70123, false); // trigger Blistering Cold
                     return;
                 }
+                case 72527:
                 case 70360:                                 // Eat Ooze (Putricide)
                 {
                     if (!unitTarget)
@@ -10374,7 +10375,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                                 unitTarget->RemoveAurasDueToSpell(70347);
                         }
                         else
-                            holder->ModStackAmount(-3);
+                            holder->SetStackAmount(holder->GetStackAmount() - 3);
                     }
                     return;
                 }

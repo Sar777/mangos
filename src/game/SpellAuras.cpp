@@ -3330,7 +3330,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 uint32 entry = 37672;
 
-                if (target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
+                if (target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC ||
                     target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 {
                     entry = 38285;

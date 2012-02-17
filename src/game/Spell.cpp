@@ -5402,6 +5402,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Caster aura req check if need
     if (m_spellInfo->casterAuraSpell && !m_caster->HasAura(m_spellInfo->casterAuraSpell))
+        // hack (need correct spells 70360 and 72527 mechanic of change dbc)
+        if(m_spellInfo->casterAuraSpell != 70346 && m_spellInfo->casterAuraSpell != 72456)
         return SPELL_FAILED_CASTER_AURASTATE;
     if (m_spellInfo->excludeCasterAuraSpell)
     {
@@ -9269,6 +9271,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             break;
         }
         case 70346: // Slime Puddle
+        case 72456:
         case 72868:
         case 72869:
         {
@@ -9276,6 +9279,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
 
             if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(70347))
                 radius += holder->GetStackAmount() * 0.2f;
+
 
             FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
