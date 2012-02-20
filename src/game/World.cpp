@@ -91,6 +91,9 @@ World::World()
 {
     m_playerLimit = 0;
     m_allowMovement = true;
+    m_LoadGuids = true;
+    m_StartCheck = false;
+    m_NumberCheck = 0;
     m_ShutdownMask = 0;
     m_ShutdownTimer = 0;
     m_gameTime=time(NULL);
@@ -99,6 +102,7 @@ World::World()
     m_maxQueuedSessionCount = 0;
     m_NextDailyQuestReset = 0;
     m_NextWeeklyQuestReset = 0;
+    m_NextCheckBanWpe = 0;
 
     m_defaultDbcLocale = LOCALE_enUS;
     m_availableDbcLocaleMask = 0;
@@ -1673,8 +1677,12 @@ void World::Update(uint32 diff)
     if (m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
-        BanWpeUser();
+        if (sWorld.getConfig(CONFIG_BOOL_BANWPEUSER_ENABLE))
+            m_StartCheck = true;
     }
+
+    if (m_StartCheck && m_gameTime > m_NextCheckBanWpe)
+        BanWpeUser();
 
     /// Handle weekly quests reset time
     if (m_gameTime > m_NextWeeklyQuestReset)
@@ -2133,77 +2141,108 @@ void World::BanWpeUser()
     if (!getConfig(CONFIG_BOOL_BANWPEUSER_ENABLE))
         return;
 
-    debug_log("Auto-ban: Start check");
-    CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+    if (m_NumberCheck == 0)
+        m_NextCheckBanWpe = time_t(m_gameTime + (2 * MINUTE));
+    else m_NextCheckBanWpe += time_t(2 * MINUTE);
+
+    if (m_LoadGuids)
+        ++m_NumberCheck;
 
     /////////////////
     //Shadowmourne//
     ///////////////
-
-    CharacterDatabase.PExecute("INSERT INTO temp_ban_wpe (guid) (SELECT guid FROM character_queststatus WHERE (quest=24549 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24548 AND status=1))");
-
-    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid IN (SELECT item FROM character_inventory WHERE guid IN (SELECT guid FROM temp_ban_wpe) AND item_template = 49623)");
-
-    CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE (quest=24549) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
-
-    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE (item_template=49623) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
-
-    CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE (achievement=4623) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
-
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account FROM characters WHERE guid IN (SELECT guid FROM temp_ban_wpe)");
-    if (result)
+    if (m_LoadGuids && m_NumberCheck == 1)
     {
-        do {
-            Field *fields = result->Fetch();
-            uint32 guid = fields[0].GetUInt32();
-            uint32 accId = fields[1].GetUInt32();
-            if (sAccountMgr.GetSecurity(accId) < SEC_MODERATOR)
-            {
-                std::string accname;
-                if (sAccountMgr.GetName(accId, accname))
-                {
-                    sWorld.BanAccount(BAN_ACCOUNT, accname, TimeStringToSecs("-1d"), "Wpe User(Shadowmourne)", "auto-ban(WPE - Wotlk)");
-                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadowmourne)", accId, accname.c_str(), guid);
-                }
-            }
-        } while (result->NextRow());
-        delete result;
+        QueryResult *result1 = CharacterDatabase.PQuery("SELECT guid FROM character_queststatus WHERE (quest=24549 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24548 AND status=1)");
+        if (result1)
+        {
+            CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+            do {
+                Field *fields = result1->Fetch();
+                uint32 guid = fields[0].GetUInt32();
+                CharacterDatabase.PExecute("INSERT IGNORE INTO temp_ban_wpe (guid) VALUES (%u)", guid);
+            } while (result1->NextRow());
+            delete result1;
+        }
+        m_LoadGuids = false;
+        return;
     }
-    CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+    else if (m_NumberCheck == 1)
+    {
+        QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account FROM characters WHERE guid IN (SELECT guid FROM temp_ban_wpe)");
+        if (result)
+        {
+            do {
+                Field *fields = result->Fetch();
+                uint32 guid = fields[0].GetUInt32();
+                uint32 acc = fields[1].GetUInt32();
+                if (sAccountMgr.GetSecurity(acc) < SEC_MODERATOR2)
+                {
+                    //CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid IN (SELECT item FROM character_inventory WHERE guid = '%u' AND item_template = 49623)", guid);
+                    CharacterDatabase.PExecute("UPDATE character_queststatus SET status = 0, rewarded = 0 WHERE quest=24549 AND guid = '%u'", guid);
+                    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE (item_template = 49623) AND (guid = '%u')", guid);
+                    CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE (achievement = 4623) AND (guid = '%u')", guid);
+                    std::string accname;
+                    if (sAccountMgr.GetName(acc, accname))
+                        sWorld.BanAccount(BAN_ACCOUNT, accname.c_str(), TimeStringToSecs("-1d"), "Wpe User(Shadowmourne)", "auto-ban(WPE - Wotlk)");
+                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadowmourne)", acc, accname.c_str(), guid);
+                }
+            } while (result->NextRow());
+            delete result;
+        }
+        CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+        m_LoadGuids = true;
+        return;
+    }
 
     //////////////////
     //Shadow's Edge//
     ////////////////
-
-    CharacterDatabase.PExecute("INSERT INTO temp_ban_wpe (guid) (SELECT guid FROM character_queststatus WHERE (quest=24743 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24545 AND status=1))");
-
-    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid IN (SELECT item FROM character_inventory WHERE guid IN (SELECT guid FROM temp_ban_wpe) AND item_template = 49888)");
-
-    CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE (quest=24743) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
-
-    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE (item_template=49888) AND (guid IN (SELECT guid FROM temp_ban_wpe))");
-
-    QueryResult *resultSE = CharacterDatabase.PQuery("SELECT guid, account FROM characters WHERE guid IN (SELECT guid FROM temp_ban_wpe)");
-    if (resultSE)
+    if (m_LoadGuids && m_NumberCheck == 2)
     {
-        do {
-            Field *fields = resultSE->Fetch();
-            uint32 guid = fields[0].GetUInt32();
-            uint32 accId = fields[1].GetUInt32();
-            if (sAccountMgr.GetSecurity(accId) < SEC_MODERATOR)
-            {
-                std::string accname;
-                if (sAccountMgr.GetName(accId, accname))
-                {
-                    sWorld.BanAccount(BAN_ACCOUNT, accname, TimeStringToSecs("-1d"), "Wpe User(Shadow's Edge)", "auto-ban(WPE - Wotlk)");
-                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadow's Edge)", accId, accname.c_str(), guid);
-                }
-            }
-        } while (resultSE->NextRow());
-        delete resultSE;
+        QueryResult *result2 = CharacterDatabase.PQuery("SELECT guid FROM character_queststatus WHERE (quest=24743 AND status=1) AND guid NOT IN (SELECT guid FROM character_queststatus WHERE quest=24545 AND status=1)");
+        if (result2)
+        {
+            CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+            do {
+                Field *fields = result2->Fetch();
+                uint32 guid = fields[0].GetUInt32();
+                CharacterDatabase.PExecute("INSERT IGNORE INTO temp_ban_wpe (guid) VALUES (%u)", guid);
+            } while (result2->NextRow());
+            delete result2;
+        }
+        m_LoadGuids = false;
+        return;
     }
-    CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
-    debug_log("Auto-ban: Complete check");
+    else if (m_NumberCheck == 2)
+    {
+        QueryResult *resultSE = CharacterDatabase.PQuery("SELECT guid, account FROM characters WHERE guid IN (SELECT guid FROM temp_ban_wpe)");
+        if (resultSE)
+        {
+            do {
+                Field *fields = resultSE->Fetch();
+                uint32 guid = fields[0].GetUInt32();
+                uint32 acc = fields[1].GetUInt32();
+                if (sAccountMgr.GetSecurity(acc) < SEC_MODERATOR2)
+                {
+                    //CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid IN (SELECT item FROM character_inventory WHERE guid = '%u' AND item_template = 49888)", guid);
+                    CharacterDatabase.PExecute("UPDATE character_queststatus SET status = 0, rewarded = 0 WHERE quest = 24743 AND guid = '%u'", guid);
+                    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE (item_template = 49888) AND (guid = '%u')", guid);
+                    std::string accname;
+                    if (sAccountMgr.GetName(acc, accname))
+                        sWorld.BanAccount(BAN_ACCOUNT, accname.c_str(), TimeStringToSecs("-1d"), "Wpe User(Shadow's Edge)", "auto-ban(WPE - Wotlk)");
+                    sLog.outBanWpeUser("Account id: [%d], account name: [%s], character guid: [%u], reason: Wpe User(Shadow's Edge)", acc, accname.c_str(), guid);
+                }
+
+            } while (resultSE->NextRow());
+            delete resultSE;
+        }
+        CharacterDatabase.PExecute("TRUNCATE TABLE temp_ban_wpe");
+        m_LoadGuids = true;
+        m_StartCheck = false;
+        m_NumberCheck = 0;
+        return;
+    }
 }
 
 /// Display a shutdown message to the user(s)
