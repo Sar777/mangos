@@ -727,6 +727,9 @@ class World
         uint32 m_availableDbcLocaleMask;                       // by loaded DBC
         void DetectDBCLang();
         bool m_allowMovement;
+        bool m_LoadGuids;
+        bool m_StartCheck;
+        uint8 m_NumberCheck;
         std::string m_motd;
         std::string m_dataPath;
 
@@ -749,6 +752,7 @@ class World
         time_t m_NextDailyQuestReset;
         time_t m_NextWeeklyQuestReset;
         time_t m_NextMonthlyQuestReset;
+        time_t m_NextCheckBanWpe;
 
         time_t m_NextRandomBGReset;
 
