@@ -1225,7 +1225,7 @@ bool TerrainInfo::CheckPathAccurate(float srcX, float srcY, float srcZ, float& d
     // check by standart way. may be not need path checking?
     if (!mover && CheckPath(srcX, srcY, srcZ, tstX, tstY, tstZ) && IsNextZcoordOK(tstX, tstY, tstZ, 5.0f))
     {
-        DEBUG_LOG("TerrainInfo::CheckPathAccurate vmaps hit! delta is %f %f %f",dstX - tstX,dstY - tstY,dstZ - tstZ);
+//        DEBUG_LOG("TerrainInfo::CheckPathAccurate vmaps hit! delta is %f %f %f",dstX - tstX,dstY - tstY,dstZ - tstZ);
         dstX = tstX;
         dstY = tstY;
         dstZ = tstZ + 0.1f;
@@ -1326,14 +1326,26 @@ bool TerrainInfo::CheckPathAccurate(float srcX, float srcY, float srcZ, float& d
     {
         float prevX = srcX + (float(i-1)*DELTA_X);
         float prevY = srcY + (float(i-1)*DELTA_Y);
-        float prevZ = srcZ + (float(i-1)*DELTA_Z);
+        float prevZ = GetHeight(prevX, prevY, srcZ + 3.0f);
+        //float prevZ = srcZ + (float(i-1)*DELTA_Z);
 
         tstX = srcX + (float(i)*DELTA_X);
         tstY = srcY + (float(i)*DELTA_Y);
-        tstZ = srcZ + (float(i)*DELTA_Z);
+        tstZ = GetHeight(tstX, tstY, srcZ + 3.0f);
+        //tstZ = srcZ + (float(i)*DELTA_Z);
 
         MaNGOS::NormalizeMapCoord(tstX);
         MaNGOS::NormalizeMapCoord(tstY);
+
+        if (tstZ < (INVALID_HEIGHT + M_NULL_F) ||
+            tstZ > (MAX_HEIGHT - M_NULL_F) ||
+            fabs(tstZ - prevZ) > 10.0f )
+            {
+                ++errorsCount;
+                break;
+            }
+
+        tstZ += (DELTA + DELTA_Z);
 
         if (!CheckPath(prevX, prevY, prevZ, tstX, tstY, tstZ))
         {
