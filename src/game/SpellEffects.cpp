@@ -9645,14 +9645,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-		case 62168:                  // Algalon - Black Hole Damage
-                {
-		    if (!unitTarget)
-		      return;
-		  
-		    unitTarget->CastSpell(unitTarget, 62169, true);
-		    return;		  
-		}
                 case 62428:                                 // Load into Catapult
                 {
                     if (!unitTarget)
