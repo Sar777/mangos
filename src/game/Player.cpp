@@ -22567,13 +22567,16 @@ Player* Player::GetNextRandomRaidMember(float radius)
     return nearMembers[randTarget];
 }
 
-PartyResult Player::CanUninviteFromGroup() const
+PartyResult Player::CanUninviteFromGroup(ObjectGuid guid) const
 {
     const Group* grp = GetGroup();
     if (!grp)
         return ERR_NOT_IN_GROUP;
 
     if (!grp->IsLeader(GetObjectGuid()) && !grp->IsAssistant(GetObjectGuid()))
+        return ERR_NOT_LEADER;
+
+    if (grp->IsLeader(guid) || (grp->IsAssistant(GetObjectGuid()) && grp->IsAssistant(guid)))
         return ERR_NOT_LEADER;
 
     if (InBattleGround())

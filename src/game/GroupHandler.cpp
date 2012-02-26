@@ -282,7 +282,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
         return;
     }
 
-    PartyResult res = GetPlayer()->CanUninviteFromGroup();
+    PartyResult res = GetPlayer()->CanUninviteFromGroup(guid);
     if (res != ERR_PARTY_RESULT_OK)
     {
         SendPartyResult(PARTY_OP_LEAVE, "", res);
@@ -332,7 +332,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
         return;
     }
 
-    PartyResult res = GetPlayer()->CanUninviteFromGroup();
+    PartyResult res = GetPlayer()->CanUninviteFromGroup(guid);
     if (res != ERR_PARTY_RESULT_OK)
     {
         SendPartyResult(PARTY_OP_LEAVE, "", res);
