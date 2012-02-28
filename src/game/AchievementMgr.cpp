@@ -1074,14 +1074,25 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         break;
                     }
-                    default:
+                    case 1871:
                     {
-                        // those requirements couldn't be found in the dbc
-                        AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                        if(!data || !data->Meets(GetPlayer(),unit))
-                        continue;
+                        VehicleKit* vehicleKit = GetPlayer()->GetVehicle();
+                        if(!vehicleKit)
+                            continue;
+                        uint32 DragonEntry = vehicleKit->GetBase()->GetEntry();
+
+                        if (!(achievementCriteria->ID == 7177 && DragonEntry == 27756) &&   // Ruby Dragon
+                            !(achievementCriteria->ID == 7178 && DragonEntry == 27692) &&   // Emerald Dragon
+                            !(achievementCriteria->ID == 7179 && DragonEntry == 27755))     // Amber Dragon
+                            continue;
+                        break;
                     }
                 }
+
+                // those requirements couldn't be found in the dbc
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if(!data || !data->Meets(GetPlayer(),unit))
+                continue;
 
                 change = miscvalue2;
                 progressType = PROGRESS_ACCUMULATE;

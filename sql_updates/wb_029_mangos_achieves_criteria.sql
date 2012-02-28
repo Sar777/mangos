@@ -44,6 +44,9 @@ replace into achievement_criteria_requirement values(5787,16,8,0);
 replace into achievement_criteria_requirement values(5787,6,4395,0);
 delete from achievement_criteria_requirement where criteria_id=4227 and type=5;
 
+delete from achievement_criteria_requirement where criteria_id in(7625,7628);
+insert into achievement_criteria_requirement values(7625,0,0,0),(7628,0,0,0);
+
 -- ICC instance special criterias
 replace into achievement_criteria_requirement values(12777,18,0,0);
 replace into achievement_criteria_requirement values(13079,18,0,0);
