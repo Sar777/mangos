@@ -2346,6 +2346,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
 
+            // Set destination if flag is TARGET_FLAG_SOURCE_LOCATION
+            if (m_targets.m_destX < M_NULL_F && m_targets.m_destY < M_NULL_F && m_targets.m_destZ < M_NULL_F)
+            {
+                m_targets.m_destX = m_targets.m_srcX;
+                m_targets.m_destY = m_targets.m_srcY;
+                m_targets.m_destZ = m_targets.m_srcZ;
+            }
+
             // Select friendly targets for positive effect
             if (IsPositiveEffect(m_spellInfo, effIndex))
                 targetB = SPELL_TARGETS_FRIENDLY;
