@@ -378,6 +378,10 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
             player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();
     }
 
+    // Battle Area System
+    if (Player* const pPlayer = sObjectMgr.GetPlayer(guid))
+        RemoveFromBattleArea(pPlayer);
+
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
     if (GetMembersCount() > uint32(isBGGroup() ? 1 : 2))    // in BG group case allow 1 members group
     {
@@ -501,6 +505,7 @@ void Group::Disband(bool hideDestroy)
             player->GetSession()->SendPacket(&data);
         }
 
+        RemoveFromBattleArea(player);
         _homebindIfInstance(player);
     }
     RollId.clear();
@@ -512,7 +517,8 @@ void Group::Disband(bool hideDestroy)
     {
         CharacterDatabase.BeginTransaction();
         CharacterDatabase.PExecute("DELETE FROM groups WHERE groupId='%u'", m_Guid.GetCounter());
-        CharacterDatabase.PExecute("DELETE FROM group_member WHERE groupId='%u'", m_Guid.GetCounter());
+        CharacterDatabase.PExecute("DELETE FROM character_battle_registration WHERE group_id='%u'", m_Guid.GetCounter());
+        CharacterDatabase.PExecute("DELETE FROM group_member WHERE groupId='%u'", m_Guid.GetCounter());        
         CharacterDatabase.CommitTransaction();
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, false, NULL);
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, true, NULL);
@@ -520,6 +526,27 @@ void Group::Disband(bool hideDestroy)
 
     m_leaderGuid.Clear();
     m_leaderName = "";
+}
+
+// Battle Area System
+void Group::RemoveFromBattleArea(Player* pPlayer)
+{
+    if (!pPlayer)
+        return;
+
+    if (pPlayer->GetMapId() == 37)
+        pPlayer->TeleportTo(530, -1943.39f, 5167.73f, -40.20f, 2.04f);
+}
+
+void TeleportInBattleArea(ObjectGuid guid, uint32 mapId, float x, float y, float z, float o)
+{
+    if (Player *pPlayer = sObjectMgr.GetPlayer(guid))
+    {
+        if (!pPlayer->InBattleGround())
+            pPlayer->TeleportTo(mapId, x, y, x, o);
+
+        debug_log("Teleport in Battle Area");
+    }
 }
 
 /*********************************************************/

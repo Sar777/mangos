@@ -350,6 +350,10 @@ class MANGOS_DLL_SPEC Group
 
         bool SetPlayerMap(ObjectGuid guid, uint32 mapid);
 
+        // Battle Area System
+        void RemoveFromBattleArea(Player* pPlayer);
+        void TeleportInBattleArea(ObjectGuid guid, uint32 mapId, float x, float y, float z, float o);
+
         /*********************************************************/
         /***                   LOOT SYSTEM                     ***/
         /*********************************************************/
