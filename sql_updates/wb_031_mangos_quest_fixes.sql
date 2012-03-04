@@ -15,3 +15,15 @@ update quest_template set ExclusiveGroup=0 where entry=12321;
 
 -- Quest 11865 (temporary fix)
 update gameobject_template set data5=0 where name="Caribou Trap";
+
+--Quest 13300 and 13302
+update gossip_menu_option set action_menu_id=-1, action_script_id=10137 where menu_id=10137;
+delete from gossip_scripts where id=10137;
+insert into gossip_scripts(id, command, datalong, datalong2,comments) values(10137,8,31866,0,"Kill credit");
+
+--Quest 13119
+delete from spell_script_target where entry=57853;
+insert into spell_script_target values(57853,1,30742),(57853,1,30744),(57853,1,30745),(57853,1,30950);
+
+-- Quests 10512 and 10545
+update creature_template set ScriptName="mobs_bladespire_ogre" where entry=19995;

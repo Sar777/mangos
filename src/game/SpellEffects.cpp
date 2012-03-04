@@ -2035,6 +2035,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, NULL, NULL, true);
                     return;
                 }
+                case 38782:                                 // Druid Signal
+                {
+                    if (eff_idx == 0)
+                        m_caster->SummonCreature(22423, m_caster->GetPositionX() + 1.0f, m_caster->GetPositionY() + 1.0f, 
+                                                m_caster->GetPositionZ(), m_caster->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120000);
+                    break;
+                }
                 case 39189:                                 // Sha'tari Torch
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -8493,6 +8500,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     // Removes snares and roots.
                     unitTarget->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK,30918,true);
                     break;
+                }
+                case 36310:                                 // Rina's Diminution Powder
+                {
+                    // Quest Credit
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)m_caster)->KilledMonsterCredit(21176);
+
+                    unitTarget->setFaction(m_caster->getFaction());
+                    ((Creature*)unitTarget)->AI()->EnterEvadeMode();
+                    return;
                 }
                 case 37473:                                 // Detect Whispers (related to quest 10607 - Whispers of the Raven God_Whispers of the Raven God)
                 {
