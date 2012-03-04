@@ -14781,7 +14781,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         if (!srcItemCount)
             srcItemCount = 1;
 
-        DestroyItemCount(srcItemId, srcItemCount, true, true);
+//      DestroyItemCount(srcItemId, srcItemCount, true, true);
     }
 
     // Destroy requered items
