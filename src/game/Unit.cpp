@@ -1569,12 +1569,8 @@ void Unit::CalculateSpellDamage(DamageInfo *damageInfo, int32 damage, SpellEntry
             if (DamageMultiplier != 1.0f)
                 damage = int32(damage * DamageMultiplier);
 
-            uint32 bonus_affected_damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
-
-            if (bonus_affected_damage < damage)
-                damage = bonus_affected_damage + CalcIgnoreDamageReduction(damage - bonus_affected_damage, damageSchoolMask);
-            else
-                damage = bonus_affected_damage;
+            uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damage, damageSchoolMask);
+            damage = damage - reduction_affected_damage + pVictim->MeleeDamageBonusTaken(this, reduction_affected_damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
 
             // if crit add critical bonus
             if (crit)
@@ -1598,12 +1594,8 @@ void Unit::CalculateSpellDamage(DamageInfo *damageInfo, int32 damage, SpellEntry
             if (DamageMultiplier != 1.0f)
                 damage = int32(damage * DamageMultiplier);
 
-            uint32 bonus_affected_damage = pVictim->SpellDamageBonusTaken(this, spellInfo, damage, SPELL_DIRECT_DAMAGE);
-
-            if (bonus_affected_damage < damage)
-                damage = bonus_affected_damage + CalcIgnoreDamageReduction(damage - bonus_affected_damage, damageSchoolMask);
-            else
-                damage = bonus_affected_damage;
+            uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damage, damageSchoolMask);
+            damage = damage - reduction_affected_damage + pVictim->SpellDamageBonusTaken(this, spellInfo, reduction_affected_damage, SPELL_DIRECT_DAMAGE);
 
             // If crit add critical bonus
             if (crit)
@@ -1619,19 +1611,14 @@ void Unit::CalculateSpellDamage(DamageInfo *damageInfo, int32 damage, SpellEntry
 
     // only from players and their pets
     if (GetTypeId() == TYPEID_PLAYER || GetObjectGuid().IsPet())
-    {
         damage -= pVictim->GetSpellDamageReduction(damage);
-    }
 
     // damage mitigation
     if (damage > 0)
     {
         // physical damage => armor
         if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
-        {
-            uint32 armor_affected_damage = CalcArmorReducedDamage(pVictim, damage);
-            damage = armor_affected_damage + CalcIgnoreDamageReduction(damage - armor_affected_damage, damageInfo->SchoolMask());
-        }
+            damage = CalcArmorReducedDamage(pVictim, damage);
     }
     else
         damage = 0;
@@ -1730,16 +1717,12 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, DamageInfo* damage
     damage += CalculateDamage (damageInfo->attackType, false);
     // Add melee damage bonus
     damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType);
-    uint32 bonus_affected_damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType);
 
-    if (bonus_affected_damage < damage)
-        damage = bonus_affected_damage + CalcIgnoreDamageReduction(damage - bonus_affected_damage, damageInfo->SchoolMask());
-    else
-        damage = bonus_affected_damage;
+    uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damage, damageInfo->SchoolMask());
+    damage = damage - reduction_affected_damage + damageInfo->target->MeleeDamageBonusTaken(this, reduction_affected_damage, damageInfo->attackType);
 
     // Calculate armor reduction
-    uint32 armor_affected_damage = CalcArmorReducedDamage(damageInfo->target, damage);
-    damageInfo->damage = armor_affected_damage + CalcIgnoreDamageReduction(damage - armor_affected_damage, damageInfo->SchoolMask());
+    damageInfo->damage = CalcArmorReducedDamage(damageInfo->target, damage);
     damageInfo->cleanDamage += damage - damageInfo->damage;
 
     damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
@@ -2097,15 +2080,15 @@ uint32 Unit::CalcNotIgnoreAbsorbDamage( uint32 damage, SpellSchoolMask damageSch
     return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
 }
 
-uint32 Unit::CalcIgnoreDamageReduction(uint32 damage, SpellSchoolMask damageSchoolMask)
+uint32 Unit::CalcNotIgnoreDamageReduction(uint32 damage, SpellSchoolMask damageSchoolMask)
 {
     float absorb_affected_rate = 1.0f;
     Unit::AuraList const& ignoreAbsorb = GetAurasByType(SPELL_AURA_MOD_IGNORE_DAMAGE_REDUCTION_SCHOOL);
     for(Unit::AuraList::const_iterator i = ignoreAbsorb.begin(); i != ignoreAbsorb.end(); ++i)
         if ((*i)->GetMiscValue() & damageSchoolMask)
-            absorb_affected_rate *= (*i)->GetModifier()->m_amount / 100.0f;
+            absorb_affected_rate *= (100.0f - (*i)->GetModifier()->m_amount)/100.0f;
 
-    return absorb_affected_rate <= 0.0f ? damage : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : 0);
+    return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
 }
 
 uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
