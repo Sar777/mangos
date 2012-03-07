@@ -1618,7 +1618,7 @@ void Unit::CalculateSpellDamage(DamageInfo *damageInfo, int32 damage, SpellEntry
     {
         // physical damage => armor
         if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
-            damage = damage - CalcArmorReducedDamage(pVictim, damage);
+            damage = CalcArmorReducedDamage(pVictim, damage);
     }
     else
         damage = 0;
@@ -1722,7 +1722,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, DamageInfo* damage
     damage = damage - reduction_affected_damage + damageInfo->target->MeleeDamageBonusTaken(this, reduction_affected_damage, damageInfo->attackType);
 
     // Calculate armor reduction
-    damageInfo->damage = damage - CalcArmorReducedDamage(damageInfo->target, damage);
+    damageInfo->damage = CalcArmorReducedDamage(damageInfo->target, damage);
     damageInfo->cleanDamage += damage - damageInfo->damage;
 
     damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
