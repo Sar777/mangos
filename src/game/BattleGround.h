@@ -474,6 +474,7 @@ class BattleGround
         void UpdateWorldState(uint32 Field, uint32 Value);
         void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player *Source);
         virtual void EndBattleGround(Team winner);
+        void EndArena(Team winner);
         void BlockMovement(Player *plr);
 
         void SendMessageToAll(int32 entry, ChatMsg type, Player const* source = NULL);
@@ -643,6 +644,8 @@ class BattleGround
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
         bool   m_ArenaEnded;
+        uint32 m_TimeToEndArena;
+        Team   m_ArenaWinner;
         char const *m_Name;
 
         /* Player lists */

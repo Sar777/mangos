@@ -313,6 +313,8 @@ BattleGround::BattleGround()
     m_PrematureCountDownTimer = 0;
 
     m_ArenaEnded = false;
+    m_TimeToEndArena = 0;
+    m_ArenaWinner = TEAM_NONE;
 
     m_StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_2M;
     m_StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_1M;
@@ -587,9 +589,9 @@ void BattleGround::Update(uint32 diff)
     }
 
     // Arena time limit
-    if (isArena() && !m_ArenaEnded)
+    if (isArena())
     {
-        if (m_StartTime > uint32(ARENA_TIME_LIMIT))
+        if (!m_ArenaEnded && m_StartTime > uint32(ARENA_TIME_LIMIT))
         {
             Team winner;
             // winner is team with higher damage
@@ -599,8 +601,18 @@ void BattleGround::Update(uint32 diff)
                 winner = HORDE;
             else
                 winner = TEAM_NONE;
-           EndBattleGround(winner);
-           m_ArenaEnded = true;
+           EndArena(winner);
+        }
+
+        if (m_ArenaEnded)
+        {
+            if (m_TimeToEndArena < diff)
+            {
+                EndBattleGround(m_ArenaWinner);
+                m_TimeToEndArena = 60000;
+            }
+            else
+             m_TimeToEndArena -= diff;
         }
     }
 
@@ -806,6 +818,13 @@ void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player 
     WorldPacket data;
     sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
     Source->GetSession()->SendPacket(&data);
+}
+
+void BattleGround::EndArena(Team winner)
+{
+    m_ArenaEnded        = true;
+    m_TimeToEndArena    = 3000;
+    m_ArenaWinner       = winner;
 }
 
 void BattleGround::EndBattleGround(Team winner)
@@ -2120,9 +2139,9 @@ uint32 BattleGround::GetAlivePlayersCountByTeam(Team team) const
 void BattleGround::CheckArenaWinConditions()
 {
     if (!GetAlivePlayersCountByTeam(ALLIANCE) && GetPlayersCountByTeam(HORDE))
-        EndBattleGround(HORDE);
+        EndArena(HORDE);
     else if (GetPlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE))
-        EndBattleGround(ALLIANCE);
+        EndArena(ALLIANCE);
 }
 
 void BattleGround::SetBgRaid(Team team, Group *bg_raid)
