@@ -11976,6 +11976,11 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
     if (unitTarget->IsInWater())
         return;
 
+    // Can't knockback World Bosses
+    if (unitTarget->GetTypeId() == TYPEID_UNIT)
+        if (((Creature*)unitTarget)->IsWorldBoss())
+            return;
+
     // Can't knockback rooted target
     if (unitTarget->hasUnitState(UNIT_STAT_ROOT))
         return;
