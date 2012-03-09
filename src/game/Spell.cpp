@@ -1964,6 +1964,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
                     radius = 9.0f;
                     break;
+                case 71341:                                 // Pact of the Darkfallen
+                    radius = 3.0f;
+                    break;
                 default:
                     break;
             }
