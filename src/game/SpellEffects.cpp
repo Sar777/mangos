@@ -5281,6 +5281,13 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
             return;
     }
 
+    // ICC hack: spells 70360 and 72527 do not have SpellDifficulty for heroic
+    if (m_spellInfo->Id == 72868)
+        m_spellInfo = sSpellStore.LookupEntry(70346);
+    if (m_spellInfo->Id == 72869)
+        m_spellInfo = sSpellStore.LookupEntry(72456);
+
+
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
     Aura* aur = m_spellAuraHolder->CreateAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem);

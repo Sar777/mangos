@@ -10541,6 +10541,13 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
         case 70672:                                         // Gaseous Bloat (Putricide)
             m_stackAmount = m_spellProto->StackAmount;
             break;
+        // Replace auras because ICC do not actually have heroic mode
+        case 72868:
+            m_spellProto = sSpellStore.LookupEntry(70346);
+            break;
+        case 72869:
+            m_spellProto = sSpellStore.LookupEntry(72456);
+            break;
     }
 }
 
