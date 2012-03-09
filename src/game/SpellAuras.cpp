@@ -11349,8 +11349,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 {
                     if (!apply)
                     {
-                        cast_at_remove = true;
-                        spellId1 = (GetSpellProto() ? GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) : 0);
+                        if (m_removeMode == AURA_REMOVE_BY_DISPEL)
+                        {
+                            cast_at_remove = true;
+                            spellId1 = (GetSpellProto() ? GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) : 0);
+                        }
                     }
                     break;
                 }
