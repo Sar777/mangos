@@ -1058,6 +1058,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if(achievementCriteria->kill_creature.creatureID != miscvalue1)
                     continue;
 
+                // For custom cases
+                uint32 changeValue = miscvalue2;
+
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 2189:                  // Artillery Expert (SotA)
@@ -1087,6 +1090,38 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         break;
                     }
+                    case 4539:                  // Once Bitten, Twice Shy(10) (ICC Lana'thel)
+                    {
+                        if (changeValue)
+                            continue;
+
+                        if (GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_10MAN_HEROIC &&
+                            GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL)
+                            continue;
+
+                        if (!(achievementCriteria->ID == 12780 && !GetPlayer()->HasAura(70871)) &&
+                            !(achievementCriteria->ID == 13011 && GetPlayer()->HasAura(70871)))
+                            continue;
+
+                        changeValue = 1;
+                        break;
+                    }
+                    case 4618:                  // Once Bitten, Twice Shy(25) (ICC Lana'thel)
+                    {
+                        if (changeValue)
+                            continue;
+
+                        if (GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_25MAN_HEROIC &&
+                            GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_25MAN_NORMAL)
+                            continue;
+
+                        if (!(achievementCriteria->ID == 13012 && !GetPlayer()->HasAura(70871)) &&
+                            !(achievementCriteria->ID == 13013 && GetPlayer()->HasAura(70871)))
+                            continue;
+
+                        changeValue = 1;
+                        break;
+                    }
                 }
 
                 // those requirements couldn't be found in the dbc
@@ -1094,7 +1129,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if(!data || !data->Meets(GetPlayer(),unit))
                 continue;
 
-                change = miscvalue2;
+                change = changeValue;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
             }
