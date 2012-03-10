@@ -2319,6 +2319,9 @@ void Aura::TriggerSpell()
             }
             case 71340:                                     // Pact of the Darkfallen (Lana'thel)
             {
+                // 2 sec.
+                if (GetAuraTicks() < 4)
+                    return;
                 // growing damage, every tenth tick is 1k higher
                 int32 multiplier = GetModifier()->m_miscvalue += 1;
                 int32 bp0 = triggerTarget->GetMap()->GetDifficulty() >= RAID_DIFFICULTY_10MAN_HEROIC ? 3600 : 1610;
