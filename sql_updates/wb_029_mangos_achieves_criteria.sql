@@ -64,6 +64,9 @@ replace into achievement_criteria_requirement values(12971,18,0,0);
 replace into achievement_criteria_requirement values(12978,18,0,0);
 replace into achievement_criteria_requirement values(12979,18,0,0);
 replace into achievement_criteria_requirement values(12980,18,0,0);
+delete from achievement_criteria_requirement where criteria_id in (12780, 13011, 13012, 13013);
+insert into achievement_criteria_requirement values
+(12780,0,0,0),(13011,0,0,0),(13012,0,0,0),(13013,0,0,0);
 
 -- Friend or Fowl
 delete from achievement_criteria_requirement where criteria_id=3821;
