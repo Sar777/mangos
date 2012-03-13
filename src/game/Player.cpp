@@ -12367,6 +12367,14 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         //pItem->SetOwnerGUID(0);
         pItem->SetGuidValue(ITEM_FIELD_CONTAINED, ObjectGuid());
         pItem->SetSlot( NULL_SLOT );
+        if (sWorld.getConfig(CONFIG_BOOL_BACKUP_ITEMS_ENABLE))
+        {
+            if (pItem->IsBackupItem())
+            {                
+                pItem->SetState(ITEM_BACKUP, this);
+                return;
+            }
+        }
         pItem->SetState(ITEM_REMOVED, this);
     }
 }
@@ -18715,7 +18723,7 @@ void Player::_SaveInventory()
     for(size_t i = 0; i < m_itemUpdateQueue.size(); ++i)
     {
         Item *item = m_itemUpdateQueue[i];
-        if(!item || item->GetState() == ITEM_REMOVED) continue;
+        if(!item || item->GetState() == ITEM_REMOVED || item->GetState() == ITEM_BACKUP) continue;
         Item *test = GetItemByPos( item->GetBagSlot(), item->GetSlot());
 
         GetAntiCheat()->DoAntiCheatCheck(CHECK_ITEM_UPDATE,item,test);
@@ -18775,6 +18783,7 @@ void Player::_SaveInventory()
                     stmt.Execute();
                 }
                 break;
+            case ITEM_BACKUP:
             case ITEM_REMOVED:
                 {
                     SqlStatement stmt = CharacterDatabase.CreateStatement(deleteInventory, "DELETE FROM character_inventory WHERE item = ?");

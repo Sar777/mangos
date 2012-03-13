@@ -7331,3 +7331,20 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleBackupItemListCommand(char* args)
+{
+    if (!*args)
+        return false;
+
+    return true;
+}
+
+bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
+{
+    if (!*args)
+        return false;
+
+    return true;
+}
+

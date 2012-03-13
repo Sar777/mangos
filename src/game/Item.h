@@ -202,7 +202,8 @@ enum ItemUpdateState
     ITEM_UNCHANGED                               = 0,
     ITEM_CHANGED                                 = 1,
     ITEM_NEW                                     = 2,
-    ITEM_REMOVED                                 = 3
+    ITEM_REMOVED                                 = 3,
+    ITEM_BACKUP                                  = 4
 };
 
 enum ItemLootUpdateState
@@ -310,6 +311,10 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsTargetValidForItemUse(Unit* pUnitTarget);
         bool IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) const;
         bool GemsFitSockets() const;
+
+        bool IsBackupItem();
+        static void DeleteOldBackupItems();
+        static void DeleteOldBackupItems(uint32 keepDays);
 
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }

@@ -889,7 +889,11 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_RAID_FLAGS_UNIQUE,      "RaidFlags.Unique", false);
 
     setConfig(CONFIG_BOOL_ALLOW_FLIGHT_ON_OLD_MAPS, "AllowFlightOnOldMaps", false);
-	setConfig(CONFIG_BOOL_ARMORY_SUPPORT, "WOWArmorySupport", false);
+    setConfig(CONFIG_BOOL_ARMORY_SUPPORT, "WOWArmorySupport", false);
+
+    setConfig(CONFIG_BOOL_BACKUP_ITEMS_ENABLE, "BackupItem.Enabel", false);
+    setConfig(CONFIG_UINT32_BACKUP_ITEMS_ITEM_LEVEL, "BackupItem.ItemLevel", 160);
+    setConfig(CONFIG_UINT32_BACKUP_ITEMS_KEEP_DAYS, "BackupItem.KeepDay", 30);
 
     m_relocation_ai_notify_delay = sConfig.GetIntDefault("Visibility.AIRelocationNotifyDelay", 1000u);
     m_relocation_lower_limit_sq  = pow(sConfig.GetFloatDefault("Visibility.RelocationLowerLimit",10), 2);
@@ -1603,6 +1607,8 @@ void World::SetInitialWorldSettings()
 
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
+
+    Item::DeleteOldBackupItems();
 
     sLog.outString("Starting Autobroadcast system by Xeross..." );
 

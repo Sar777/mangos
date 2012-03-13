@@ -420,6 +420,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand backupItemCommandTable[] =
+    {
+        { "list",           SEC_GAMEMASTER,     false, &ChatHandler::HandleBackupItemListCommand,      "", NULL },
+        { "restore",        SEC_GAMEMASTER,     false, &ChatHandler::HandleBackupItemRestoreCommand,   "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand modifyCommandTable[] =
     {
         { "hp",             SEC_MODERATOR,      false, &ChatHandler::HandleModifyHPCommand,            "", NULL },
@@ -855,6 +862,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
         { "gearscore",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowGearScoreCommand,       "", NULL },
         { "mmap",           SEC_GAMEMASTER,     false, NULL,                                           "", mmapCommandTable },
+        { "backupitem",     SEC_GAMEMASTER,     false, NULL,                                           "", backupItemCommandTable },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };

@@ -354,6 +354,13 @@ void Item::SaveToDB()
             delete this;
             return;
         }
+        case ITEM_BACKUP:
+        {
+            static SqlStatementID BackupInst;
+            SqlStatement stmt = CharacterDatabase.CreateStatement(BackupInst, "UPDATE item_instance SET owner_guid = 0, old_owner = ?, ItemID = ?, deleteDate = ? WHERE guid = ?");
+            stmt.PExecute(GetOwnerGuid().GetCounter(), GetEntry(), uint64(time(NULL)), GetGUIDLow());
+            return;
+        }
         case ITEM_UNCHANGED:
             return;
     }
@@ -1407,4 +1414,46 @@ bool Item::HasTriggeredByAuraSpell(SpellEntry const* spellInfo) const
                 return true;
     }
     return false;
+}
+
+bool Item::IsBackupItem()
+{
+    ItemPrototype const* prototype = sObjectMgr.GetItemPrototype(GetEntry());
+    if (!prototype)
+        return false;
+
+    if (prototype->ItemLevel >= sWorld.getConfig(CONFIG_UINT32_BACKUP_ITEMS_ITEM_LEVEL)
+       && prototype->InventoryType >= INVTYPE_HEAD
+       && prototype->InventoryType <= INVTYPE_RELIC
+       && prototype->Quality >= ITEM_QUALITY_EPIC)
+        return true;
+
+    return false;
+}
+
+void Item::DeleteOldBackupItems()
+{
+    uint32 keepDays = sWorld.getConfig(CONFIG_UINT32_BACKUP_ITEMS_KEEP_DAYS);
+    if (!keepDays)
+        return;
+
+    Item::DeleteOldBackupItems(keepDays);
+}
+
+void Item::DeleteOldBackupItems(uint32 keepDays)
+{
+    sLog.outString("Item::DeleteOldBackupItems: Deleting all backup items which have been deleted %u days before...", keepDays);
+
+    QueryResult *resultItems = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE deleteDate IS NOT NULL AND deleteDate < '" UI64FMTD "'", uint64(time(NULL) - time_t(keepDays * DAY)));
+    if (resultItems)
+    {
+        sLog.outString("Item::DeleteOldBackupItems: Found %u item(s) to delete",uint32(resultItems->GetRowCount()));
+        do
+        {
+            Field *itemsFields = resultItems->Fetch();
+            uint64 guid = itemsFields[0].GetUInt64();
+            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = %u", guid);
+        } while(resultItems->NextRow());
+        delete resultItems;
+    }
 }
