@@ -7389,7 +7389,7 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
     uint32 itemguid = 18;
     if (!ExtractUInt32(&args, itemguid))
         return false;
-    debug_log("TEST %u", itemguid);
+
     ObjectGuid target = sObjectMgr.GetPlayerGuidByName(playerName);
     if (!target)
         return false;

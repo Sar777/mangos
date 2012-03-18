@@ -261,7 +261,7 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
             has_items = true;
     }
 
-    uint32 mailId = sObjectMgr.GenerateMailID();    
+    uint32 mailId = sObjectMgr.GenerateMailID();
 
     time_t deliver_time = time(NULL) + deliver_delay;
 
