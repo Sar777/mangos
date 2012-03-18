@@ -261,7 +261,7 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
             has_items = true;
     }
 
-    uint32 mailId = sObjectMgr.GenerateMailID();
+    uint32 mailId = sObjectMgr.GenerateMailID();    
 
     time_t deliver_time = time(NULL) + deliver_delay;
 
@@ -333,6 +333,77 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
     }
     else if (!m_items.empty())
         deleteIncludedItems();
+}
+
+void WorldSession::SendExternalMails()
+{
+    debug_log("External Mail - Send Mails from Queue...");
+    QueryResult* result = CharacterDatabase.Query("SELECT id, receiver, subject, message, money, item, item_count, item_guid FROM mail_external");
+    if (!result)
+    {
+        debug_log("External Mail - No Mails in Queue...");
+        return;
+    }
+    else
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 id = fields[0].GetUInt32();
+            ObjectGuid receiver_guid = ObjectGuid(HIGHGUID_PLAYER, fields[1].GetUInt32());
+            std::string subject = fields[2].GetString();
+            std::string message = fields[3].GetString();
+            uint32 money = fields[4].GetUInt32();
+            uint32 ItemID = fields[5].GetUInt32();
+            uint32 ItemCount = fields[6].GetUInt32();
+            uint64 ItemGuid = fields[7].GetUInt64();
+
+            Player *receiver = sObjectMgr.GetPlayer(receiver_guid);
+
+            if (receiver != 0)
+            {
+                debug_log("External Mail - Sending mail to %u, Item:%u", receiver_guid, ItemID);
+                if (!ItemGuid)
+                {
+                    if (ItemID != 0)
+                    {
+                        Item* ToMailItem = Item::CreateItem(ItemID, ItemCount, receiver);
+                        ToMailItem->SaveToDB();
+                        MailDraft(subject, 0)
+                                .AddItem(ToMailItem)
+                                .SetMoney(money)
+                                .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+                        }
+                        else
+                        {
+                            MailDraft(subject, 0)
+                                .SetMoney(money)
+                                .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+                        }
+                        CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id=%u", id);
+                }
+                else
+                {
+                    Item* ToBackupItem = Item::CreateItem(ItemID, ItemCount, receiver);
+                    if (ToBackupItem)
+                    {
+                        ToBackupItem->SaveToDB();
+                        MailDraft(subject, "Restore Item")
+                            .AddItem(ToBackupItem)
+                            .SendMailTo(MailReceiver(receiver), MailSender(), MAIL_CHECK_MASK_RETURNED);
+                        CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id=%u", id);
+                        //CharacterDatabase.PExecute("UPDATE mail_items SET item_guid = '%u'", ItemGuid, ToBackupItem->GetGUIDLow());
+                        //CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = %u", ToBackupItem->GetGUIDLow());
+                        // NOT SUPPORT
+                    }
+
+                }
+            }
+        }
+        while(result->NextRow());
+        delete result;
+    }
+    debug_log("External Mail - All Mails Sent...");
 }
 
 /**

@@ -221,6 +221,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_MAZE_START_GUID,
     CONFIG_UINT32_BACKUP_ITEMS_ITEM_LEVEL,
     CONFIG_UINT32_BACKUP_ITEMS_KEEP_DAYS,
+    CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -324,7 +325,7 @@ enum eConfigFloatValues
 enum eConfigBoolValues
 {
     CONFIG_BOOL_GRID_UNLOAD = 0,
-	CONFIG_BOOL_DROP_ITEM_LEVEL_ENABLE,
+    CONFIG_BOOL_DROP_ITEM_LEVEL_ENABLE,
     CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY,
     CONFIG_BOOL_OFFHAND_CHECK_AT_TALENTS_RESET,
     CONFIG_BOOL_ALLOW_TWO_SIDE_ACCOUNTS,
@@ -415,6 +416,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_MMAP_ENABLED,
     CONFIG_BOOL_RESET_DUEL_AREA_ENABLED,
     CONFIG_BOOL_BACKUP_ITEMS_ENABLE,
+    CONFIG_BOOL_EXTERNAL_MAIL_ENABLE,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -715,6 +717,7 @@ class World
         time_t m_startTime;
         time_t m_gameTime;
         IntervalTimer m_timers[WUPDATE_COUNT];
+        IntervalTimer extmail_timer;
         uint32 mail_timer;
         uint32 mail_timer_expires;
 

@@ -969,7 +969,9 @@ enum MangosStrings
     LANG_NPC_EVENTAI_PHASE              = 1506,
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
-    // Room for more Level 2              1509-1599 not used
+    LANG_BACKUP_ITEM_LIST_CHAT          = 1509,
+    LANG_BACKUP_ITEM_LIST_CONSOLE       = 1510,
+    // Room for more Level 2              1511-1599 not used
 
     // FREE IDS                           1600-9999
 

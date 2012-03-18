@@ -2171,3 +2171,40 @@ VMSS.ForceUnloadDelay = 3000
 ###################################################################################################################
 DuelReset.Enable = 0
 DuelReset.AreaIds = "12,14,4570"
+
+###################################################################################################################
+#    ExternalMail System
+#
+#    ExternalMail.Enable
+#        Enable external mail delivery from mail_external table.
+#        Default: 0 (disabled)
+#                 1 (enabled)
+#
+#    ExternalMailInterval
+#        Mail delivery delay time for item sending from mail_external table,
+#         in minutes.
+#        Default: 10 minute
+#
+###################################################################################################################
+
+ExternalMail.Enable = 0
+ExternalMailInterval = 10
+
+###################################################################################################################
+#    Backup Items
+#
+#    BackupItem.Enabel
+#        Default: 0 (disabled)
+#                 1 (enabled)
+#
+#    BackupItem.ItemLevel
+#        Default: 220
+#
+#    BackupItem.KeepDay
+#        Default: 20
+#
+###################################################################################################################
+
+BackupItem.Enabel = 0
+BackupItem.ItemLevel = 220
+BackupItem.KeepDay = 20
