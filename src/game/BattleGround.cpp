@@ -604,13 +604,10 @@ void BattleGround::Update(uint32 diff)
            EndArena(winner);
         }
 
-        if (m_ArenaEnded)
+        if (m_ArenaEnded && GetStatus() != STATUS_WAIT_LEAVE)
         {
             if (m_TimeToEndArena < diff)
-            {
                 EndBattleGround(m_ArenaWinner);
-                m_TimeToEndArena = 60000;
-            }
             else
              m_TimeToEndArena -= diff;
         }
