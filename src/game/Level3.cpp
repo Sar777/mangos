@@ -7332,11 +7332,47 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     return true;
 }
 
+void ChatHandler::ShowListBackupItems(uint32 itemId, uint32 itemguid, int loc_idx)
+{
+    ItemPrototype const *itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
+    if(!itemProto)
+        return;
+
+    std::string name = itemProto->Name1;
+    sObjectMgr.GetItemLocaleStrings(itemProto->ItemId, loc_idx, &name);
+
+    if (m_session)
+        PSendSysMessage(LANG_BACKUP_ITEM_LIST_CHAT, itemguid, itemId, name.c_str());
+    else
+        PSendSysMessage(LANG_BACKUP_ITEM_LIST_CONSOLE, itemguid, itemId, name.c_str());
+}
+
 bool ChatHandler::HandleBackupItemListCommand(char* args)
 {
     if (!*args)
         return false;
 
+    char* cplayerName = ExtractArg(&args);
+    std::string playerName = cplayerName;
+    if (!normalizePlayerName(playerName))
+        return false;
+
+    ObjectGuid target = sObjectMgr.GetPlayerGuidByName(playerName);
+    if (!target)
+        return false;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, ItemID FROM item_instance WHERE owner = '%u'", target);
+    if (result)
+    {
+        do {
+            Field *fields = result->Fetch();
+            uint64 itemguid = fields[0].GetUInt64();
+            uint32 itemid = fields[1].GetUInt32();
+            ShowListBackupItems(itemid, itemguid, GetSessionDbLocaleIndex());
+
+        } while (result->NextRow());
+        delete result;
+    }
     return true;
 }
 
@@ -7345,6 +7381,32 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
     if (!*args)
         return false;
 
+    char* cplayerName = ExtractArg(&args);
+    std::string playerName = cplayerName;
+    if (!normalizePlayerName(playerName))
+        return false;
+
+    uint32 itemguid = 18;
+    if (!ExtractUInt32(&args, itemguid))
+        return false;
+
+    ObjectGuid target = sObjectMgr.GetPlayerGuidByName(playerName);
+    if (!target)
+        return false;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, ItemID, owner FROM item_instance WHERE guid = '%u' AND owner = '%u'", itemguid, target);
+    if (result)
+    {
+        do {
+            Field *fields = result->Fetch();
+            uint64 lowguid = fields[0].GetUInt64();
+            uint32 itemid = fields[1].GetUInt32();
+            uint32 owner = fields[2].GetUInt32();
+            CharacterDatabase.PExecute("INSERT INTO mail_external (receiver, item, item_guid, item_count) VALUES (%u, %u, %u, 1)", owner, itemid, lowguid);
+            CharacterDatabase.PExecute("UPDATE item_instance SET owner = 0, ItemID = 0, deleteDate = NULL WHERE guid = %u", lowguid);
+        } while (result->NextRow());
+        delete result;
+    }
     return true;
 }
 

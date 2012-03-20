@@ -358,7 +358,7 @@ void Item::SaveToDB()
         case ITEM_BACKUP:
         {
             static SqlStatementID BackupInst;
-            SqlStatement stmt = CharacterDatabase.CreateStatement(BackupInst, "UPDATE item_instance SET owner_guid = 0, old_owner = ?, ItemID = ?, deleteDate = ? WHERE guid = ?");
+            SqlStatement stmt = CharacterDatabase.CreateStatement(BackupInst, "UPDATE item_instance SET owner_guid = 0, owner = ?, ItemID = ?, deleteDate = ? WHERE guid = ?");
             stmt.PExecute(GetOwnerGuid().GetCounter(), GetEntry(), uint64(time(NULL)), GetGUIDLow());
             return;
         }

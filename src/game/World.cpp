@@ -895,6 +895,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_BACKUP_ITEMS_ITEM_LEVEL, "BackupItem.ItemLevel", 160);
     setConfig(CONFIG_UINT32_BACKUP_ITEMS_KEEP_DAYS, "BackupItem.KeepDay", 30);
 
+    setConfig(CONFIG_BOOL_EXTERNAL_MAIL_ENABLE, "ExternalMail.Enable", false);
+    setConfig(CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL, "ExternalMailInterval", 10);
+
     m_relocation_ai_notify_delay = sConfig.GetIntDefault("Visibility.AIRelocationNotifyDelay", 1000u);
     m_relocation_lower_limit_sq  = pow(sConfig.GetFloatDefault("Visibility.RelocationLowerLimit",10), 2);
 
@@ -1557,6 +1560,8 @@ void World::SetInitialWorldSettings()
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
+    // handle timer for external mail
+    extmail_timer.SetInterval(getConfig(CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL) * MINUTE * IN_MILLISECONDS);
     mail_timer = uint32((((localtime( &m_gameTime )->tm_hour + 20) % 24)* HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval() );
                                                             //1440
     mail_timer_expires = uint32( (DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
@@ -1706,6 +1711,17 @@ void World::Update(uint32 diff)
 
     if (m_gameTime > m_NextRandomBGReset)
         ResetRandomBG();
+
+    // Handle external mail
+    if (getConfig(CONFIG_BOOL_EXTERNAL_MAIL_ENABLE))
+    {
+        extmail_timer.Update(diff);
+        if (extmail_timer.Passed())
+        {
+            WorldSession::SendExternalMails();
+            extmail_timer.Reset();
+        }
+    }
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())

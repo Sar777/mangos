@@ -703,6 +703,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleGetValueHelper(Object* target, uint32 field, char* typeStr);
         bool HandlerDebugModValueHelper(Object* target, uint32 field, char* typeStr, char* valStr);
         bool HandleSetValueHelper(Object* target, uint32 field, char* typeStr, char* valStr);
+        void ShowListBackupItems(uint32 itemId, uint32 itemguid, int loc_idx);
 
         bool HandleSendItemsHelper(MailDraft& draft, char* args);
         bool HandleSendMailHelper(MailDraft& draft, char* args);
