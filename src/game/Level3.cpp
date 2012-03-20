@@ -7357,7 +7357,7 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
     if (!normalizePlayerName(playerName))
         return false;
 
-    ObjectGuid target = sObjectMgr.GetPlayerGuidByName(playerName);
+    ObjectGuid target = sAccountMgr.GetPlayerGuidByName(playerName);
     if (!target)
         return false;
 
@@ -7390,7 +7390,7 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
     if (!ExtractUInt32(&args, itemguid))
         return false;
 
-    ObjectGuid target = sObjectMgr.GetPlayerGuidByName(playerName);
+    ObjectGuid target = sAccountMgr.GetPlayerGuidByName(playerName);
     if (!target)
         return false;
 
