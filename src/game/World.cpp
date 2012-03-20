@@ -2039,7 +2039,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
 
     Field* fieldsAccount = resultAccounts->Fetch();
     uint32 account = fieldsAccount[0].GetUInt32();
-    if (sAccountMgr.GetSecurity(sObjectMgr.GetPlayerAccountIdByPlayerName(safe_author)) < sAccountMgr.GetSecurity(account))
+    if (sAccountMgr.GetSecurity(sAccountMgr.GetPlayerAccountIdByPlayerName(safe_author)) < sAccountMgr.GetSecurity(account))
     {
         delete resultAccounts;
         return BAN_SYNTAX_ERROR;
@@ -2082,7 +2082,7 @@ bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)
         if (mode == BAN_ACCOUNT)
             account = sAccountMgr.GetId (nameOrIP);
         else if (mode == BAN_CHARACTER)
-            account = sObjectMgr.GetPlayerAccountIdByPlayerName (nameOrIP);
+            account = sAccountMgr.GetPlayerAccountIdByPlayerName (nameOrIP);
 
         if (!account)
             return false;
@@ -2418,27 +2418,6 @@ void World::UpdateResultQueue()
     CharacterDatabase.ProcessResultQueue();
     WorldDatabase.ProcessResultQueue();
     LoginDatabase.ProcessResultQueue();
-}
-
-void World::UpdateRealmCharCount(uint32 accountId)
-{
-    CharacterDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId,
-        "SELECT COUNT(guid) FROM characters WHERE account = '%u'", accountId);
-}
-
-void World::_UpdateRealmCharCount(QueryResult *resultCharCount, uint32 accountId)
-{
-    if (resultCharCount)
-    {
-        Field *fields = resultCharCount->Fetch();
-        uint32 charCount = fields[0].GetUInt32();
-        delete resultCharCount;
-
-        LoginDatabase.BeginTransaction();
-        LoginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%u' AND realmid = '%u'", accountId, realmID);
-        LoginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)", charCount, accountId, realmID);
-        LoginDatabase.CommitTransaction();
-    }
 }
 
 void World::InitWeeklyQuestResetTime()

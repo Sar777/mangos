@@ -7963,7 +7963,6 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                 }
                             }
                         }
-                        break;
                         // Improved Faerie Fire
                         if (pVictim->HasAura(770) || pVictim->HasAura(16857))
                         {
@@ -11158,6 +11157,8 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
             {
                 case COMMAND_STAY:                          //flat=1792  //STAY
                 {
+                    InterruptNonMeleeSpells(false);
+                    AttackStop();
                     StopMoving();
                     GetMotionMaster()->Clear(false);
                     GetMotionMaster()->MoveIdle();
@@ -11167,7 +11168,9 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
                 }
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
                 {
+                    InterruptNonMeleeSpells(false);
                     AttackStop();
+                    GetMotionMaster()->Clear(false);
                     GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST,((Pet*)this)->GetPetFollowAngle());
                     GetCharmInfo()->SetState(CHARM_STATE_COMMAND,COMMAND_FOLLOW);
                     SendCharmState();
@@ -11219,6 +11222,12 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
                 {
+                    InterruptNonMeleeSpells(false);
+                    AttackStop();
+                    StopMoving();
+                    GetMotionMaster()->Clear(false);
+                    GetMotionMaster()->MoveIdle();
+
                     if(((Creature*)this)->IsPet())
                     {
                         Pet* p = (Pet*)this;

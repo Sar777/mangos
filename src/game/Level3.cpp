@@ -5734,7 +5734,7 @@ bool ChatHandler::HandleBanInfoCharacterCommand(char* args)
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
-    uint32 accountid = target ? target->GetSession()->GetAccountId() : sObjectMgr.GetPlayerAccountIdByGUID(target_guid);
+    uint32 accountid = target ? target->GetSession()->GetAccountId() : sAccountMgr.GetPlayerAccountIdByGUID(target_guid);
 
     std::string accountname;
     if (!sAccountMgr.GetName(accountid,accountname))
@@ -6105,7 +6105,7 @@ bool ChatHandler::HandlePDumpLoadCommand(char *args)
 
             ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
 
-            if (sObjectMgr.GetPlayerAccountIdByGUID(guid))
+            if (sAccountMgr.GetPlayerAccountIdByGUID(guid))
             {
                 PSendSysMessage(LANG_CHARACTER_GUID_IN_USE, lowguid);
                 SetSentErrorMessage(true);
@@ -6164,7 +6164,7 @@ bool ChatHandler::HandlePDumpWriteCommand(char *args)
             return false;
         }
 
-        guid = sObjectMgr.GetPlayerGuidByName(name);
+        guid = sAccountMgr.GetPlayerGuidByName(name);
         if (!guid)
         {
             PSendSysMessage(LANG_PLAYER_NOT_FOUND);
@@ -6177,7 +6177,7 @@ bool ChatHandler::HandlePDumpWriteCommand(char *args)
     else
         guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
 
-    if (!sObjectMgr.GetPlayerAccountIdByGUID(guid))
+    if (!sAccountMgr.GetPlayerAccountIdByGUID(guid))
     {
         PSendSysMessage(LANG_PLAYER_NOT_FOUND);
         SetSentErrorMessage(true);
@@ -6263,7 +6263,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             case HOME_MOTION_TYPE:
                 if(unit->GetTypeId()==TYPEID_UNIT)
                 {
-                    static_cast<HomeMovementGenerator<Creature> const*>(&*action)->GetResetPosition(const_cast<Creature&>(*((Creature*)unit)),x,y,z);
+                    ((Creature*)unit)->GetRespawnCoord(x,y,z);
                     PSendSysMessage(LANG_MOVEGENS_HOME_CREATURE,x,y,z);
                 }
                 else
