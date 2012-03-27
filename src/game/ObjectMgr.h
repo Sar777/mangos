@@ -811,8 +811,6 @@ class ObjectMgr
         void LoadWeatherZoneChances();
         void LoadGameTele();
 
-        void LoadNpcGossips();
-
         void LoadGossipMenus();
 
         void LoadVendorTemplates();
