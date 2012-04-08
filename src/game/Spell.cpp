@@ -3622,6 +3622,8 @@ void Spell::cast(bool skipCheck)
                 AddTriggeredSpell(74610);                  // Fiery combustion
             else if (m_spellInfo->Id == 74799)
                 AddTriggeredSpell(74800);                  // Soul consumption
+            else if (m_spellInfo->Id == 61717)             // Blossoming Branch
+                AddPrecastSpell(61719);                    // Easter Lay Noblegarden Egg Aura
             else if (m_spellInfo->Id == 61968)             // Flash Freeze (Hodir: Ulduar)
                 AddTriggeredSpell(62148);                  // visual effect
             else if (m_spellInfo->Id == 69839)             // Unstable Ooze Explosion (Rotface)
