@@ -3313,7 +3313,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     Creature* pTargetDummy = NULL;
                     float fRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
-                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 29734, true, fRange);
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 29734, true, false, fRange);
                     MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pTargetDummy, u_check);
 
                     Cell::VisitGridObjects(m_caster, searcher, fRange);
