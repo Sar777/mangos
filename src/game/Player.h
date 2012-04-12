@@ -1534,7 +1534,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         static void DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRealmChars = true, bool deleteFinally = false);
         static void DeleteOldCharacters();
-        static void DeleteOldCharacters(uint32 keepDays);
+        static void DeleteOldCharacters(uint32 keepDays, bool DeleteOldChars = false);
 
         bool m_mailsUpdated;
 

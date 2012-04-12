@@ -1958,11 +1958,23 @@ Anticheat.Warden  = 0
 #        Default: 30
 #                 0  - Don't delete any characters, they stay in the database forever.
 #
+#    OldCharDelete.MinLevel
+#        Delete old characters level < OldCharDelete.MinLevel
+#        Default: 15
+#
+#    OldCharDelete.KeepDays
+#        Define the amount of days for which the characters are kept in the database before
+#        they will be removed
+#        Default: 0 - Disabled check for old characters
+#
 ###################################################################################################################
 
 CharDelete.Method = 1
 CharDelete.MinLevel = 10
 CharDelete.KeepDays = 30
+
+OldCharDelete.MinLevel = 15
+OldCharDelete.KeepDays = 0
 
 ###################################################################################################################
 #    Refer-A-Friend system by Mas0n

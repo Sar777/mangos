@@ -4556,10 +4556,11 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 void Player::DeleteOldCharacters()
 {
     uint32 keepDays = sWorld.getConfig(CONFIG_UINT32_CHARDELETE_KEEP_DAYS);
-    if (!keepDays)
-        return;
-
-    Player::DeleteOldCharacters(keepDays);
+    if (keepDays)
+        Player::DeleteOldCharacters(keepDays);
+    uint32 keepDaysLastLogin = sWorld.getConfig(CONFIG_UINT32_DELETE_OLD_CHARS_KEEP_DAYS);
+    if (keepDaysLastLogin)
+        Player::DeleteOldCharacters(keepDaysLastLogin, true);
 }
 
 /**
@@ -4569,21 +4570,41 @@ void Player::DeleteOldCharacters()
  *
  * @param keepDays overrite the config option by another amount of days
  */
-void Player::DeleteOldCharacters(uint32 keepDays)
+void Player::DeleteOldCharacters(uint32 keepDays, bool DeleteOldChars)
 {
-    sLog.outString("Player::DeleteOldChars: Deleting all characters which have been deleted %u days before...", keepDays);
-
-    QueryResult *resultChars = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < '" UI64FMTD "'", uint64(time(NULL) - time_t(keepDays * DAY)));
-    if (resultChars)
+    if (!DeleteOldChars)
     {
-        sLog.outString("Player::DeleteOldChars: Found %u character(s) to delete",uint32(resultChars->GetRowCount()));
-        do
+        sLog.outString("Player::DeleteOldChars: Deleting all characters which have been deleted %u days before...", keepDays);
+
+        QueryResult *resultChars = CharacterDatabase.PQuery("SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < '" UI64FMTD "'", uint64(time(NULL) - time_t(keepDays * DAY)));
+        if (resultChars)
         {
-            Field *charFields = resultChars->Fetch();
-            ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, charFields[0].GetUInt32());
-            Player::DeleteFromDB(guid, charFields[1].GetUInt32(), true, true);
-        } while(resultChars->NextRow());
-        delete resultChars;
+            sLog.outString("Player::DeleteOldChars: Found %u character(s) to delete",uint32(resultChars->GetRowCount()));
+            do
+            {
+                Field *charFields = resultChars->Fetch();
+                ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, charFields[0].GetUInt32());
+                Player::DeleteFromDB(guid, charFields[1].GetUInt32(), true, true);
+            } while(resultChars->NextRow());
+            delete resultChars;
+        }
+    }
+    else
+    {
+        sLog.outString("Player::DeleteOldChars: Deleting all characters which have been last login %u days before...", keepDays);
+
+        QueryResult *resultChars1 = CharacterDatabase.PQuery("SELECT guid, account FROM characters WHERE level < '%u' AND logout_time < '%u' AND (deleteInfos_Account IS NULL OR deleteInfos_Account = 0)", sWorld.getConfig(CONFIG_UINT32_DELETE_OLD_CHARS_MIN_LEVEL), uint64(time(NULL) - time_t(keepDays * DAY)));
+        if (resultChars1)
+        {
+            sLog.outString("Player::DeleteOldChars: Found %u character(s) to delete", uint32(resultChars1->GetRowCount()));
+            do
+            {
+                Field *charFields = resultChars1->Fetch();
+                ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, charFields[0].GetUInt32());
+                Player::DeleteFromDB(guid, charFields[1].GetUInt32(), true, true);
+            } while(resultChars1->NextRow());
+            delete resultChars1;
+        }
     }
 }
 
