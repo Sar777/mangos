@@ -25361,7 +25361,7 @@ void Player::InterruptTaxiFlying()
     {
         GetUnitStateMgr().DropAction(UNIT_ACTION_TAXI);
         m_taxi.ClearTaxiDestinations();
-        GetUnitStateMgr().InitDefaults();
+        GetUnitStateMgr().InitDefaults(false);
     }
     // save only in non-flight case
     else

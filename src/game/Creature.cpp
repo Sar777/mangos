@@ -512,7 +512,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 {
                     SetDeathState(JUST_DIED);
                     SetHealth(0);
-                    GetUnitStateMgr().InitDefaults();
+                    GetUnitStateMgr().InitDefaults(true);
                     clearUnitState(UNIT_STAT_ALL_STATE);
                     LoadCreatureAddon(true);
                 }
@@ -1513,6 +1513,12 @@ float Creature::GetAttackDistance(Unit const* pl) const
     return (RetDistance*aggroRate);
 }
 
+float Creature::GetReachDistance(Unit const* unit) const
+{
+    //require realization of creature strategy (melee/spellcaster diffirent).
+    return GetAttackDistance(unit);
+}
+
 void Creature::SetDeathState(DeathState s)
 {
     if ((s == JUST_DIED && !m_isDeadByDefault) || (s == JUST_ALIVED && m_isDeadByDefault))
@@ -1545,9 +1551,7 @@ void Creature::SetDeathState(DeathState s)
             UpdateSpeed(MOVE_RUN, false);
         }
 
-        // FIXME: may not be blizzlike
-        if (Pet* pet = GetPet())
-            pet->Unsummon(PET_SAVE_AS_DELETED, this);
+        GetUnitStateMgr().InitDefaults(true);
 
         if (CanFly())
             GetMotionMaster()->MoveFall();

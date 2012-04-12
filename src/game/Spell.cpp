@@ -916,12 +916,14 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
         if (dist < 5.0f)
             dist = 5.0f;
         target.timeDelay = (uint64) floor(dist / speed_proto * 1000.0f);
-
+/*
+this piece of code make delayed stun and other effects for charge-like spells. seems not offlike...
         if (m_spellInfo->AttributesEx7 & SPELL_ATTR_EX7_HAS_CHARGE_EFFECT)
         {
             if (target.timeDelay > GetDelayStart())
                 SetDelayStart(target.timeDelay);
         }
+*/
     }
     // Spell cast on self - mostly TRIGGER_MISSILE code
     else if ((speed_proto > M_NULL_F) && affectiveObject && (pVictim == affectiveObject))
@@ -1109,10 +1111,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         m_damage += target->damage;
     }
 
-    // recheck for visibility of target
-    if ((m_spellInfo->speed > 0.0f ||
-        (m_spellInfo->EffectImplicitTargetA[0] == TARGET_CHAIN_DAMAGE && GetSpellCastTime(m_spellInfo, this) > 0)) &&
-        (!unit->isVisibleForOrDetect(m_caster, m_caster, false) && !m_IsTriggeredSpell))
+    // recheck for availability/visibility of target
+    if (((m_spellInfo->speed > 0.0f ||
+        (m_spellInfo->EffectImplicitTargetA[0] == TARGET_CHAIN_DAMAGE &&
+        GetSpellCastTime(m_spellInfo, this) > 0)) &&
+        (!unit->isVisibleForOrDetect(m_caster, m_caster, false) && !m_IsTriggeredSpell)))
     {
         caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
         missInfo = SPELL_MISS_EVADE;
@@ -4173,6 +4176,7 @@ void Spell::update(uint32 difftime)
             cancel();
     }
 
+
     switch(m_spellState)
     {
         case SPELL_STATE_PREPARING:
@@ -4208,6 +4212,35 @@ void Spell::update(uint32 difftime)
                     // check if player has turned if flag is set
                     if ( m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->GetOrientation() )
                         cancel();
+                }
+
+                // check if all targets away range
+                if (!m_IsTriggeredSpell && (difftime >= m_timer))
+                {
+                    SpellCastResult result = CheckRange(true, m_targets.getUnitTarget());
+                    bool checkFailed = false;
+                    switch (result)
+                    {
+                        case SPELL_CAST_OK:
+                            break;
+                        case SPELL_FAILED_TOO_CLOSE:
+                        case SPELL_FAILED_UNIT_NOT_INFRONT:
+                            if (m_spellInfo->AttributesEx7 & SPELL_ATTR_EX7_HAS_CHARGE_EFFECT)
+                                break;
+                            checkFailed = true;
+                            break;
+                        case SPELL_FAILED_OUT_OF_RANGE:
+                        default:
+                            checkFailed = true;
+                            break;
+                    }
+
+                    if (checkFailed)
+                    {
+                        SendCastResult(result);
+                        cancel();
+                        return;
+                    }
                 }
 
                 // check if there are alive targets left
@@ -6989,16 +7022,17 @@ bool Spell::CanAutoCast(Unit* target)
     return false;                                           //target invalid
 }
 
-SpellCastResult Spell::CheckRange(bool strict)
+SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
 {
-    Unit *target = m_targets.getUnitTarget();
-    GameObject *pGoTarget = m_targets.getGOTarget();
+    Unit* target = (checkTarget && checkTarget->GetObjectGuid().IsUnit()) ? (Unit*)checkTarget : m_targets.getUnitTarget();
+    GameObject* pGoTarget = (checkTarget && checkTarget->GetObjectGuid().IsGameObject()) ? (GameObject*)checkTarget : m_targets.getGOTarget();
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
 
     bool friendly = target ? target->IsFriendlyTo(m_caster) : false;
     float max_range = GetSpellMaxRange(srange, friendly);
     float min_range = GetSpellMinRange(srange, friendly);
+    float add_range = checkTarget ? 0.0f : (strict ? 1.25f : 6.25f);
 
     // special range cases
     switch(m_spellInfo->rangeIndex)
@@ -7022,7 +7056,7 @@ SpellCastResult Spell::CheckRange(bool strict)
 
                 float combat_range = m_caster->GetMeleeAttackDistance(target);
 
-                float range_mod = combat_range + (strict ? 1.25f : 6.25f);
+                float range_mod = combat_range + add_range;
 
                 if (Player* modOwner = m_caster->GetSpellModOwner())
                     modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range_mod, this);
@@ -7036,7 +7070,7 @@ SpellCastResult Spell::CheckRange(bool strict)
         }
         default:
             //add radius of caster and ~5 yds "give" for non stricred (landing) check
-            max_range += (strict ? 1.25f : 6.25f);
+            max_range += add_range;
             break;
     }
 
