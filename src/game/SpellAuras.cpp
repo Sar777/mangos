@@ -47,6 +47,7 @@
 #include "Vehicle.h"
 #include "CellImpl.h"
 #include "InstanceData.h"
+#include "Language.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -1526,15 +1527,13 @@ void Aura::TriggerSpell()
                         triggerTarget->CastCustomSpell(triggerTarget, 29879, &bpDamage, NULL, NULL, true, NULL, this, casterGUID);
                         return;
                     }
-                    case 27819:                             // Detonate Mana (Naxxramas: Kel'Thuzad)
+                    // Detonate Mana
+                    case 27819:
                     {
-                        if (!target->GetMaxPower(POWER_MANA))
-                            return;
-
-                        uint32 uiBurnMana = urand(1800, 2200);
-                        uint32 uiCurrMana = target->GetPower(POWER_MANA);
-                        target->SetPower(POWER_MANA, uiBurnMana > uiCurrMana ? 0 : uiCurrMana - uiBurnMana);
-                        target->CastSpell(target, 27820, true);
+                        // 33% Mana Burn on normal mode, 50% on heroic mode
+                        int32 bpDamage = (int32)triggerTarget->GetPower(POWER_MANA) / (triggerTarget->GetMap()->GetDifficulty() ? 2 : 3);
+                        triggerTarget->ModifyPower(POWER_MANA, -bpDamage);
+                        triggerTarget->CastCustomSpell(triggerTarget, 27820, &bpDamage, NULL, NULL, true, NULL, this, triggerTarget->GetObjectGuid());
                         return;
                     }
 //                    // Controller Timer
@@ -2592,6 +2591,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 58589:                                 // Stoneclaw Totem VIII
                         target->CastSpell(target, 58583, true);
                         return;
+                    case 58600:                             // Restricted Flight Area
+                        target->MonsterWhisper(LANG_NO_FLY_ZONE, target, true);
+                        return;
                     case 58590:                                 // Stoneclaw Totem IX
                         target->CastSpell(target, 58584, true);
                         return;
@@ -2609,12 +2611,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
                     case 62061:                             // Festive Holiday Mount
-                    {
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
                             target->CastSpell(target, 25860, true, NULL, this);
                         return;
-                    }
                     case 62109:                             // Tails Up: Aura
                         target->setFaction(1990);           // Ambient (hostile)
                         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
@@ -3598,7 +3598,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->PlayDirectSound(14972, (Player *)target);
                     }
                     return;
-                case 10848:
                 case 27978:
                 case 40131:
                     if (apply)

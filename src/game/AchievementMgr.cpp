@@ -2823,8 +2823,7 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 {
     DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::SetCriteriaProgress(%u, %u) for (GUID:%u)", criteria->ID, changeValue, m_player->GetGUIDLow());
 
-<<<<<<< HEAD
-    uint32 max_value = GetCriteriaProgressMaxCounter(criteria);
+    uint32 max_value = GetCriteriaProgressMaxCounter(criteria, achievement);
 
     //Statistics for Dungeons & Raids Bosses slains have maxCounter = 1
     //But need count every creature killing
@@ -2837,12 +2836,8 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
         achievement->categoryId == 15062 )      // Fall of the Lich King
             max_value = 0;
 
-
     if (!max_value)
         max_value = std::numeric_limits<uint32>::max();
-=======
-    uint32 max_value = GetCriteriaProgressMaxCounter(criteria, achievement);
->>>>>>> b1208edeec3dd885784b5ba5ec72e5bfd366dc18
 
     // change value must be in allowed value range for SET/HIGHEST directly
     if (changeValue > max_value)
