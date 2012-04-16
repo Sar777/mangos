@@ -358,7 +358,7 @@ void Item::SaveToDB()
         case ITEM_BACKUP:
         {
             static SqlStatementID BackupInst;
-            SqlStatement stmt = CharacterDatabase.CreateStatement(BackupInst, "UPDATE item_instance SET owner_guid = 0, owner = ?, ItemID = ?, deleteDate = ? WHERE guid = ?");
+            SqlStatement stmt = CharacterDatabase.CreateStatement(BackupInst, "UPDATE item_instance SET owner_guid = 0, owner_guid2= ?, item_id = ?, deleteDate = ? WHERE guid = ?");
             stmt.PExecute(GetOwnerGuid().GetCounter(), GetEntry(), uint64(time(NULL)), GetGUIDLow());
             return;
         }
@@ -746,7 +746,7 @@ bool Item::UpdateItemSuffixFactor()
 
 void Item::SetState(ItemUpdateState state, Player* forplayer)
 {
-    if (uState == ITEM_NEW && state == ITEM_REMOVED)
+    if (uState == ITEM_NEW && (state == ITEM_REMOVED || state == ITEM_BACKUP))
     {
         // pretend the item never existed
         if (forplayer || GetOwnerGuid())

@@ -355,51 +355,60 @@ void WorldSession::SendExternalMails()
             std::string subject = fields[2].GetString();
             std::string message = fields[3].GetString();
             uint32 money = fields[4].GetUInt32();
-            uint32 ItemID = fields[5].GetUInt32();
-            uint32 ItemCount = fields[6].GetUInt32();
-            uint64 ItemGuid = fields[7].GetUInt64();
+            uint32 item_id = fields[5].GetUInt32();
+            uint32 item_count = fields[6].GetUInt32();
+            uint64 item_guid = fields[7].GetUInt64(); // for backup item
 
             Player *receiver = sObjectMgr.GetPlayer(receiver_guid);
 
             if (receiver != 0)
             {
-                debug_log("External Mail - Sending mail to %u, Item:%u", receiver_guid, ItemID);
-                if (!ItemGuid)
+                debug_log("External Mail - Sending mail to %u, Item:%u", receiver_guid, item_id);
+                if (!item_guid)
                 {
-                    if (ItemID != 0)
+                    if (item_id)
                     {
-                        Item* ToMailItem = Item::CreateItem(ItemID, ItemCount, receiver);
+                        Item* ToMailItem = Item::CreateItem(item_id, item_count, receiver);
                         ToMailItem->SaveToDB();
-                        MailDraft(subject, 0)
+                        MailDraft(subject, message)
                                 .AddItem(ToMailItem)
                                 .SetMoney(money)
                                 .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
                         }
                         else
                         {
-                            MailDraft(subject, 0)
+                            MailDraft(subject, message)
                                 .SetMoney(money)
                                 .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
-                        }
-                        CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id=%u", id);
+                        }                        
                 }
                 else
                 {
-                    Item* ToBackupItem = Item::CreateItem(ItemID, ItemCount, receiver);
-                    if (ToBackupItem)
+                    if (QueryResult *resultItems = CharacterDatabase.PQuery("SELECT data, text FROM item_instance WHERE guid ='%u'", item_guid))
                     {
-                        ToBackupItem->SaveToDB();
-                        MailDraft(subject, "Restore Item")
-                            .AddItem(ToBackupItem)
-                            .SendMailTo(MailReceiver(receiver), MailSender(), MAIL_CHECK_MASK_RETURNED);
-                        CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id=%u", id);
-                        //CharacterDatabase.PExecute("UPDATE mail_items SET item_guid = '%u'", ItemGuid, ToBackupItem->GetGUIDLow());
-                        //CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = %u", ToBackupItem->GetGUIDLow());
-                        // NOT SUPPORT
-                    }
+                        Field *fields2 = resultItems->Fetch();
+                        ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(item_id);
+                        if (!itemProto)
+                        {
+                            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item_guid);
+                            break;
+                        }
 
+                        Item *pItem = NewItemOrBag(itemProto);
+                        if (!pItem->LoadFromDB(item_guid, fields2, receiver_guid))
+                        {
+                            pItem->FSetState(ITEM_REMOVED);
+                            pItem->SaveToDB();              // it also deletes item object !
+                            break;
+                        }
+
+                        MailDraft(subject, message)
+                                .AddItem(pItem)
+                                .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+                    }
                 }
-            }
+                CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id = %u", id);
+            }            
         }
         while(result->NextRow());
         delete result;

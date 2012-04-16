@@ -7340,18 +7340,19 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
     if (!target)
         return false;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, ItemID FROM item_instance WHERE owner = '%u'", target);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id FROM item_instance WHERE owner_guid2 = '%u'", target);
     if (result)
     {
         do {
             Field *fields = result->Fetch();
-            uint64 itemguid = fields[0].GetUInt64();
-            uint32 itemid = fields[1].GetUInt32();
-            ShowListBackupItems(itemid, itemguid, GetSessionDbLocaleIndex());
+            uint64 item_guid = fields[0].GetUInt64();
+            uint32 item_id = fields[1].GetUInt32();
+            ShowListBackupItems(item_id, item_guid, GetSessionDbLocaleIndex());
 
         } while (result->NextRow());
         delete result;
     }
+    else PSendSysMessage("Error: No item is found possible to recover.");
     return true;
 }
 
@@ -7365,27 +7366,28 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
     if (!normalizePlayerName(playerName))
         return false;
 
-    uint32 itemguid = 18;
-    if (!ExtractUInt32(&args, itemguid))
+    uint32 item_guid;
+    if (!ExtractUInt32(&args, item_guid))
         return false;
 
     ObjectGuid target = sAccountMgr.GetPlayerGuidByName(playerName);
     if (!target)
         return false;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, ItemID, owner FROM item_instance WHERE guid = '%u' AND owner = '%u'", itemguid, target);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target);
     if (result)
     {
         do {
             Field *fields = result->Fetch();
-            uint64 lowguid = fields[0].GetUInt64();
-            uint32 itemid = fields[1].GetUInt32();
-            uint32 owner = fields[2].GetUInt32();
-            CharacterDatabase.PExecute("INSERT INTO mail_external (receiver, item, item_guid, item_count) VALUES (%u, %u, %u, 1)", owner, itemid, lowguid);
-            CharacterDatabase.PExecute("UPDATE item_instance SET owner = 0, ItemID = 0, deleteDate = NULL WHERE guid = %u", lowguid);
+            uint64 item_guid = fields[0].GetUInt64();
+            uint32 item_id = fields[1].GetUInt32();
+            uint32 owner_guid = fields[2].GetUInt32();
+            CharacterDatabase.PExecute("INSERT INTO mail_external (receiver, item, item_guid, item_count) VALUES (%u, %u, %u, 1)", owner_guid, item_id, item_guid);
+            CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid2 = NULL, item_id = NULL, deleteDate = NULL WHERE guid = %u", item_guid);
+            PSendSysMessage("Restored to item(%u).", item_guid);
         } while (result->NextRow());
         delete result;
     }
+    else PSendSysMessage("Error: Item(%u) not found.", item_guid);
     return true;
 }
-
