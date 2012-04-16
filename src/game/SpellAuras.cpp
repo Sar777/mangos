@@ -11016,8 +11016,10 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount)
             }
         }
     }
-    if (m_spellProto->Id == 25281) // Turkey Marker (do not change duration of timed achievement)
-        refresh=false;
+    // Turkey Marker
+    // Hack for not changing duration of timed achievement
+    if (m_spellProto->Id == 25281)
+        refresh = false;
 
     if (refresh)
         // Stack increased refresh duration

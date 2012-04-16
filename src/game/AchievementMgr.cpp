@@ -453,6 +453,10 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
 
         switch (type)
         {
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY: // reset days of daily quests complete
+                if(miscvalue1 == ACHIEVEMENT_CRITERIA_CONDITION_DAILY)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
             case ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE:     // have total statistic also not expected to be reset
             case ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE:    // have total statistic also not expected to be reset
                 if (achievementCriteria->healing_done.flag == miscvalue1 &&
@@ -462,10 +466,6 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA: // have total statistic also not expected to be reset
                 // reset only the criteria having the miscvalue1 condition
                 if (achievementCriteria->win_rated_arena.flag == miscvalue1)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY: // reset days of daily quests complete
-                if(miscvalue1 == ACHIEVEMENT_CRITERIA_CONDITION_UNK1)     // load ACHIEVEMENT_CRITERIA_CONDITION_UNK1 from dbc is not implement
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
@@ -965,11 +965,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     // some hardcoded requirements
                     switch(achievementCriteria->referredAchievement)
                     {
-                        case 204:              // WS Ironman (both)
-                        {
-                            // Not need checking for 3 flag captures without dying (Check Separately 3 captures and 0 deaths)
-                            break;
-                        }
                         case 1164:             // AV, own both mines (horde)
                         case 225:              // AV, own both mines (alliance)
                         {
@@ -1068,9 +1063,15 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if(achievementCriteria->kill_creature.creatureID != miscvalue1)
                     continue;
 
+                // those requirements couldn't be found in the dbc
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if(!data || !data->Meets(GetPlayer(),unit))
+                    continue;
+
                 // For custom cases
                 uint32 changeValue = miscvalue2;
 
+                // some hardcoded criterias
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 2189:                  // Artillery Expert (SotA)
@@ -1087,7 +1088,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         break;
                     }
-                    case 1871:
+                    case 1871:                  // Experienced Drake Rider (The Oculus)
                     {
                         VehicleKit* vehicleKit = GetPlayer()->GetVehicle();
                         if(!vehicleKit)
@@ -1133,11 +1134,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         break;
                     }
                 }
-
-                // those requirements couldn't be found in the dbc
-                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                if(!data || !data->Meets(GetPlayer(),unit))
-                continue;
 
                 change = changeValue;
                 progressType = PROGRESS_ACCUMULATE;
@@ -1212,6 +1208,17 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         counter++;
                 change = counter;
                 progressType = PROGRESS_HIGHEST;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
+            {
+                // skip at login
+                if(!miscvalue1)
+                    continue;
+
+                // Add one day of daily quests
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_IN_ZONE:
@@ -1420,6 +1427,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1 || miscvalue1 != achievementCriteria->be_spell_target.spellID)
                     continue;
 
+                // for special conditions
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 1757:          // Defense of the Ancients(alliance)
@@ -1469,7 +1477,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         // those requirements couldn't be found in the dbc
                         AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
 
-                        if(!data || !data->Meets(GetPlayer(),unit))
+                        if (!data)
+                            continue;
+                        if (!data->Meets(GetPlayer(),unit))
                             continue;
                         break;
                     }
@@ -1534,6 +1544,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 // speedup for non-login case
                 if(miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
                     continue;
+
                 // check item count
                 if(!miscvalue2)
                     continue;
@@ -1544,34 +1555,28 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
             {
-                //miscvalue1 - mapID
-                //miscvalue2 - ArenaType
+                //miscvalue1 = mapID
+                //miscvalue2 = ArenaType
                 if(!miscvalue1)
                     continue;
                 if(achievementCriteria->win_arena.mapID != miscvalue1)
                     continue;
 
-                //some hardcoded achievement
+                // Victories statistic for ArenaType
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 362:
-                    {
-                        if(miscvalue2!=ARENA_TYPE_5v5)
+                        if(miscvalue2 != ARENA_TYPE_5v5)
                             continue;
                         break;
-                    }
                     case 364:
-                    {
-                        if(miscvalue2!=ARENA_TYPE_3v3)
+                        if(miscvalue2 != ARENA_TYPE_3v3)
                             continue;
                         break;
-                    }
                     case 366:
-                    {
-                        if(miscvalue2!=ARENA_TYPE_2v2)
+                        if(miscvalue2 != ARENA_TYPE_2v2)
                             continue;
                         break;
-                    }
                 }
 
                 change = 1;
@@ -1580,38 +1585,31 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             {
-                //miscvalue1 - mapID
-                //miscvalue2 - ArenaType
+                //miscvalue1 = mapID
+                //miscvalue2 = ArenaType
                 if(!miscvalue1 || achievementCriteria->play_arena.mapID != miscvalue1)
                     continue;
 
-                //some hardcoded achievement
+                // Matches statistic for ArenaType
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 363:
-                    {
                         if(miscvalue2!=ARENA_TYPE_5v5)
                             continue;
                         break;
-                    }
                     case 365:
-                    {
                         if(miscvalue2!=ARENA_TYPE_3v3)
                             continue;
                         break;
-                    }
                     case 367:
-                    {
                         if(miscvalue2!=ARENA_TYPE_2v2)
                             continue;
                         break;
-                    }
                 }
 
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
-
             }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
                 // miscvalue1 contains the personal rating
@@ -1641,16 +1639,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 if (achievementCriteria->use_item.itemID != miscvalue1)
                     continue;
-                //some hardcoded achievement
-                switch(achievementCriteria->referredAchievement)
-                {
-                    case 1291:
-                    {
-                        if(!GetPlayer()->HasAura(45123))
-                            continue;
-                        break;
-                    }
-                }
                 // possible additional requirements
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
                 if (data && !data->Meets(GetPlayer(), unit, miscvalue1))
@@ -1864,7 +1852,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         break;
                     }
                     case 1259:                      // Not So Fast (WS)
-                    {
                         if (!bg || !unit)
                             continue;
                         if (bg->GetTypeID(true) != BATTLEGROUND_WS)
@@ -1872,11 +1859,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         if(!unit->HasAura(23451))
                             continue;
                         break;
-
-                    }
                     case 1764:                      // Drop It (SotA)
                     case 2190:                      // Drop It Now (SotA)
-                    {
                         if (!bg || !unit)
                             continue;
                         if (bg->GetTypeID(true) != BATTLEGROUND_SA)
@@ -1884,37 +1868,30 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         if(!unit->HasAura(52418))
                             continue;
                         break;
-                    }
                     case 1109:                      // 5v5 Honorable Kills
-                    {
                         if(!bg)
                             continue;
                         if(!bg->isArena())
                             continue;
-                        if(bg->GetArenaType()!=ARENA_TYPE_5v5)
+                        if(bg->GetArenaType() != ARENA_TYPE_5v5)
                             continue;
                         break;
-                    }
                     case 1110:                      // 3v3 Honorable Kills
-                    {
                         if(!bg)
                             continue;
                         if(!bg->isArena())
                             continue;
-                        if(bg->GetArenaType()!=ARENA_TYPE_3v3)
+                        if(bg->GetArenaType() != ARENA_TYPE_3v3)
                             continue;
                         break;
-                    }
                     case 1111:                      // 2v2 Honorable Kills
-                    {
                         if(!bg)
                             continue;
                         if(!bg->isArena())
                             continue;
-                        if(bg->GetArenaType()!=ARENA_TYPE_2v2)
+                        if(bg->GetArenaType() != ARENA_TYPE_2v2)
                             continue;
                         break;
-                    }
                     default:
                     {
                         // those requirements couldn't be found in the dbc
@@ -1980,6 +1957,57 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
+            {
+                // miscvalue1 = CreatureType
+                // miscvalue2 = Given XP
+                if(!miscvalue1)
+                    continue;
+
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 107:               // Creature kills
+                    {
+                        // Creature types is not stored in dbc
+                        if( (achievementCriteria->ID == 4948 && miscvalue1 == CREATURE_TYPE_BEAST) ||
+                            (achievementCriteria->ID == 4949 && miscvalue1 == CREATURE_TYPE_DEMON) ||
+                            (achievementCriteria->ID == 4950 && miscvalue1 == CREATURE_TYPE_DRAGONKIN) ||
+                            (achievementCriteria->ID == 4951 && miscvalue1 == CREATURE_TYPE_ELEMENTAL) ||
+                            (achievementCriteria->ID == 4952 && miscvalue1 == CREATURE_TYPE_GIANT) ||
+                            (achievementCriteria->ID == 4953 && miscvalue1 == CREATURE_TYPE_HUMANOID) ||
+                            (achievementCriteria->ID == 4954 && miscvalue1 == CREATURE_TYPE_MECHANICAL) ||
+                            (achievementCriteria->ID == 4955 && miscvalue1 == CREATURE_TYPE_UNDEAD) ||
+                            (achievementCriteria->ID == 4956 && miscvalue1 == CREATURE_TYPE_NOT_SPECIFIED) ||
+                            (achievementCriteria->ID == 4957 && miscvalue1 == CREATURE_TYPE_TOTEM) )
+                            break;
+                        continue;
+                    }
+                    case 108:               // Critters kills
+                    {
+                        if(miscvalue1 != CREATURE_TYPE_CRITTER)
+                            continue;
+                        break;
+                    }
+                    case 1197:              // Total kills
+                    {
+                        break;
+                    }
+                    case 1198:              // Total kills that grant experience or honor
+                    {
+                        if(miscvalue2 < 1)
+                            continue;
+                        break;
+                    }
+                    default:
+                    {
+                        continue;
+                    }
+                }
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_GAIN_REVERED_REPUTATION:
                 change = GetPlayer()->GetReputationMgr().GetReveredFactionCount();
                 progressType = PROGRESS_HIGHEST;
@@ -2052,90 +2080,68 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 BattleGround* bg=GetPlayer()->GetBattleGround();
 
+                // those requirements couldn't be found in the dbc
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 252:                   // With a Little Helper from My Friends (Event: Feast of Winter Veil)
                     {
                         Player* plr = GetPlayer();
-                        if(!((plr->GetAura(26274,EFFECT_INDEX_0))&&(achievementCriteria->ID==3829)) ||
-                        !((plr->GetAura(26157,EFFECT_INDEX_0))&&(achievementCriteria->ID==3826)) ||
-                        !((plr->GetAura(26272,EFFECT_INDEX_0))&&(achievementCriteria->ID==3827)) ||
-                        !((plr->GetAura(26273,EFFECT_INDEX_0))&&(achievementCriteria->ID==3828)) )
+                        if (!((plr->GetAura(26274,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3829)) ||
+                            !((plr->GetAura(26157,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3826)) ||
+                            !((plr->GetAura(26272,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3827)) ||
+                            !((plr->GetAura(26273,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3828)) )
                             continue;
                         break;
                     }
                     case 381:                   // World Honorable Kills
                     {
-                        // Including 4 Criterias:
-                        // 5492 - Eastern Kingdoms
-                        // 5493 - Kalimdor
-                        // 5494 - Outland
-                        // 5495 - Northrend
+                        // if at battleground
                         if(bg)
                             continue;
-                        if( (achievementCriteria->ID==5492 && GetPlayer()->GetMapId()==0) ||
-                            (achievementCriteria->ID==5493 && GetPlayer()->GetMapId()==1) ||
-                            (achievementCriteria->ID==5494 && GetPlayer()->GetMapId()==530) ||
-                            (achievementCriteria->ID==5495 && GetPlayer()->GetMapId()==571) )
+                        if( (achievementCriteria->ID == 5492 && GetPlayer()->GetMapId() == 0) ||    // Eastern Kingdoms
+                            (achievementCriteria->ID == 5493 && GetPlayer()->GetMapId() == 1) ||    // Kalimdor
+                            (achievementCriteria->ID == 5494 && GetPlayer()->GetMapId() == 530) ||  // Outland
+                            (achievementCriteria->ID == 5495 && GetPlayer()->GetMapId() == 571) )   // Northrend
                             break;
                         continue;
                     }
                     case 382:                   // BattleGround Honorable Kills
                     {
-                        // Including 6 Criterias:
-                        // 5499(AB), 5500(AV), 5501(WS), 5502(EY), 5503(SA), 13260(IC)
                         if(!bg)
                             continue;
-                        if( (achievementCriteria->ID==5499 && GetPlayer()->GetMapId()==529) ||
-                            (achievementCriteria->ID==5500 && GetPlayer()->GetMapId()==30) ||
-                            (achievementCriteria->ID==5501 && GetPlayer()->GetMapId()==489) ||
-                            (achievementCriteria->ID==5502 && GetPlayer()->GetMapId()==566) ||
-                            (achievementCriteria->ID==5503 && GetPlayer()->GetMapId()==607) ||
-                            (achievementCriteria->ID==13260 && GetPlayer()->GetMapId()==628) )
+                        if( (achievementCriteria->ID == 5499 && GetPlayer()->GetMapId() == 529) ||  // AB
+                            (achievementCriteria->ID == 5500 && GetPlayer()->GetMapId() == 30) ||   // AV
+                            (achievementCriteria->ID == 5501 && GetPlayer()->GetMapId() == 489) ||  // WS
+                            (achievementCriteria->ID == 5502 && GetPlayer()->GetMapId() == 566) ||  // EY
+                            (achievementCriteria->ID == 5503 && GetPlayer()->GetMapId() == 607) ||  // SA
+                            (achievementCriteria->ID == 13260 && GetPlayer()->GetMapId() == 628) )  // IC
                             break;
                         continue;
                     }
                     case 1112:                  // Eye of the Storm Honorable Kills
-                    {
-                        //Criteria 5510
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_EY))
                             continue;
                         break;
-                    }
                     case 1113:                  // Alterac Valley Honorable Kills
-                    {
-                        //Criteria 5507
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_AV))
                             continue;
                         break;
-                    }
                     case 1114:                  // Arathi Basin Honorable Kills
-                    {
-                        //Criteria 5508
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_AB))
                             continue;
                         break;
-                    }
                     case 1115:                  // Warsong Gulch Honorable Kills
-                    {
-                        //Criteria 5509
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_WS))
                             continue;
                         break;
-                    }
                     case 1261:                  // G.N.E.R.D. Rage
-                    {
                         if(!GetPlayer()->HasAura(48890))
                             continue;
                         break;
-                    }
                     case 1486:                  // Strand of the Ancients Honorable Kills
-                    {
-                        //Criteria 5511
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_SA))
                             continue;
                         break;
-                    }
                     case 3850:                  // Mowed Down (IoC)
                     {
                         //if not at bg
@@ -2150,29 +2156,27 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     }
                     case 3855:                  // Glaive Grave (IoC)
                     {
-                        //if not at bg
+                        // if not at bg
                         BattleGround* bg = GetPlayer()->GetBattleGround();
                         if (!bg)
                             continue;
                         if (bg->GetTypeID(true) != BATTLEGROUND_IC)
                            continue;
-                        //without deaths
+                        // without deaths
                         if(bg->GetPlayerScore(GetPlayer(),SCORE_DEATHS)!=0)
                             continue;
-                        //if not on vehicle
-                        if(!GetPlayer()->hasUnitState(UNIT_STAT_ON_VEHICLE))
+                        // if not on vehicle
+                        if(!GetPlayer()->GetVehicle())
                             continue;
-                        if(!((GetPlayer()->GetVehicle()) && (GetPlayer()->GetVehicle()->GetBase()->GetEntry() == 34802)))
+                        // if vehicle is Glaive Thrower
+                        if(GetPlayer()->GetVehicle()->GetBase()->GetEntry() != 34802)
                             continue;
                         break;
                     }
                     case 4779:                  // Isle of Conquests Honorable Kills
-                    {
-                        //Criteria 13261
                         if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_IC))
                             continue;
                         break;
-                    }
                 }
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
@@ -2180,9 +2184,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
+                // miscvalue1 = kills count
+                // miscvalue2 = creature entry
                 if (!miscvalue1)
                     continue;
-                // miscvalue2 = creature entry
 
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
@@ -2208,69 +2213,53 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 }
 
                 BattleGround* bg = GetPlayer()->GetBattleGround();
+
                 // some hardcoded requirements
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 231:                   // Wrecking Ball
-                    {
                         if(!bg || bg->GetPlayerScore(GetPlayer(),SCORE_DEATHS) != 0)
                             continue;
                         break;
-                    }
                     case 233:                   // Bloodthirsty Berserker
-                    {
                         if(!bg || !GetPlayer()->HasAura(24378))
                             continue;
                         break;
-                    }
                     case 1488:                  // World Killing Blows
                     {
-                        // Criterias:
-                        // 5512 - Eastern Kingdoms
-                        // 5530 - Kalimdor
-                        // 5531 - Burning Crusade Areas
-                        // 5532 - Northrend
                         if(bg)
                             continue;
-                        if( (achievementCriteria->ID==5512 && GetPlayer()->GetMapId()==0) ||
-                            (achievementCriteria->ID==5530 && GetPlayer()->GetMapId()==1) ||
-                            (achievementCriteria->ID==5531 && GetPlayer()->GetMapId()==530) ||
-                            (achievementCriteria->ID==5532 && GetPlayer()->GetMapId()==571) )
+                        if( (achievementCriteria->ID == 5512 && GetPlayer()->GetMapId() == 0) ||    // Eastern Kingdoms
+                            (achievementCriteria->ID == 5530 && GetPlayer()->GetMapId() == 1) ||    // Kalimdor
+                            (achievementCriteria->ID == 5531 && GetPlayer()->GetMapId() == 530) ||  // Burning Crusade Areas
+                            (achievementCriteria->ID == 5532 && GetPlayer()->GetMapId() == 571) )   // Northrend
                             break;
                         continue;
                     }
                     case 1490:                  // Arena Killing Blows
                     {
-                        // Criterias:
-                        // 5533 - Nagrand Arena
-                        // 5534 - Blade's Edge Arena
-                        // 5535 - Ruins of Lordaeron
-                        // 9165 - Dalaran Sewers
-                        // 9166 - Ring of Valor
                         if(!bg)
                             continue;
                         if(!bg->isArena())
                             continue;
-                        if( (achievementCriteria->ID==5533 && GetPlayer()->GetMapId()==559) ||
-                            (achievementCriteria->ID==5534 && GetPlayer()->GetMapId()==562) ||
-                            (achievementCriteria->ID==5535 && GetPlayer()->GetMapId()==572) ||
-                            (achievementCriteria->ID==9165 && GetPlayer()->GetMapId()==617) ||
-                            (achievementCriteria->ID==9166 && GetPlayer()->GetMapId()==618) )
+                        if( (achievementCriteria->ID == 5533 && GetPlayer()->GetMapId() == 559) ||  // Nagrand Arena
+                            (achievementCriteria->ID == 5534 && GetPlayer()->GetMapId() == 562) ||  // Blade's Edge Arena
+                            (achievementCriteria->ID == 5535 && GetPlayer()->GetMapId() == 572) ||  // Ruins of Lordaeron
+                            (achievementCriteria->ID == 9165 && GetPlayer()->GetMapId() == 617) ||  // Dalaran Sewers
+                            (achievementCriteria->ID == 9166 && GetPlayer()->GetMapId() == 618) )   // Ring of Valor
                             break;
                         continue;
                     }
                     case 1491:                  // Battleground Killing Blows
                     {
-                        // Including 6 Criterias:
-                        // 5436(AV), 5537(AB), 5538(WS), 5539(EY), 5540(SA), 13224(IC)
                         if(!bg)
                             continue;
-                        if( (achievementCriteria->ID==5436 && GetPlayer()->GetMapId()==30) ||
-                            (achievementCriteria->ID==5537 && GetPlayer()->GetMapId()==529) ||
-                            (achievementCriteria->ID==5538 && GetPlayer()->GetMapId()==489) ||
-                            (achievementCriteria->ID==5539 && GetPlayer()->GetMapId()==566) ||
-                            (achievementCriteria->ID==5540 && GetPlayer()->GetMapId()==607) ||
-                            (achievementCriteria->ID==13224 && GetPlayer()->GetMapId()==628) )
+                        if( (achievementCriteria->ID == 5436 && GetPlayer()->GetMapId() == 30) ||   // AV
+                            (achievementCriteria->ID == 5537 && GetPlayer()->GetMapId() == 529) ||  // AB
+                            (achievementCriteria->ID == 5538 && GetPlayer()->GetMapId() == 489) ||  // WS
+                            (achievementCriteria->ID == 5539 && GetPlayer()->GetMapId() == 566) ||  // EY
+                            (achievementCriteria->ID == 5540 && GetPlayer()->GetMapId() == 607) ||  // SA
+                            (achievementCriteria->ID == 13224 && GetPlayer()->GetMapId() == 628) )  // IC
                             break;
                         continue;
                     }
@@ -2282,26 +2271,27 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             continue;
                         if(!bg->isArena())
                             continue;
-                        if( (achievementCriteria->ID==5441 && bg->GetArenaType()==ARENA_TYPE_2v2) ||
-                            (achievementCriteria->ID==5442 && bg->GetArenaType()==ARENA_TYPE_3v3) ||
-                            (achievementCriteria->ID==5443 && bg->GetArenaType()==ARENA_TYPE_5v5) )
+                        if( (achievementCriteria->ID == 5441 && bg->GetArenaType() == ARENA_TYPE_2v2) ||
+                            (achievementCriteria->ID == 5442 && bg->GetArenaType() == ARENA_TYPE_3v3) ||
+                            (achievementCriteria->ID == 5443 && bg->GetArenaType() == ARENA_TYPE_5v5) )
                             break;
                         continue;
                     }
                     case 3856:                  // Demolition Derby (alliance)
                     case 4256:                  // Demolition Derby (horde)
                     {
-                        uint32 AcCrID = achievementCriteria->ID;
-                        if( ((AcCrID==11497 || AcCrID==12178) && miscvalue2==34802) ||  // Glaive Thrower
-                            ((AcCrID==11498 || AcCrID==12179) && miscvalue2==34775) ||  // Demolisher
-                            ((AcCrID==11500 || AcCrID==12181) && miscvalue2==34793) ||  // Catapult
-                            ((AcCrID==11501 || AcCrID==12182) && miscvalue2==34776) )   // Siege Engine
+                        uint32 AchCrID = achievementCriteria->ID;
+                        if( ((AchCrID == 11497 || AchCrID == 12178) && miscvalue2 == 34802) ||  // Glaive Thrower
+                            ((AchCrID == 11498 || AchCrID == 12179) && miscvalue2 == 34775) ||  // Demolisher
+                            ((AchCrID == 11500 || AchCrID == 12181) && miscvalue2 == 34793) ||  // Catapult
+                            ((AchCrID == 11501 || AchCrID == 12182) && miscvalue2 == 34776) )   // Siege Engine
                             break;
                         continue;
                     }
                 }
 
-                SetCriteriaProgress(achievementCriteria, achievement, miscvalue1, PROGRESS_ACCUMULATE);
+                change = miscvalue1;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
@@ -2332,8 +2322,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                                                          // WS, capture 3 flags without dying
                         if (achievementCriteria->referredAchievement == 204)
                         {
-                            //if (!(bg->GetPlayerScore(GetPlayer(), SCORE_DEATHS) == 0 && bg->GetPlayerScore(GetPlayer(), SCORE_FLAG_CAPTURES) >= 3))
-                            if(!bg->GetPlayerScore(GetPlayer(), SCORE_DEATHS)==0)
+                            if (!(bg->GetPlayerScore(GetPlayer(), SCORE_DEATHS) == 0 && bg->GetPlayerScore(GetPlayer(), SCORE_FLAG_CAPTURES) >= 3))
                                 continue;
                         }
                         break;
@@ -2375,7 +2364,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                             }
                             case 216:                    // EY, capture 3 flags without dying
                             {
-                                if(!bg->GetPlayerScore(GetPlayer(), SCORE_DEATHS)==0)
+                                if (!(bg->GetPlayerScore(GetPlayer(), SCORE_DEATHS) == 0 && bg->GetPlayerScore(GetPlayer(), SCORE_FLAG_CAPTURES) >= 3))
                                     continue;
                                 break;
                             }
@@ -2441,75 +2430,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_STAT:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_RATING:
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
-            {
-                //Add 1 day of daily quest
-                if(!miscvalue1)
-                    continue;
-
-                change = 1;
-                progressType = PROGRESS_ACCUMULATE;
-                break;
-
-            }
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
-            {
-                if(!miscvalue1)
-                    continue;
-                // miscvalue2==1 Any kill
-                // miscvalue2==2 Kill with XP
-                if(!miscvalue2)
-                    continue;
-                switch(achievementCriteria->referredAchievement)
-                {
-                    case 107:               // Creature kills
-                    {
-                        // Criterias: maybe in wrong places
-                        // 4948 - Beasts        4949 - Demon
-                        // 4950 - Dragonkin     4951 - Elemental
-                        // 4952 - Giant         4953 - HUmanoid
-                        // 4954 - Mechanical    4955 - Undead
-                        // 4956 - Unspecified   4957 - Totems
-                        if( (achievementCriteria->ID==4948 && miscvalue1==CREATURE_TYPE_BEAST) ||
-                            (achievementCriteria->ID==4949 && miscvalue1==CREATURE_TYPE_DEMON) ||
-                            (achievementCriteria->ID==4950 && miscvalue1==CREATURE_TYPE_DRAGONKIN) ||
-                            (achievementCriteria->ID==4951 && miscvalue1==CREATURE_TYPE_ELEMENTAL) ||
-                            (achievementCriteria->ID==4952 && miscvalue1==CREATURE_TYPE_GIANT) ||
-                            (achievementCriteria->ID==4953 && miscvalue1==CREATURE_TYPE_HUMANOID) ||
-                            (achievementCriteria->ID==4954 && miscvalue1==CREATURE_TYPE_MECHANICAL) ||
-                            (achievementCriteria->ID==4955 && miscvalue1==CREATURE_TYPE_UNDEAD) ||
-                            (achievementCriteria->ID==4956 && miscvalue1==CREATURE_TYPE_NOT_SPECIFIED) ||
-                            (achievementCriteria->ID==4957 && miscvalue1==CREATURE_TYPE_TOTEM) )
-                            break;
-                        continue;
-                    }
-                    case 108:               // Critters kills
-                    {
-                        // Criteria 4958
-                        if(miscvalue1!=CREATURE_TYPE_BEAST && miscvalue1!=CREATURE_TYPE_CRITTER)
-                            continue;
-                        break;
-                    }
-                    case 1197:              // Total kills
-                    {
-                        break;
-                    }
-                    case 1198:              // Total kills that grant experience or honor
-                    {
-                        if(miscvalue2!=2)
-                            continue;
-                        break;
-                    }
-                    default:
-                    {
-                        continue;
-                    }
-                }
-
-                change = 1;
-                progressType = PROGRESS_ACCUMULATE;
-                break;
-            }
             // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:

@@ -597,10 +597,14 @@ bool ChatHandler::HandleGonameCommand(char* args)
         target->InterruptTaxiFlying();
 
         // to point to see at target with same orientation
-        float x,y,z;
-        target->GetContactPoint(_player,x,y,z);
+        float x, y, z;
 
-        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE);
+        if (_player->GetMapId() == target->GetMapId())
+            target->GetContactPoint(_player, x, y, z);
+        else
+            target->GetPosition(x, y, z);
+
+        _player->TeleportTo(target->GetMapId(), x, y, z + 0.5f, _player->GetAngle(target), TELE_TO_GM_MODE);
     }
     else
     {
@@ -618,6 +622,8 @@ bool ChatHandler::HandleGonameCommand(char* args)
         bool in_flight;
         if (!Player::LoadPositionFromDB(target_guid, map,x,y,z,o,in_flight))
             return false;
+
+        z += 0.5f;
 
         return HandleGoHelper(_player, map, x, y, &z);
     }

@@ -824,7 +824,13 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
                     sLog.outError("Player %s has clicked SOTA Relic without Relic gate being destroyed", player->GetName());
                     return;
                 }
-
+                //Achievement Storm the Beach (1310)
+                for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                {
+                    if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+                        if (plr->GetTeam() != defender)
+                            plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, BG_SA_STORM_THE_BEACH);
+                }
                 if (Phase == SA_ROUND_ONE) // Victory at first round
                 {
                     RoundScores[0].winner = GetDefender() == ALLIANCE ? HORDE : ALLIANCE;

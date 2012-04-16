@@ -6963,7 +6963,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             // and those in a lifetime
             ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
-			UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, 1);
+            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, 1);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS, pVictim->getClass());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, pVictim->getRace());
         }
@@ -21813,7 +21813,8 @@ void Player::SendAurasForTarget(Unit *target)
 
 void Player::SetDailyQuestStatus( uint32 quest_id )
 {
-    for(uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    uint32 quest_daily_idx;
+    for(quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
     {
         if(!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
         {
@@ -21822,6 +21823,9 @@ void Player::SetDailyQuestStatus( uint32 quest_id )
             break;
         }
     }
+    // if first daily quest at curent day
+    if (!quest_daily_idx)
+        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY, 1);
 }
 
 void Player::SetWeeklyQuestStatus( uint32 quest_id )
@@ -21838,15 +21842,17 @@ void Player::SetMonthlyQuestStatus(uint32 quest_id)
 
 void Player::ResetDailyQuestStatus()
 {
-    int32 m_dailyquestCount=0;
-    for(uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    uint32 dailyQuestCount = 0;
+    for(uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)   
     {
         if(GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
-            ++m_dailyquestCount;
+            ++dailyQuestCount;
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,0);
     }
-    if(m_dailyquestCount==0)
-        GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY,ACHIEVEMENT_CRITERIA_CONDITION_UNK1);
+
+    // Reset daily_quest_daily if there are no daily quest last day
+    if(!dailyQuestCount)
+        GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY,ACHIEVEMENT_CRITERIA_CONDITION_DAILY);
 
     // DB data deleted in caller
     m_DailyQuestChanged = false;
@@ -22329,7 +22335,7 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
             {
                 KilledMonster(normalInfo, pVictim->GetObjectGuid());
                 if(uint32 normalType = normalInfo->type)
-                    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp<1 ? 1 : 2);
+                    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp);
             }
     }
 }
