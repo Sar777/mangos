@@ -23,6 +23,7 @@
 #include "WorldPacket.h"
 #include "Database/DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
+#include "World.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {

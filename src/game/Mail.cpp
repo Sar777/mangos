@@ -391,15 +391,15 @@ void WorldSession::SendExternalMails()
                         if (!itemProto)
                         {
                             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item_guid);
-                            break;
+                            continue;
                         }
 
                         Item *pItem = NewItemOrBag(itemProto);
-                        if (!pItem->LoadFromDB(item_guid, fields2, receiver_guid))
+                        if (pItem && !pItem->LoadFromDB(item_guid, fields2, receiver_guid))
                         {
                             pItem->FSetState(ITEM_REMOVED);
                             pItem->SaveToDB();              // it also deletes item object !
-                            break;
+                            continue;
                         }
 
                         MailDraft(subject, message)
@@ -408,7 +408,7 @@ void WorldSession::SendExternalMails()
                     }
                 }
                 CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id = %u", id);
-            }            
+            }
         }
         while(result->NextRow());
         delete result;
