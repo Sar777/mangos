@@ -7338,7 +7338,10 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
 
     ObjectGuid target = sAccountMgr.GetPlayerGuidByName(playerName);
     if (!target)
-        return false;
+    {
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id FROM item_instance WHERE owner_guid2 = '%u'", target);
     if (result)
