@@ -7321,9 +7321,9 @@ void ChatHandler::ShowListBackupItems(uint32 itemId, uint32 itemguid, int loc_id
     sObjectMgr.GetItemLocaleStrings(itemProto->ItemId, loc_idx, &name);
 
     if (m_session)
-        PSendSysMessage(LANG_BACKUP_ITEM_LIST_CHAT, itemguid, itemId, name.c_str());
+        PSendSysMessage(LANG_BACKUPITEM_LIST_CHAT, itemguid, itemId, name.c_str());
     else
-        PSendSysMessage(LANG_BACKUP_ITEM_LIST_CONSOLE, itemguid, itemId, name.c_str());
+        PSendSysMessage(LANG_BACKUPITEM_LIST_CONSOLE, itemguid, itemId, name.c_str());
 }
 
 bool ChatHandler::HandleBackupItemListCommand(char* args)
@@ -7352,7 +7352,7 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
         } while (result->NextRow());
         delete result;
     }
-    else PSendSysMessage("Error: No item is found possible to recover.");
+    else PSendSysMessage(LANG_BACKUPITEM_LIST_ERR);
     return true;
 }
 
@@ -7372,7 +7372,10 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
 
     ObjectGuid target = sAccountMgr.GetPlayerGuidByName(playerName);
     if (!target)
-        return false;
+    {
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target);
     if (result)
@@ -7384,10 +7387,45 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
             uint32 owner_guid = fields[2].GetUInt32();
             CharacterDatabase.PExecute("INSERT INTO mail_external (receiver, item, item_guid, item_count) VALUES (%u, %u, %u, 1)", owner_guid, item_id, item_guid);
             CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid2 = NULL, item_id = NULL, deleteDate = NULL WHERE guid = %u", item_guid);
-            PSendSysMessage("Restored to item(%u).", item_guid);
+            PSendSysMessage(LANG_BACKUPITEM_RESTORE_OK);
         } while (result->NextRow());
         delete result;
     }
-    else PSendSysMessage("Error: Item(%u) not found.", item_guid);
+    else PSendSysMessage(LANG_BACKUPITEM_RESTORE_ERR);
+    return true;
+}
+
+bool ChatHandler::HandleBackupItemAllRestoreCommand(char* args)
+{
+    if (!*args)
+        return false;
+
+    char* cplayerName = ExtractArg(&args);
+    std::string playerName = cplayerName;
+    if (!normalizePlayerName(playerName))
+        return false;
+
+    ObjectGuid target = sAccountMgr.GetPlayerGuidByName(playerName);
+    if (!target)
+    {
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target);
+    if (result)
+    {
+        do {
+            Field *fields = result->Fetch();
+            uint64 item_guid = fields[0].GetUInt64();
+            uint32 item_id = fields[1].GetUInt32();
+            uint32 owner_guid = fields[2].GetUInt32();
+            CharacterDatabase.PExecute("INSERT INTO mail_external (receiver, item, item_guid, item_count) VALUES (%u, %u, %u, 1)", owner_guid, item_id, item_guid);
+            CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid2 = NULL, item_id = NULL, deleteDate = NULL WHERE guid = %u", item_guid);
+            PSendSysMessage(LANG_BACKUPITEM_RESTORE_OK);
+        } while (result->NextRow());
+        delete result;
+    }
+    else PSendSysMessage(LANG_BACKUPITEM_LIST_ERR);
     return true;
 }

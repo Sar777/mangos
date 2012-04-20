@@ -424,6 +424,7 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         { "list",           SEC_GAMEMASTER,     false, &ChatHandler::HandleBackupItemListCommand,      "", NULL },
         { "restore",        SEC_GAMEMASTER,     false, &ChatHandler::HandleBackupItemRestoreCommand,   "", NULL },
+        { "allrestore",     SEC_GAMEMASTER,     false, &ChatHandler::HandleBackupItemAllRestoreCommand,"", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 

@@ -371,15 +371,15 @@ void WorldSession::SendExternalMails()
                         Item* ToMailItem = Item::CreateItem(item_id, item_count, receiver);
                         ToMailItem->SaveToDB();
                         MailDraft(subject, message)
-                                .AddItem(ToMailItem)
-                                .SetMoney(money)
-                                .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
-                        }
-                        else
-                        {
-                            MailDraft(subject, message)
-                                .SetMoney(money)
-                                .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+                            .AddItem(ToMailItem)
+                            .SetMoney(money)
+                            .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+                    }
+                    else
+                    {
+                        MailDraft(subject, message)
+                           .SetMoney(money)
+                           .SendMailTo(MailReceiver(receiver), MailSender(receiver, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
                         }                        
                 }
                 else

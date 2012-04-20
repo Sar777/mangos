@@ -631,6 +631,7 @@ class MANGOS_DLL_SPEC ChatHandler
 
         bool HandleBackupItemListCommand(char* args);
         bool HandleBackupItemRestoreCommand(char* args);
+        bool HandleBackupItemAllRestoreCommand(char* args);
 
         //! Development Commands
         bool HandleSaveAllCommand(char* args);

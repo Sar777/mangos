@@ -814,6 +814,7 @@ enum MangosStrings
     LANG_GUILD_INITIATE                 = 815,
     LANG_FAIL_ENTER_SPECTRAL_REALM      = 816,
     LANG_NO_FLY_ZONE                    = 817,
+
     // Room for in-game strings           818-999 not used
 
     // Level 4 (CLI only commands)
@@ -944,7 +945,13 @@ enum MangosStrings
     LANG_AHBOT_ITEMS_RATIO              = 1191,
     LANG_MOVEGENS_EFFECT                = 1192,
     LANG_GEARSCORE                      = 1193,
-    // Room for more level 3              1194-1199 not used
+    // Backup items
+    LANG_BACKUPITEM_RESTORE_ERR         = 1194,
+    LANG_BACKUPITEM_RESTORE_OK          = 1195,
+    LANG_BACKUPITEM_LIST_ERR            = 1196,
+    LANG_BACKUPITEM_LIST_CHAT           = 1197,
+    LANG_BACKUPITEM_LIST_CONSOLE        = 1198,
+    // Room for more level 3              1199-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -970,9 +977,7 @@ enum MangosStrings
     LANG_NPC_EVENTAI_PHASE              = 1506,
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
-    LANG_BACKUP_ITEM_LIST_CHAT          = 1509,
-    LANG_BACKUP_ITEM_LIST_CONSOLE       = 1510,
-    // Room for more Level 2              1511-1599 not used
+    // Room for more Level 2              1509-1599 not used
 
     // FREE IDS                           1600-9999
 
