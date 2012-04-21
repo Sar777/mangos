@@ -7343,7 +7343,7 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id FROM item_instance WHERE owner_guid2 = '%u'", target);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
@@ -7380,7 +7380,7 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target.GetCounter());
     if (result)
     {
         do {
@@ -7415,7 +7415,7 @@ bool ChatHandler::HandleBackupItemAllRestoreCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
