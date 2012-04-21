@@ -363,7 +363,7 @@ void WorldSession::SendExternalMails()
 
             if (receiver != 0)
             {
-                debug_log("External Mail - Sending mail to %u, Item:%u", receiver_guid, item_id);
+                debug_log("External Mail - Sending mail to %u, Item: %u", receiver_guid.GetCounter(), item_id);
                 if (!item_guid)
                 {
                     if (item_id)
