@@ -439,7 +439,7 @@ m_isPersistent(false), m_in_use(0), m_spellAuraHolder(holder)
     }
 
     // Start periodic on next tick or at aura apply
-    if (!(spellproto->AttributesEx5 & SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY))
+    if (!spellproto->HasAttribute(SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY))
         m_periodicTimer = m_modifier.periodictime;
 
     // Calculate CrowdControl damage start value
@@ -921,7 +921,7 @@ void Aura::AreaAuraUpdate(uint32 diff)
         bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
         if ( !caster || caster->hasUnitState(UNIT_STAT_ISOLATED) ||
             !realcaster->IsInMap(target)      ||
-            !caster->IsWithinDistInMap(target, m_radius)      ||
+            !caster->IsWithinDistInMap(target, m_radius)        ||
             !caster->HasAura(GetId(), GetEffIndex())            ||
             caster->IsFriendlyTo(target) != needFriendly
            )
@@ -1322,6 +1322,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             entry->EffectSpellClassMask[GetEffIndex()] = ClassFamilyMask::create<CF_SHAMAN_FLAMETONGUE_WEAPON>();
         }
     }
+
     ((Player*)GetTarget())->AddSpellMod(this, apply);
 
     ReapplyAffectedPassiveAuras();
@@ -1448,8 +1449,22 @@ void Aura::TriggerSpell()
 //                    case 23792: break;
 //                    // Axe Flurry
 //                    case 24018: break;
-//                    // Mark of Arlokk
-//                    case 24210: break;
+                    case 24210:                             // Mark of Arlokk
+                    {
+                        // Replacement for (classic) spell 24211 (doesn't exist anymore)
+                        std::list<Creature*> lList;
+
+                        // Search for all Zulian Prowler in range
+                        MaNGOS::AllCreaturesOfEntryInRangeCheck check(triggerTarget, 15101, 15.0f);
+                        MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(lList, check);
+                        Cell::VisitGridObjects(triggerTarget, searcher, 15.0f);
+
+                        for (std::list<Creature*>::const_iterator itr = lList.begin(); itr != lList.end(); ++itr)
+                            if ((*itr)->isAlive())
+                                (*itr)->AddThreat(triggerTarget, float(5000));
+
+                        return;
+                    }
 //                    // Restoration
 //                    case 24379: break;
 //                    // Happy Pet
@@ -2625,10 +2640,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 63322:                             // Saronite Vapors
                         if (Unit* caster = GetCaster())
                         {
-                            int32 damage = 50 << GetStackAmount();
-                            target->CastCustomSpell(target, 63338, &damage, 0, 0, true, 0, 0, caster->GetObjectGuid()); // damage spell
+                            int32 damage = 100 << GetStackAmount();
+                            caster->CastCustomSpell(target, 63338, &damage, 0, 0, true); // damage spell
                             damage = damage >> 1;
-                            target->CastCustomSpell(target, 63337, &damage, 0, 0, true); // manareg spell
+                            caster->CastCustomSpell(target, 63337, &damage, 0, 0, true); // manareg spell
                         }
                         return;
                     case 63624:                             // Learn a Second Talent Specialization
@@ -3753,6 +3768,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             break;
         case SPELLFAMILY_HUNTER:
+        {
             switch(GetId())
             {
                 case 34477:                                 // Misdirection, main spell
@@ -3769,6 +3785,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        }
         case SPELLFAMILY_PALADIN:
             switch(GetId())
             {
@@ -5727,7 +5744,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     if(!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     if (apply)
     {
@@ -5766,7 +5783,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     uint32 misc  = m_modifier.m_miscvalue;
     Unit *target = GetTarget();
 
-    if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+    if (apply && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
     {
         uint32 mechanic = 1 << (misc-1);
 
@@ -5848,7 +5865,7 @@ void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
 {
     uint32 mechanic  = m_modifier.m_miscvalue;
 
-    if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+    if (apply && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
         GetTarget()->RemoveAurasAtMechanicImmunity(mechanic,GetId());
 
     // check implemented in Unit::IsImmuneToSpell and Unit::IsImmuneToSpellEffect
@@ -5878,7 +5895,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
 
 void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
 {
-    if (apply && Real && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+    if (apply && Real && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
     {
         Unit::AuraList const& auraList = GetTarget()->GetAurasByType(AuraType(m_modifier.m_miscvalue));
         for(Unit::AuraList::const_iterator itr = auraList.begin(); itr != auraList.end();)
@@ -6602,10 +6619,10 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 // Rip
                 if (spellProto->SpellFamilyFlags.test<CF_DRUID_RIP_BITE>())
                 {
-                    // 0.01*$AP*cp
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         break;
 
+                    // 0.01*$AP*cp
                     uint8 cp = caster->GetComboPoints();
 
                     // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
@@ -7008,7 +7025,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     }
 
     //recalculate current HP/MP after applying aura modifications (only for spells with 0x10 flag)
-    if ((m_modifier.m_miscvalue == STAT_STAMINA) && (maxHPValue > 0) && (GetSpellProto()->Attributes & 0x10))
+    if (m_modifier.m_miscvalue == STAT_STAMINA && maxHPValue > 0 && GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY))
     {
         // newHP = (curHP / maxHP) * newMaxHP = (newMaxHP * curHP) / maxHP -> which is better because no int -> double -> int conversion is needed
         // Multiplication of large numbers cause uint32 overflow so using trick
@@ -7263,8 +7280,10 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
         switch (GetId())
         {
             case 60430:                                         // Molten Fury
+            case 61254:                                         // Will of Sartharion
             case 64193:                                         // Heartbreak
             case 65737:                                         // Heartbreak
+            case 64582:                                         // Emergency Mode (Ulduar - Mimiron)
                 target->SetHealth(target->GetMaxHealth());
                 break;
             default:
@@ -8003,7 +8022,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             for (Unit::SpellAuraHolderMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
             {
                 SpellEntry const *spellInfo = itr->second->GetSpellProto();
-                if ((itr->second->IsPassive() && (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT)
+                if ((itr->second->IsPassive() && spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT)
                     && (spellInfo->StancesNot & (1<<(form-1)))) || (spellInfo->Id == 66530 && form == FORM_DIREBEAR))  // Improved Barkskin must not affect Dire Bear Form, but does not have correct data in dbc
                 {
                     target->RemoveAurasDueToSpell(itr->second->GetId());
@@ -8124,7 +8143,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsPassiveSpell(spellInfo))
                     continue;
-                if ((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && spellInfo->StancesNot & (1<<(form-1)))
+                if (spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && (spellInfo->StancesNot & (1<<(form-1))))
                     target->CastSpell(target, itr->first, true, NULL, this);
             }
         }
@@ -8701,7 +8720,7 @@ void Aura::PeriodicTick()
             if (GetSpellProto()->Id == 50344) // Dream Funnel Oculus drake spell
                 damageInfo.damage = uint32(pCaster->GetMaxHealth()*0.05f);
 
-            target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !(GetSpellProto()->AttributesEx & SPELL_ATTR_EX_CANT_REFLECTED));
+            target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u abs is %u",
                 GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, GetId(), damageInfo.absorb);
@@ -8798,7 +8817,7 @@ void Aura::PeriodicTick()
             if (GetAffectiveCasterGuid().IsPlayer())
                 damageInfo.damage -= target->GetSpellDamageReduction(damageInfo.damage);
 
-            target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !(spellProto->AttributesEx & SPELL_ATTR_EX_CANT_REFLECTED));
+            target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
                 GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, GetId(),damageInfo.absorb);
@@ -10523,8 +10542,8 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
 
     m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
                               m_spellProto->Stances &&
-                            !(m_spellProto->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
-                            !(m_spellProto->Attributes & SPELL_ATTR_NOT_SHAPESHIFT));
+                              !m_spellProto->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
+                              !m_spellProto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT));
 
     Unit* unitCaster = caster && caster->isType(TYPEMASK_UNIT) ? (Unit*)caster : NULL;
 
@@ -10552,6 +10571,7 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
         case 55166:                                         // Tidal Force
         case 58914:                                         // Kill Command (pet part)
         case 62519:                                         // Attuned to Nature
+        case 63050:                                         // Sanity (Ulduar - Yogg Saron)
         case 64455:                                         // Feral Essence
         case 66228:                                         // Nether Power (ToC: Lord Jaraxxus)
         case 67106:                                         // Nether Power (ToC: Lord Jaraxxus)
@@ -10669,7 +10689,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     // set infinity cooldown state for spells
     if (caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_spellProto->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+        if (m_spellProto->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
         {
             Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : NULL;
             ((Player*)caster)->AddSpellAndCategoryCooldowns(m_spellProto,castItem ? castItem->GetEntry() : 0, NULL,true);
@@ -10900,7 +10920,8 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
                     break;
                 }
             }
-            // this was last holder
+
+            // this has been last aura
             if (!found)
                 m_target->ModifyAuraState(AuraState(removeState), false);
         }
@@ -10908,7 +10929,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         // reset cooldown state for spells
         if (caster && caster->GetTypeId() == TYPEID_PLAYER)
         {
-            if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
+            if (GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
                 // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
                 ((Player*)caster)->SendCooldownEvent(GetSpellProto());
         }
@@ -11295,6 +11316,23 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     else
                         return;
+                    break;
+                }
+                case 62056:                                 // Stone Grip (Kologarn encounter)
+                case 63985:                                 // Stone Grip (Kologarn encounter) heroic
+                {
+                    if (!apply)
+                    {
+                        spellId1 = GetId() == 62056 ? 64290 : 64292;
+                    }
+                }
+                case 62546:                                 // Scorch (Ignis encounter)
+                case 63474:                                 // Scorch (Ignis encounter) heroic
+                {
+                    if (apply)
+                    {
+                        spellId1 = 62551;
+                    }
                     break;
                 }
                 case 62619:                                 // Potent Pheromones (Freya encounter)

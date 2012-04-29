@@ -470,7 +470,7 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_RATE_POWER_RAGE_LOSS, "Rate.Rage.Loss", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME, "Rate.RunicPower.Income", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_LOSS,"Rate.RunicPower.Loss",   1.0f);
-    setConfig(CONFIG_FLOAT_RATE_POWER_FOCUS,             "Rate.Focus",  1.0f);
+    setConfig(CONFIG_FLOAT_RATE_POWER_FOCUS,             "Rate.Focus", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_POWER_ENERGY,            "Rate.Energy", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_SKILL_DISCOVERY,      "Rate.Skill.Discovery",      1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_ITEM_PERCENT,       "Rate.Drop.Item.Percent",       1.0f);
@@ -1270,9 +1270,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Vehicle Accessories...");
     sObjectMgr.LoadVehicleAccessories();
 
-    sLog.outString( "Loading Creature Respawn Data..." );   // must be after PackInstances()
-    sMapPersistentStateMgr.LoadCreatureRespawnTimes();
-
     sLog.outString( "Loading Gameobject Data..." );
     sObjectMgr.LoadGameObjects();
 
@@ -1313,7 +1310,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Creating map persistent states for non-instanceable maps..." );   // must be after PackInstances(), LoadCreatures(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
     sMapPersistentStateMgr.InitWorldMaps();
 
-    sLog.outString( "Loading Creature Respawn Data..." );   // must be after LoadCreatures(), and sMapPersistentStateMgr.InitWorldMaps()
+    sLog.outString( "Loading Creature Respawn Data..." );   // must be after LoadCreatures(), and sMapPersistentStateMgr.InitWorldMaps() , and PackInstances()
     sMapPersistentStateMgr.LoadCreatureRespawnTimes();
 
     sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after LoadGameObjects(), and sMapPersistentStateMgr.InitWorldMaps()
