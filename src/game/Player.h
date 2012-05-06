@@ -1297,9 +1297,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool update, bool in_characterInventoryDB = false);
                                                             // in trade, guild bank, mail....
         void RemoveItemDependentAurasAndCasts( Item * pItem );
-        void DestroyItem( uint8 bag, uint8 slot, bool update );
-        void DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check = false, bool inBankAlso = false);
-        void DestroyItemCount( Item* item, uint32& count, bool update );
+        void DestroyItem(uint8 bag, uint8 slot, bool update, bool backup = false);
+        void DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check = false, bool inBankAlso = false, bool backup = false);
+        void DestroyItemCount(Item* item, uint32& count, bool update, bool backup = false);
         void DestroyConjuredItems( bool update );
         void DestroyZoneLimitedItem( bool update, uint32 new_zone );
         void SplitItem( uint16 src, uint16 dst, uint32 count );

@@ -268,13 +268,13 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if(count)
+    if (count)
     {
         uint32 i_count = count;
-        _player->DestroyItemCount( pItem, i_count, true );
+        _player->DestroyItemCount(pItem, i_count, true, true);
     }
     else
-        _player->DestroyItem( bag, slot, true );
+        _player->DestroyItem(bag, slot, true, true);
 }
 
 // Only _static_ data send in this packet !!!

@@ -1555,7 +1555,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, int32 _damage, SpellEntr
     switch (spellInfo->Id)
     {
         case 72999:                         // Shadow Prisen
-            damageInfo->damage = damage;
+            damageInfo->damage = _damage;
             return;
         default:
             break;

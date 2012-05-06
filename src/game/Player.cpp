@@ -12335,7 +12335,7 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
         m_itemSoulboundTradeable.push_back(pLastItem);
 }
 
-void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
+void Player::DestroyItem(uint8 bag, uint8 slot, bool update, bool backup /*= false*/)
 {
     Item *pItem = GetItemByPos( bag, slot );
     if ( pItem )
@@ -12424,7 +12424,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         pItem->SetSlot( NULL_SLOT );
         if (sWorld.getConfig(CONFIG_BOOL_BACKUP_ITEMS_ENABLE))
         {
-            if (pItem->IsBackupItem())
+            if (pItem->IsBackupItem() && backup)
             {                
                 pItem->SetState(ITEM_BACKUP, this);
                 return;
@@ -12434,7 +12434,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     }
 }
 
-void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check, bool inBankAlso)
+void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check, bool inBankAlso, bool backup /*= false*/)
 {
     DEBUG_LOG("STORAGE: DestroyItemCount item = %u, count = %u", item, count);
     uint32 remcount = 0;
@@ -12450,7 +12450,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                 {
                     // all items in inventory can unequipped
                     remcount += pItem->GetCount();
-                    DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
+                    DestroyItem(INVENTORY_SLOT_BAG_0, i, update, backup);
 
                     if (remcount >= count)
                         return;
@@ -12679,26 +12679,26 @@ void Player::DestroyConjuredItems( bool update )
                 DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
 }
 
-void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
+void Player::DestroyItemCount(Item* pItem, uint32 &count, bool update, bool backup /*= false*/)
 {
     if(!pItem)
         return;
 
-    DEBUG_LOG( "STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem->GetGUIDLow(),pItem->GetEntry(), count);
+    DEBUG_LOG("STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem->GetGUIDLow(),pItem->GetEntry(), count);
 
-    if ( pItem->GetCount() <= count )
+    if (pItem->GetCount() <= count)
     {
         count -= pItem->GetCount();
 
-        DestroyItem( pItem->GetBagSlot(),pItem->GetSlot(), update);
+        DestroyItem(pItem->GetBagSlot(),pItem->GetSlot(), update, backup);
     }
     else
     {
-        ItemRemovedQuestCheck( pItem->GetEntry(), count);
-        pItem->SetCount( pItem->GetCount() - count );
+        ItemRemovedQuestCheck(pItem->GetEntry(), count);
+        pItem->SetCount(pItem->GetCount() - count);
         count = 0;
         if (IsInWorld() && update)
-            pItem->SendCreateUpdateToPlayer( this );
+            pItem->SendCreateUpdateToPlayer(this);
         pItem->SetState(ITEM_CHANGED, this);
     }
 }
