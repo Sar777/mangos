@@ -7,15 +7,15 @@
 # command after changing this file, to see if there are
 # any tracked files which get ignored after the change.
 #
+# Extractor generated files at Windows build
+#
 
-#
-# Scripting projects
-# This excludes all 3rd party script libraries
-#
-*/
-!universal/
-<<<<<<< HEAD
-!scriptdev2/
-=======
-!ScriptDev2/
->>>>>>> cc7bb1f0b4064946d720428ed75732f4ab16e808
+*.bsc
+*.pdb
+*.ncb
+*.sdf
+*.opensdf
+*.user
+Debug
+Release
+git_id
