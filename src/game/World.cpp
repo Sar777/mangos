@@ -1624,6 +1624,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Initialize AuctionHouseBot...");
     sAuctionBot.Initialize();
 
+    sLog.outString("Reset failed login...");
+    LoginDatabase.Execute("UPDATE account SET failed_logins = 0");
+
     sLog.outString( "WORLD: World initialized" );
 
     uint32 uStartInterval = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
