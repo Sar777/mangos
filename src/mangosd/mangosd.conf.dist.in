@@ -2211,7 +2211,7 @@ ExternalMailInterval = 10
 ###################################################################################################################
 #    Backup Items
 #
-#    BackupItem.Enabel
+#    BackupItem.Enable
 #        Default: 0 (disabled)
 #                 1 (enabled)
 #
@@ -2223,6 +2223,6 @@ ExternalMailInterval = 10
 #
 ###################################################################################################################
 
-BackupItem.Enabel = 0
+BackupItem.Enable = 0
 BackupItem.ItemLevel = 220
 BackupItem.KeepDay = 20
