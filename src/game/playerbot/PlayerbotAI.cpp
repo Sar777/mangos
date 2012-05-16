@@ -652,6 +652,7 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
                 default:
                     break;
             }
+            break;
         }
         default:
             break;
@@ -957,6 +958,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         return;
                 }
             }
+            break;
         }
 
         case SMSG_CAST_FAILED:
@@ -2444,6 +2446,7 @@ void PlayerbotAI::DoLoot()
                                     skillId = SkillByLockType(LockType(lockInfo->Index[i]));
                                     reqSkillValue = lockInfo->Skill[i];
                                 }
+                                break;
                         }
                     }
                 }
@@ -3815,6 +3818,7 @@ bool PlayerbotAI::HasTool(uint32 TC)
             break;
         default:
             out << sObjectMgr.GetPlayerBotString(41, GetMaster()->GetSession()->GetSessionDbLocaleIndex());
+            break;
     }
     TellMaster(out.str().c_str());
     return false;
@@ -6060,6 +6064,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     break;
                 case REACT_PASSIVE:
                     SendWhisper(sObjectMgr.GetPlayerBotStringStr(91, GetMaster()->GetSession()->GetSessionDbLocaleIndex()), fromPlayer);
+                    break;
+                default:
+                    break;
             }
         }
         else if (subcommand == "cast" && argumentFound)
@@ -6139,6 +6146,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         break;
                     default:
                         color = "cffffffff";
+                        break;
                 }
 
                 if (IsPositiveSpell(spellId))

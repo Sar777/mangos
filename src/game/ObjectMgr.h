@@ -1169,7 +1169,7 @@ class ObjectMgr
                 return 0;
 
             ItemPrototype const* proto = GetItemPrototype(iter->second);
-            return (proto && proto->AllowableRace & raceMask) ? iter->second : 0;
+            return (proto && (proto->AllowableRace & raceMask)) ? iter->second : 0;
         }
 
         uint32 GetItemExpireConvert(uint32 itemEntry) const
