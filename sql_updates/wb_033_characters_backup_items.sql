@@ -3,6 +3,8 @@ ADD `owner_guid2` INT UNSIGNED NOT NULL DEFAULT '0',
 ADD `item_id` INT UNSIGNED NOT NULL DEFAULT '0',
 ADD `deleteDate` INT UNSIGNED NULL DEFAULT NULL
 
+ALTER TABLE `item_instance` ADD INDEX `idx_backup_items` (`owner_guid2`, `deleteDate`);
+
 DROP TABLE IF EXISTS `mail_external`;
 CREATE TABLE `mail_external` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
