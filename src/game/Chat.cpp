@@ -3008,7 +3008,8 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
             if (!normalizePlayerName(name))
                 return ObjectGuid();
 
-            if (Player* player = sObjectMgr.GetPlayer(name.c_str()))
+            Player* player = sObjectMgr.GetPlayer(name.c_str());
+            if (player)
                 return player->GetObjectGuid();
 
             return sAccountMgr.GetPlayerGuidByName(name);
@@ -3095,7 +3096,8 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
             if (!normalizePlayerName(name))
                 return false;
 
-            if (Player* player = sObjectMgr.GetPlayer(name.c_str()))
+            Player* player = sObjectMgr.GetPlayer(name.c_str());
+            if (player)
             {
                 mapid = player->GetMapId();
                 x = player->GetPositionX();

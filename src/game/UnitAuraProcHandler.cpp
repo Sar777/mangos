@@ -1624,7 +1624,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     target = this;
                     triggered_spell_id = 54425;
                     // mana gain amount (normal for aura 54037 and doubled for 54038)
-                    if (HasAura(54038))
+                    if (GetOwner() && GetOwner()->HasAura(54038))
                         basepoints[0] = 8;
                     break;
                 }
@@ -4596,7 +4596,8 @@ SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(Unit *pVictim, DamageI
         triggeredByAura->GetModifier()->m_amount, spellInfo->Id, triggeredByAura->GetModifier()->m_auraname, triggeredByAura->GetId());
 
     DamageInfo procDamageInfo(this, pVictim, spellInfo);
-    CalculateSpellDamage(&procDamageInfo, triggeredByAura->GetModifier()->m_amount, spellInfo);
+    procDamageInfo.damage = triggeredByAura->GetModifier()->m_amount;
+    CalculateSpellDamage(&procDamageInfo);
     procDamageInfo.target->CalculateAbsorbResistBlock(this, &procDamageInfo, spellInfo);
     DealDamageMods(procDamageInfo.target,procDamageInfo.damage,&procDamageInfo.absorb);
     SendSpellNonMeleeDamageLog(&procDamageInfo);
