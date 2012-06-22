@@ -7313,7 +7313,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     return true;
 }
 
-void ChatHandler::ShowListBackupItems(uint32 itemId, uint32 itemguid, int loc_idx)
+void ChatHandler::ShowListBackupItems(uint32 itemId, uint32 itemguid, time_t deleteDate, int loc_idx)
 {
     ItemPrototype const *itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
     if(!itemProto)
@@ -7321,11 +7321,14 @@ void ChatHandler::ShowListBackupItems(uint32 itemId, uint32 itemguid, int loc_id
 
     std::string name = itemProto->Name1;
     sObjectMgr.GetItemLocaleStrings(itemProto->ItemId, loc_idx, &name);
+    std::string dateStr = TimeToTimestampStr(deleteDate);
+    char buffer[255];
+    sprintf(buffer, "|cffffffff|Hplayer:%u|h[%u]|h|r", itemguid);
 
     if (m_session)
-        PSendSysMessage(LANG_BACKUPITEM_LIST_CHAT, itemguid, itemId, name.c_str());
+        PSendSysMessage(LANG_BACKUPITEM_LIST_CHAT, buffer, itemId, name.c_str(), dateStr.c_str());
     else
-        PSendSysMessage(LANG_BACKUPITEM_LIST_CONSOLE, itemguid, itemId, name.c_str());
+        PSendSysMessage(LANG_BACKUPITEM_LIST_CONSOLE, itemguid, itemId, name.c_str(), dateStr.c_str());
 }
 
 bool ChatHandler::HandleBackupItemListCommand(char* args)
@@ -7345,14 +7348,15 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, deleteDate FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
             Field *fields = result->Fetch();
             uint64 item_guid = fields[0].GetUInt64();
             uint32 item_id = fields[1].GetUInt32();
-            ShowListBackupItems(item_id, item_guid, GetSessionDbLocaleIndex());
+            time_t deleteDate = time_t(fields[2].GetUInt64());
+            ShowListBackupItems(item_id, item_guid, deleteDate, GetSessionDbLocaleIndex());
 
         } while (result->NextRow());
         delete result;
