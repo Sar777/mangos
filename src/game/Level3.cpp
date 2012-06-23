@@ -7315,7 +7315,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
 void ChatHandler::ShowListBackupItems(uint32 itemId, uint32 itemguid, time_t deleteDate, int loc_idx)
 {
-    ItemPrototype const *itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
+    ItemPrototype const* itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
     if(!itemProto)
         return;
 
@@ -7348,11 +7348,11 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, deleteDate FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, item_id, deleteDate FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
-            Field *fields = result->Fetch();
+            Field* fields = result->Fetch();
             uint64 item_guid = fields[0].GetUInt64();
             uint32 item_id = fields[1].GetUInt32();
             time_t deleteDate = time_t(fields[2].GetUInt64());
@@ -7361,7 +7361,8 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
         } while (result->NextRow());
         delete result;
     }
-    else PSendSysMessage(LANG_BACKUPITEM_LIST_ERR);
+    else
+        PSendSysMessage(LANG_BACKUPITEM_LIST_ERR);
     return true;
 }
 
@@ -7386,7 +7387,7 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target.GetCounter());
     if (result)
     {
         do {
@@ -7400,7 +7401,8 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
         } while (result->NextRow());
         delete result;
     }
-    else PSendSysMessage(LANG_BACKUPITEM_RESTORE_ERR);
+    else
+        PSendSysMessage(LANG_BACKUPITEM_RESTORE_ERR);
     return true;
 }
 
@@ -7421,11 +7423,11 @@ bool ChatHandler::HandleBackupItemAllRestoreCommand(char* args)
         return true;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
-            Field *fields = result->Fetch();
+            Field* fields = result->Fetch();
             uint64 item_guid = fields[0].GetUInt64();
             uint32 item_id = fields[1].GetUInt32();
             uint32 owner_guid = fields[2].GetUInt32();
@@ -7435,6 +7437,7 @@ bool ChatHandler::HandleBackupItemAllRestoreCommand(char* args)
         } while (result->NextRow());
         delete result;
     }
-    else PSendSysMessage(LANG_BACKUPITEM_LIST_ERR);
+    else
+        PSendSysMessage(LANG_BACKUPITEM_LIST_ERR);
     return true;
 }
