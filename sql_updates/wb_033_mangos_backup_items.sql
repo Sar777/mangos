@@ -4,8 +4,8 @@ INSERT INTO `mangos_string` (`entry`, `content_default`, `content_loc1`, `conten
 (1194, 'Item(%u) not found.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Итем(GUID: %u) не найден.'),
 (1195, 'Restored to item(GUID: %u).', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Итем(GUID: %u) восстановлен.'),
 (1196, 'No item is found possible to recover.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Не найдено итемов доступных для восстановления.'),
-(1197, 'GUID: %s - |cffffffff|Hitem:%d:0:0:0:0:0:0:0:0|h[%s]|h|r - Date: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'GUID: %d - |cffffffff|Hitem:%d:0:0:0:0:0:0:0:0|h[%s]|h|r - Дата удаления: %s'),
-(1198, 'GUID: %u - |cffffffff|Hquest:%d:%d|h[%s]|h|r - Date: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'GUID: %s - |cffffffff|Hquest:%d:%d|h[%s]|h|r - Date: %u');
+(1197, 'GUID: %s - |cffffffff|Hitem:%d:0:0:0:0:0:0:0:0|h[%s]|h|r - Date: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'GUID: %s - |cffffffff|Hitem:%d:0:0:0:0:0:0:0:0|h[%s]|h|r - Дата удаления: %s'),
+(1198, 'GUID: %u - |cffffffff|Hquest:%d:%d|h[%s]|h|r - Date: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'GUID: %u - |cffffffff|Hquest:%d:%d|h[%s]|h|r - Date: %s');
 
 DELETE FROM `command` WHERE `name` IN ('backupitem list', 'backupitem restore', 'backupitem allrestore');
 INSERT INTO `command` (`name`, `security`, `help`) VALUES 
