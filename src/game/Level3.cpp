@@ -7348,7 +7348,7 @@ bool ChatHandler::HandleBackupItemListCommand(char* args)
         return true;
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, item_id, deleteDate FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(data, ' ', 4), ' ', -1) AS UNSIGNED) AS item_id, deleteDate FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
@@ -7387,7 +7387,7 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
         return true;
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(data, ' ', 4), ' ', -1) AS UNSIGNED) AS item_id, owner_guid2 FROM item_instance WHERE guid = '%u' AND owner_guid2 = '%u'", item_guid, target.GetCounter());
     if (result)
     {
         do {
@@ -7396,7 +7396,7 @@ bool ChatHandler::HandleBackupItemRestoreCommand(char* args)
             uint32 item_id = fields[1].GetUInt32();
             uint32 owner_guid = fields[2].GetUInt32();
             CharacterDatabase.PExecute("INSERT INTO mail_external (receiver, item, item_guid, item_count) VALUES (%u, %u, %u, 1)", owner_guid, item_id, item_guid);
-            CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid2 = NULL, item_id = NULL, deleteDate = NULL WHERE guid = %u", item_guid);
+            CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid2 = NULL, deleteDate = NULL WHERE guid = %u", item_guid);
             PSendSysMessage(LANG_BACKUPITEM_RESTORE_OK);
         } while (result->NextRow());
         delete result;
@@ -7423,7 +7423,7 @@ bool ChatHandler::HandleBackupItemAllRestoreCommand(char* args)
         return true;
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(data, ' ', 4), ' ', -1) AS UNSIGNED) AS item_id, owner_guid2 FROM item_instance WHERE owner_guid2 = '%u'", target.GetCounter());
     if (result)
     {
         do {
