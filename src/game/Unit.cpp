@@ -1395,6 +1395,13 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const *spellInfo, bool triggered, 
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
+
+    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+    if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+        if (WorldObject* caster = spell->GetCastingObject())
+            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+
     spell->m_CastItem = castItem;
     spell->prepare(&targets, triggeredByAura);
 
@@ -1472,6 +1479,13 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const *spellInfo, int32 cons
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
     spell->m_CastItem = castItem;
+
+    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+    if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+        if (WorldObject* caster = spell->GetCastingObject())
+            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+
     spell->prepare(&targets, triggeredByAura);
 }
 
@@ -1521,7 +1535,16 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const *spellInfo, boo
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
 
     SpellCastTargets targets;
-    targets.setDestination(x, y, z);
+
+    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        targets.setDestination(x, y, z);
+    if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+        targets.setSource(x, y, z);
+
+    // Spell cast with x,y,z but without dbc target-mask, set only destination!
+    if (!(targets.m_targetMask & (TARGET_FLAG_DEST_LOCATION | TARGET_FLAG_SOURCE_LOCATION)))
+        targets.setDestination(x, y, z);
+
     spell->m_CastItem = castItem;
     spell->prepare(&targets, triggeredByAura);
 }
@@ -5917,12 +5940,12 @@ void Unit::RemoveDynObject(uint32 spellid)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
         }
         else if (spellid == 0 || dynObj->GetSpellId() == spellid)
         {
             dynObj->Delete();
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
         }
         else
             ++i;
@@ -5946,7 +5969,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
             continue;
         }
 
@@ -5964,7 +5987,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
             continue;
         }
 
@@ -6601,10 +6624,10 @@ Unit* Unit::getAttackerForHelper()
     if (!IsInCombat())
         return NULL;
 
-    ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
     if (!attackers.empty())
     {
-        for(ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
+        for(GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
         {
             ObjectGuid guid = *itr++;
             Unit* attacker = GetMap()->GetUnit(guid);
@@ -6838,9 +6861,9 @@ void Unit::RemoveAllAttackers()
     if (!GetMap())
         return;
 
-    ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-    for (ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+    for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
     {
         Unit* attacker = GetMap()->GetUnit(*itr);
         if(!attacker || !attacker->AttackStop())
@@ -9390,7 +9413,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
-bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
+bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance, bool skipLOScheck) const
 {
     if(!u || !IsInMap(u))
         return false;
@@ -9601,6 +9624,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (visibleDistance <= 0 || !IsWithinDist(viewPoint,visibleDistance))
             return false;
     }
+
+    if (skipLOScheck)
+        return true;
 
     // Now check is target visible with LoS
     float ox,oy,oz;
@@ -10212,9 +10238,9 @@ bool Unit::SelectHostileTarget()
     // Note: creature not have targeted movement generator but have attacker in this case
     if (GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
     {
-        ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+        GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-        for (ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+        for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
         {
             Unit* attacker = GetMap()->GetUnit(*itr);
             if (attacker && attacker->IsInMap(this) && attacker->isTargetableForAttack() && attacker->isInAccessablePlaceFor(this))
@@ -11022,7 +11048,7 @@ void Unit::CleanupsBeforeDelete()
         DeleteThreatList();
         if (GetTypeId()==TYPEID_PLAYER)
             getHostileRefManager().setOnlineOfflineState(false);
-        else
+        else if (CanHaveThreatList())
             getHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
         GetUnitStateMgr().InitDefaults(false);
@@ -11795,7 +11821,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
 
         SpellProcEventEntry const *spellProcEvent = itr->second;
         bool useCharges = itr->first->GetAuraCharges() > 0;
-        bool procSuccess = true;
+        bool procSuccess = false;
         bool anyAuraProc = false;
 
         // For players set spell cooldown if need
@@ -11848,9 +11874,9 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                 case SPELL_AURA_PROC_CANT_TRIGGER:
                     continue;
                 case SPELL_AURA_PROC_FAILED:
-                    procSuccess = false;
                     break;
                 case SPELL_AURA_PROC_OK:
+                    procSuccess |= true;
                     break;
             }
             anyAuraProc = true;
@@ -11865,6 +11891,11 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
         // Remove charge (aura can be removed by triggers)
         if (useCharges && procSuccess && anyAuraProc && !itr->first->IsDeleted())
         {
+            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST,"Unit::ProcDamageAndSpellFor: %s drop charge from %s, aura %u (current charges count %u)",
+                GetObjectGuid().GetString().c_str(),
+                pTarget->GetObjectGuid().GetString().c_str(),
+                itr->first->GetId(),
+                itr->first->GetAuraCharges());
             // If last charge dropped add spell to remove list
             if (itr->first->DropAuraCharge())
                 removedSpells.insert(itr->first->GetId());
@@ -13121,9 +13152,9 @@ void Unit::StopAttackFaction(uint32 faction_id)
         }
     }
 
-    ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-    for (ObjectGuidSet::iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
     {
         Unit* attacker = GetMap()->GetUnit(*itr);
 
@@ -13489,12 +13520,16 @@ bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* 
             break;
     }
 
-    // spell can hit all targets in two cases:
-    if (VMAP::VMapFactory::checkSpellForLoS(spellInfo->Id))
+    // spell can hit all targets in some cases:
+    if (!VMAP::VMapFactory::checkSpellForLoS(spellInfo->Id))
         return true;
 
     if (spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_DETECTION))
         return true;
+
+    // some totem spells must ignore LOS, only visibility/detect checks applied
+    if (caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem())
+        return isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, true, false, true);
 
     // spell can't hit stealth/invisible targets
     if (no_stealth && caster->isType(TYPEMASK_UNIT) && !isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, false))

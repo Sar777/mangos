@@ -1212,8 +1212,8 @@ enum IgnoreUnitState
     IGNORE_UNIT_TARGET_NON_FROZEN = 126,                    // ignore absent of frozen state
 };
 
-typedef ObjectGuidSet GuardianPetList;
-typedef ObjectGuidSet GroupPetList;
+typedef GuidSet GuardianPetList;
+typedef GuidSet GroupPetList;
 
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
@@ -1844,7 +1844,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void UpdateVisibilityAndView();                     // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
-        bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
+        bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true, bool skipLOScheck = false) const;
         bool canDetectInvisibilityOf(Unit const* u) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update);// overwrite WorldObject::SetPhaseMask
         bool IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* spellInfo) const;

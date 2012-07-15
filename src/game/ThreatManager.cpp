@@ -327,7 +327,6 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
         if (!pTarget)
             continue;
 
-        MAPLOCK_READ(pTarget, MAP_LOCK_TYPE_THREAT);
         // some units are prefered in comparison to others
         // if (checkThreatArea) consider IsOutOfThreatArea - expected to be only set for pCurrentVictim
         //     This prevents dropping valid targets due to 1.1 or 1.3 threat rule vs invalid current target
@@ -471,8 +470,11 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 
 void ThreatManager::addThreatDirectly(Unit* pVictim, float threat)
 {
+<<<<<<< HEAD
     MAPLOCK_READ(pVictim, MAP_LOCK_TYPE_THREAT);
 
+=======
+>>>>>>> 90c0c6c83239bbb97e2125e92006756402d98403
     HostileReference* ref = iThreatContainer.addThreat(pVictim, threat);
     // Ref is online
     if (ref)

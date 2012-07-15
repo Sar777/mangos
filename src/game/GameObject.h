@@ -688,6 +688,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         {
             m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
             m_respawnDelayTime = respawn > 0 ? uint32(respawn) : 0;
+            EnableCollision(CalculateCurrentCollisionState());
         }
         void Respawn();
         bool isSpawned() const
@@ -718,6 +719,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetDisplayId(uint32 modelId);
         void SetPhaseMask(uint32 newPhaseMask, bool update);
         void EnableCollision(bool enable);
+        bool CalculateCurrentCollisionState() const;
 
         float GetObjectBoundingRadius() const;              // overwrite WorldObject version
 
@@ -807,7 +809,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         typedef std::set<Player*> PlayersSet;
 
-        ObjectGuidSet m_capturePlayers[PVP_TEAM_COUNT];     // player sets for each faction
+        GuidSet m_capturePlayers[PVP_TEAM_COUNT];           // player sets for each faction
 
         GuidSet m_SkillupSet;                               // players that already have skill-up at GO use
 
