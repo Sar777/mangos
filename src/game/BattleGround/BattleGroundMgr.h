@@ -136,7 +136,6 @@ class BattleGroundQueue
         uint32 m_SumOfWaitTimes[PVP_TEAM_COUNT][MAX_BATTLEGROUND_BRACKETS];
 };
 
-<<<<<<< HEAD
 /*
     This class is used to invite player to BG again, when minute lasts from his first invitation
     it is capable to solve all possibilities

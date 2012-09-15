@@ -447,12 +447,8 @@ class BattleGround
         void UpdateWorldState(uint32 Field, uint32 Value);
         void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source);
         virtual void EndBattleGround(Team winner);
-<<<<<<< HEAD
         void EndArena(Team winner);
-        void BlockMovement(Player *plr);
-=======
         void BlockMovement(Player* plr);
->>>>>>> c614e328fd376fdd615c2d0928aaf196422e7f74
 
         void SendMessageToAll(int32 entry, ChatMsg type, Player const* source = NULL);
         void SendYellToAll(int32 entry, uint32 language, ObjectGuid guid);
@@ -624,13 +620,9 @@ class BattleGround
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
         bool   m_ArenaEnded;
-<<<<<<< HEAD
         uint32 m_TimeToEndArena;
         Team   m_ArenaWinner;
-        char const *m_Name;
-=======
         char const* m_Name;
->>>>>>> c614e328fd376fdd615c2d0928aaf196422e7f74
 
         /* Player lists */
         typedef std::deque<ObjectGuid> OfflineQueue;

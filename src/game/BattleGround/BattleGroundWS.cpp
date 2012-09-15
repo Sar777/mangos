@@ -595,13 +595,7 @@ void BattleGroundWS::UpdatePlayerScore(Player* source, uint32 type, uint32 value
             return;
     }
 
-<<<<<<< HEAD
-    bool A = Source->GetTeam() == ALLIANCE;
-    Source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
-    //Source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, 1, A ? BG_WS_SPELL_WARSONG_FLAG : BG_WS_SPELL_SILVERWING_FLAG);
-=======
     source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
->>>>>>> c614e328fd376fdd615c2d0928aaf196422e7f74
 }
 
 WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
