@@ -115,8 +115,15 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
     bool forceDest = (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->IsPet()
                         && owner.hasUnitState(UNIT_STAT_FOLLOW));
     i_path->calculate(x, y, z, forceDest);
-    if(i_path->getPathType() & PATHFIND_NOPATH)
-        return;
+
+    if (i_path->getPathType() & PATHFIND_NOPATH)
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS,"TargetedMovementGeneratorMedium::  unit %s cannot find path to %s (%f, %f, %f),  gained PATHFIND_NOPATH! Owerride used.",
+            owner.GetObjectGuid().GetString().c_str(),
+            i_target.isValid() ? i_target->GetObjectGuid().GetString().c_str() : "<none>",
+            x,y,z);
+        //return;
+    }
 
     D::_addUnitStateMove(owner);
     i_targetReached = false;
@@ -199,7 +206,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
             return false;
         else
         {
-            i_targetSearchingTimer += 2 * time_diff;
+            i_targetSearchingTimer += 5 * time_diff;
             return true;
         }
     }
@@ -310,14 +317,8 @@ template<class T>
 void ChaseMovementGenerator<T>::Finalize(T &owner)
 {
     owner.clearUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
-    if (owner.GetTypeId() == TYPEID_UNIT && !((Creature*)&owner)->IsPet() && owner.isAlive())
-    {
-        if (!owner.isInCombat() || ( this->i_target.getTarget() && !this->i_target.getTarget()->isInAccessablePlaceFor(&owner)))
-        {
-            if (((Creature*)&owner)->AI())
-                ((Creature*)&owner)->AI()->EnterEvadeMode();
-        }
-    }
+    if (owner.GetTypeId() == TYPEID_UNIT && owner.isAlive() && !owner.IsInEvadeMode())
+        owner.AddEvent(new EvadeDelayEvent(owner), EVADE_TIME_DELAY);
 }
 
 template<class T>

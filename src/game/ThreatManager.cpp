@@ -224,7 +224,13 @@ void ThreatContainer::clearReferences()
 HostileReference* ThreatContainer::getReferenceByTarget(Unit* pVictim)
 {
     HostileReference* result = NULL;
+    if (!pVictim)
+        return result;
+
     ObjectGuid guid = pVictim->GetObjectGuid();
+    if (guid.IsEmpty())
+        return result;
+
     for(ThreatList::const_iterator i = iThreatList.begin(); i != iThreatList.end(); ++i)
     {
         if ((*i)->getUnitGuid() == guid)
@@ -470,11 +476,10 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 
 void ThreatManager::addThreatDirectly(Unit* pVictim, float threat)
 {
-<<<<<<< HEAD
-    MAPLOCK_READ(pVictim, MAP_LOCK_TYPE_THREAT);
+    // not to self
+    if (pVictim == getOwner())
+        return;
 
-=======
->>>>>>> 90c0c6c83239bbb97e2125e92006756402d98403
     HostileReference* ref = iThreatContainer.addThreat(pVictim, threat);
     // Ref is online
     if (ref)
@@ -596,9 +601,8 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
                     setDirty(true);
                 }
                 if (getOwner() && getOwner()->IsInWorld())
-                    if (Unit* target = ObjectAccessor::GetUnit(*getOwner(), hostileReference->getUnitGuid()))
-                        if (getOwner()->IsInMap(target))
-                            getOwner()->SendThreatRemove(hostileReference);
+                    if (/*Unit* target = */getOwner()->GetMap()->GetUnit(hostileReference->getUnitGuid()))
+                        getOwner()->SendThreatRemove(hostileReference);
                 iThreatContainer.remove(hostileReference);
                 iUpdateNeed = true;
                 iThreatOfflineContainer.addReference(hostileReference);
@@ -621,9 +625,8 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
             if(hostileReference->isOnline())
             {
                 if (getOwner() && getOwner()->IsInWorld())
-                    if (Unit* target = ObjectAccessor::GetUnit(*getOwner(), hostileReference->getUnitGuid()))
-                        if (getOwner()->IsInMap(target))
-                            getOwner()->SendThreatRemove(hostileReference);
+                    if (/*Unit* target = */getOwner()->GetMap()->GetUnit(hostileReference->getUnitGuid()))
+                        getOwner()->SendThreatRemove(hostileReference);
                 iThreatContainer.remove(hostileReference);
                 iUpdateNeed = true;
             }

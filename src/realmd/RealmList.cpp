@@ -35,8 +35,12 @@ extern DatabaseType LoginDatabase;
 // if you need more from old build then add it in cases in realmd sources code
 // list sorted from high to low build and first build used as low bound for accepted by default range (any > it will accepted by realmd at least)
 
-static RealmBuildInfo ExpectedRealmdClientBuilds[] = {
-    {12340, 3, 3, 5, 'a'},                                  // highest supported build, also auto accept all above for simplify future supported builds testing
+static RealmBuildInfo ExpectedRealmdClientBuilds[] =
+{
+    {15595, 4, 3, 4, ' '},                                  // highest supported build, also auto accept all above for simplify future supported builds testing
+    {15050, 4, 3, 0, ' '},
+    {13623, 4, 0, 6, 'a'},
+    {12340, 3, 3, 5, 'a'},
     {11723, 3, 3, 3, 'a'},
     {11403, 3, 3, 2, ' '},
     {11159, 3, 3, 0, 'a'},
@@ -144,30 +148,34 @@ void RealmList::UpdateRealms(bool init)
     QueryResult *result = LoginDatabase.Query( "SELECT id, name, address, port, icon, realmflags, timezone, allowedSecurityLevel, population, realmbuilds FROM realmlist WHERE (realmflags & 1) = 0 ORDER BY name" );
 
     ///- Circle through results and add them to the realm map
-    if(result)
+    if (result)
     {
         do
         {
-            Field *fields = result->Fetch();
+            Field* fields = result->Fetch();
 
+            uint32 Id                  = fields[0].GetUInt32();
+            std::string name           = fields[1].GetCppString();
+            std::string address        = fields[2].GetCppString();
+            uint32 port                = fields[3].GetUInt32();
+            uint8 realmflags           = fields[5].GetUInt8();
             uint8 allowedSecurityLevel = fields[7].GetUInt8();
 
-            uint8 realmflags = fields[5].GetUInt8();
-
-            if (realmflags & ~(REALM_FLAG_OFFLINE|REALM_FLAG_NEW_PLAYERS|REALM_FLAG_RECOMMENDED|REALM_FLAG_SPECIFYBUILD))
+            if (realmflags & ~(REALM_FLAG_OFFLINE | REALM_FLAG_NEW_PLAYERS | REALM_FLAG_RECOMMENDED | REALM_FLAG_SPECIFYBUILD))
             {
-                sLog.outError("Realm allowed have only OFFLINE Mask 0x2), or NEWPLAYERS (mask 0x20), or RECOMENDED (mask 0x40), or SPECIFICBUILD (mask 0x04) flags in DB");
-                realmflags &= (REALM_FLAG_OFFLINE|REALM_FLAG_NEW_PLAYERS|REALM_FLAG_RECOMMENDED|REALM_FLAG_SPECIFYBUILD);
+                sLog.outError("Realm (id %u, name '%s') can only be flagged as OFFLINE (mask 0x02), NEWPLAYERS (mask 0x20), RECOMMENDED (mask 0x40), or SPECIFICBUILD (mask 0x04) in DB", Id, name.c_str());
+                realmflags &= (REALM_FLAG_OFFLINE | REALM_FLAG_NEW_PLAYERS | REALM_FLAG_RECOMMENDED | REALM_FLAG_SPECIFYBUILD);
             }
 
             UpdateRealm(
-                fields[0].GetUInt32(), fields[1].GetCppString(),fields[2].GetCppString(),fields[3].GetUInt32(),
+                Id, name, address, port,
                 fields[4].GetUInt8(), RealmFlags(realmflags), fields[6].GetUInt8(),
                 (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR),
                 fields[8].GetFloat(), fields[9].GetCppString());
 
             if(init)
-                sLog.outString("Added realm \"%s\"", fields[1].GetString());
+                sLog.outString("RealmList::UpdateRealms added realm id %u, name %s, BindAddress %s:%u, flags %u, Allowed level %u", Id, name.c_str(), address.c_str(), port, realmflags, allowedSecurityLevel);
+
         } while( result->NextRow() );
         delete result;
     }

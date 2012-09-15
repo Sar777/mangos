@@ -194,6 +194,10 @@ BindIP = "0.0.0.0"
 #        Default: 1 (Enable)
 #                 0 (Disabled)
 #
+#    WorldState.ExpireTime
+#        Expire time for cleanup WorldStates in seconds.
+#        Default: 604800 (1 week)
+#
 #    ACE mtmaps
 #    MapUpdate.Threads
 #        Number of threads to run if the binary was compiled with mtmaps support.
@@ -243,6 +247,7 @@ UpdateUptimeInterval = 10
 MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
+WorldState.ExpireTime = 604800
 MapUpdate.Threads = 1
 HomeBind.Enable = 1
 HomeBind.Timer = 1000
@@ -943,11 +948,19 @@ LexicsCutterNoActionOnGM = 1
 #        enable/disable alternative resilence damage reduction calculation (for Avenger/Sanctified wrath mostly)
 #        Default: 0     (disable, default mangos style)
 #
+#    BlinkAnimationType
+#        enable/disable alternative (fast move, like 2.4.3/3.0.1) animation type for blink-like spells
+#        Default: 0     (disable, default mangos style - teleport)
+#
 #    AllowTransferToCustomMap
 #        Allowing moving to maps, enter for which absent in AraeTrigger.dbc (by custom areatrigger_teleport entryes)
 #        Attention! Changing this option "on-the-fly" required reload areatrigger_teleport table!
 #        Default: 0 - disabled (only GM's may transfer to this maps
 #                 1 - enabled  (any player, fit to custom areatrigger_teleport condition, may transfer to this maps).
+#
+#    FactiomAndRaceChangeWithoutRenaming
+#        Default: 0 - false
+#                 1 - true -> not blizzlike
 #
 ###################################################################################################################
 
@@ -1034,6 +1047,8 @@ ResetCooldown.Enable = 0
 BanWpeUser.Enable = 0
 AllowTransferToCustomMap = 0
 ResilenceAlternativeCalculation = 0
+BlinkAnimationType = 0
+FactiomAndRaceChangeWithoutRenaming = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -1783,12 +1798,8 @@ BattleGround.Random.ResetHour = 6
 #                 1 (enable)
 #
 #    Arena.ArenaSeason.ID
-#        Current area season id show in client
-#        Default: 1
-#
 #    Arena.ArenaSeasonPrevious.ID
-#        Previous area season id show in client
-#        Default: 0
+#        Keys redundant, use WorldStates 3191 and 3901 instead
 #
 #    Arena.StartRating
 #        Default Rating at team creation
@@ -1823,13 +1834,36 @@ Arena.AutoDistributeInterval = 7
 Arena.QueueAnnouncer.Join = 0
 Arena.QueueAnnouncer.Exit = 0
 Arena.QueueAnnouncer.Start = 0
-Arena.ArenaSeason.ID = 1
-Arena.ArenaSeasonPrevious.ID = 0
 Arena.StartRating = -1
 Arena.StartPersonalRating = -1
 Arena.LoserNoChange = 0
 Arena.LoserHalfChange = 0
 Arena.RemoveAurasWithDurationLess = 30
+
+###################################################################################################################
+# OUTDOOR PVP CONFIG
+#
+#    OutdoorPvp.SIEnabled               #Enable Silithus Outdoor pvp
+#    OutdoorPvp.EPEnabled               #Enable Eastern Plaguelands Outdoor pvp
+#    OutdoorPvp.HPEnabled               #Enable Hellfire Peninsula Outdoor pvp
+#    OutdoorPvp.ZMEnabled               #Enable Zangarmarsh Outdoor pvp
+#    OutdoorPvp.TFEnabled               #Enable Terokkar Forest  Outdoor pvp
+#    OutdoorPvp.NAEnabled               #Enable Halaa (Nagrand) Outdoor pvp
+#    OutdoorPvp.GHEnabled               #Enable Venture Bay (Grizzly Hills) Outdoor pvp
+#    OutdoorPvp.WGEnabled               #Enable WinterGrasp Outdoor pvp
+#        Default: 1 (enable)
+#                 0 (disable)
+#
+###################################################################################################################
+
+OutdoorPvp.SIEnabled = 1
+OutdoorPvp.EPEnabled = 1
+OutdoorPvp.HPEnabled = 1
+OutdoorPvp.ZMEnabled = 1
+OutdoorPvp.TFEnabled = 1
+OutdoorPvp.NAEnabled = 1
+OutdoorPvp.GHEnabled = 1
+OutdoorPvp.WGEnabled = 0
 
 ###################################################################################################################
 # NETWORK CONFIG
@@ -2026,6 +2060,9 @@ Rate.RAF.LevelPerLevel  = 0.5
 #        max number of kick from group before group disband
 #    LFG.OnlyLastEncounterForCompleteDungeon = 0
 #        need complete only last encounter for dungeon complete (not blizzlike!)
+#    LFG.DisableDungeonMapIds
+#        If maybe a dungeon is buggy or something you can disable this
+#        default:            = ""
 #
 ###################################################################################################################
 LFR.Enable              = 1
@@ -2034,6 +2071,7 @@ LFG.Debug               = 0
 LFR.Extend              = 0
 LFG.MaxKicks            = 5
 LFG.OnlyLastEncounterForCompleteDungeon = 0
+LFG.DisableDungeonMapIds= ""
 
 ###################################################################################################################
 # PLAYERBOTAI CONFIGURATION

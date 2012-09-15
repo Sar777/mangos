@@ -177,6 +177,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
         FILE* dberLogfile;
         FILE* worldLogfile;
         FILE* banWpeLogfile;
+        ACE_Thread_Mutex m_worldLogMtx;
 
         // log/console control
         LogLevel m_logLevel;

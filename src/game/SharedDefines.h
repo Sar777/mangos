@@ -295,7 +295,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,            // 10 no generates threat on cast 100%
     SPELL_ATTR_EX_UNK11                        = 0x00000800,            // 11
     SPELL_ATTR_EX_UNK12                        = 0x00001000,            // 12
-    SPELL_ATTR_EX_UNK13                        = 0x00002000,            // 13
+    SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,            // 13 related to farsight (this not fully correct, but used in mangos. /dev/rsa)
     SPELL_ATTR_EX_CHANNEL_TRACKING_TARGET      = 0x00004000,            // 14
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,            // 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,            // 16 unaffected by school immunity
@@ -603,6 +603,8 @@ enum Language
 enum Team
 {
     TEAM_NONE           = 0,                                // used when team value unknown or not set, 0 is also meaning that can be used !team check
+    TEAM_BOTH_ALLOWED   = 0,                                // used when a check should evaluate true for both teams
+    TEAM_INVALID        = 1,                                // used to invalidate some team depending checks (means not for both teams)
     HORDE               = 67,
     ALLIANCE            = 469,
 };
@@ -616,7 +618,7 @@ enum TeamIndex
 
 #define PVP_TEAM_COUNT    2
 
-static inline TeamIndex GetTeamIndex(Team team) { return team == ALLIANCE ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE; }
+static inline TeamIndex GetTeamIndex(Team team) { return team == ALLIANCE ? TEAM_INDEX_ALLIANCE : ( team == HORDE ? TEAM_INDEX_HORDE : TEAM_INDEX_NEUTRAL); }
 
 enum SpellEffects
 {
@@ -764,7 +766,7 @@ enum SpellEffects
     SPELL_EFFECT_141                       = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
-    SPELL_EFFECT_144                       = 144,
+    SPELL_EFFECT_KNOCKBACK_FROM_POSITION   = 144,
     SPELL_EFFECT_SUSPEND_GRAVITY           = 145,
     SPELL_EFFECT_ACTIVATE_RUNE             = 146,
     SPELL_EFFECT_QUEST_FAIL                = 147,
@@ -1332,7 +1334,7 @@ enum Targets
     TARGET_88                               = 88,
     TARGET_DIRECTLY_FORWARD                 = 89,
     TARGET_NONCOMBAT_PET                    = 90,
-    TARGET_91                               = 91,
+    TARGET_DEST_RADIUS                      = 91,
     TARGET_UNIT_CREATOR                     = 92,
     TARGET_93                               = 93,
     TARGET_OWNED_VEHICLE                    = 94,
@@ -2124,9 +2126,14 @@ enum CreatureType
     CREATURE_TYPE_GAS_CLOUD        = 13
 };
 
-uint32 const CREATURE_TYPEMASK_DEMON_OR_UNDEAD = (1 << (CREATURE_TYPE_DEMON-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
-uint32 const CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD = (1 << (CREATURE_TYPE_HUMANOID-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
-uint32 const CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL = (1 << (CREATURE_TYPE_MECHANICAL-1)) | (1 << (CREATURE_TYPE_ELEMENTAL-1));
+// Unions of CreatureType
+enum CreatureTypeMask
+{
+    CREATURE_TYPEMASK_NONE                    = 0,                                                                       // In this typemask fits players only
+    CREATURE_TYPEMASK_DEMON_OR_UNDEAD         = (1 << (CREATURE_TYPE_DEMON-1))      | (1 << (CREATURE_TYPE_UNDEAD-1)),
+    CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD      = (1 << (CREATURE_TYPE_HUMANOID-1))   | (1 << (CREATURE_TYPE_UNDEAD-1)),
+    CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL = (1 << (CREATURE_TYPE_MECHANICAL-1)) | (1 << (CREATURE_TYPE_ELEMENTAL-1)),
+};
 
 // CreatureFamily.dbc
 enum CreatureFamily
@@ -2353,8 +2360,8 @@ enum SkillType
     SKILL_SURVIVAL2                = 142,
     SKILL_RIDING_HORSE             = 148,
     SKILL_RIDING_WOLF              = 149,
-    SKILL_RIDING_RAM               = 152,
     SKILL_RIDING_TIGER             = 150,
+    SKILL_RIDING_RAM               = 152,
     SKILL_SWIMING                  = 155,
     SKILL_2H_MACES                 = 160,
     SKILL_UNARMED                  = 162,
@@ -2912,6 +2919,23 @@ enum BattleGroundTypeId
 };
 #define MAX_BATTLEGROUND_TYPE_ID 33
 
+// handle the queue types and bg types separately to enable joining queue for different sized arenas at the same time
+enum BattleGroundQueueTypeId
+{
+    BATTLEGROUND_QUEUE_NONE     = 0,
+    BATTLEGROUND_QUEUE_AV       = 1,    // Alterac Vally
+    BATTLEGROUND_QUEUE_WS       = 2,    // Warsong Gulch
+    BATTLEGROUND_QUEUE_AB       = 3,    // Arathi basin
+    BATTLEGROUND_QUEUE_EY       = 4,    // Eye of the Storm
+    BATTLEGROUND_QUEUE_SA       = 5,    // Strand of the Ancients
+    BATTLEGROUND_QUEUE_IC       = 6,    // Isle of Conquest
+    BATTLEGROUND_QUEUE_RB       = 7,
+    BATTLEGROUND_QUEUE_2v2      = 8,
+    BATTLEGROUND_QUEUE_3v3      = 9,
+    BATTLEGROUND_QUEUE_5v5      = 10
+};
+#define MAX_BATTLEGROUND_QUEUE_TYPES 11
+
 enum ArenaType
 {
     ARENA_TYPE_NONE         = 0,                            // used for mark non-arenas or problematic cases
@@ -3054,6 +3078,19 @@ enum EncounterCreditType
     ENCOUNTER_CREDIT_CAST_SPELL     = 1
 };
 
+enum EncounterFrameCommand
+{
+    ENCOUNTER_FRAME_ENGAGE              = 0,
+    ENCOUNTER_FRAME_DISENGAGE           = 1,
+    ENCOUNTER_FRAME_UPDATE_PRIORITY     = 2,
+    ENCOUNTER_FRAME_ADD_TIMER           = 3,
+    ENCOUNTER_FRAME_ENABLE_OBJECTIVE    = 4,
+    ENCOUNTER_FRAME_UPDATE_OBJECTIVE    = 5,
+    ENCOUNTER_FRAME_DISABLE_OBJECTIVE   = 6,
+    ENCOUNTER_FRAME_UNK7                = 7,    // Seems to have something to do with sorting the encounter units
+    ENCOUNTER_FRAME_MAX
+};
+
 enum AreaLockStatus
 {
     AREA_LOCKSTATUS_OK                        = 0,
@@ -3078,6 +3115,30 @@ enum AreaLockStatus
 #define DEFAULT_VISIBILITY_DISTANCE 90.0f       // default visible distance, 90 yards on continents
 #define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
 #define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
+
+enum PhaseMasks
+{
+    PHASEMASK_NONE     = 0,
+    PHASEMASK_NORMAL   = 0x00000001,
+    PHASEMASK_ANYWHERE = 0xFFFFFFFF
+};
+
+enum ActivateTaxiReply
+{
+    ERR_TAXIOK                      = 0,
+    ERR_TAXIUNSPECIFIEDSERVERERROR  = 1,
+    ERR_TAXINOSUCHPATH              = 2,
+    ERR_TAXINOTENOUGHMONEY          = 3,
+    ERR_TAXITOOFARAWAY              = 4,
+    ERR_TAXINOVENDORNEARBY          = 5,
+    ERR_TAXINOTVISITED              = 6,
+    ERR_TAXIPLAYERBUSY              = 7,
+    ERR_TAXIPLAYERALREADYMOUNTED    = 8,
+    ERR_TAXIPLAYERSHAPESHIFTED      = 9,
+    ERR_TAXIPLAYERMOVING            = 10,
+    ERR_TAXISAMENODE                = 11,
+    ERR_TAXINOTSTANDING             = 12
+};
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite

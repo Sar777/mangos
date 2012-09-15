@@ -335,7 +335,7 @@ uint32 PlayerbotAI::initSpell(uint32 spellId)
         Spell *spell = new Spell(m_bot, pSpellInfo, false);
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
         float range = GetSpellMaxRange(srange, IsPositiveSpell(spellId));
-        m_bot->ApplySpellMod(spellId, SPELLMOD_RANGE, range, spell);
+        m_bot->ApplySpellMod(spellId, SPELLMOD_RANGE, range);
         m_spellRangeMap.insert(std::pair<uint32, float>(spellId, range));
         delete spell;
     }
@@ -3380,7 +3380,7 @@ bool PlayerbotAI::IsInRange(Unit* Target, uint32 spellId)
         return false;
 
     // TODO: ugly line of code
-    if (TempRange->minRange == TempRange->maxRange == 0.0f)
+    if ((TempRange->minRange == TempRange->maxRange) && (TempRange->maxRange == 0.0f))
         return true;
 
     //Unit is out of range of this spell

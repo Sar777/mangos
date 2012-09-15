@@ -37,7 +37,6 @@
 #include "ObjectGuid.h"
 #include "Policies/Singleton.h"
 #include "Vehicle.h"
-#include "SQLStorages.h"
 
 #include <string>
 #include <map>
@@ -46,6 +45,7 @@
 class Group;
 class ArenaTeam;
 class Item;
+class SQLStorage;
 
 struct GameTele
 {
@@ -91,12 +91,49 @@ struct AreaTrigger
     uint32 achiev0;
     uint32 achiev1;
     uint32 combatMode;
-    std::string requiredFailedText;
     uint32 target_mapId;
     float  target_X;
     float  target_Y;
     float  target_Z;
     float  target_Orientation;
+
+    // Operators
+    bool IsMinimal() const { return (requiredLevel == 0 
+                                    && requiredItem == 0 
+                                    && requiredItem2 == 0 
+                                    && heroicKey == 0 
+                                    && heroicKey2 == 0 
+                                    && requiredQuestA == 0 
+                                    && requiredQuestHeroicA == 0
+                                    && requiredQuestH == 0 
+                                    && requiredQuestHeroicH == 0
+                                    && minGS == 0 
+                                    && maxGS == 0
+                                    && achiev0 == 0 
+                                    && achiev1 == 0);
+                                    }
+
+    bool IsLessOrEqualThan(AreaTrigger const* l) const      // Expected to have same map
+    {
+        MANGOS_ASSERT(target_mapId == l->target_mapId);
+        return (requiredLevel <= l->requiredLevel
+                && requiredItem <= l->requiredItem
+                && requiredItem2 <= l->requiredItem2
+                && heroicKey <= l->heroicKey
+                && heroicKey2 <= l->heroicKey2
+                && requiredQuestA <= l->requiredQuestA
+                && requiredQuestHeroicA <= l->requiredQuestHeroicA
+                && requiredQuestH <= l->requiredQuestH
+                && requiredQuestHeroicH <= l->requiredQuestHeroicH
+                && minGS <= l->minGS
+                && maxGS <= l->maxGS
+                && achiev0 <= l->achiev0
+                && achiev1 <= l->achiev1
+                );
+    }
+
+    bool operator <= (AreaTrigger const* l) const { return IsLessOrEqualThan(l); }
+
 };
 
 typedef std::map<uint32/*player guid*/,uint32/*instance*/> CellCorpseSet;
@@ -425,7 +462,7 @@ struct GraveYardData
     uint32 safeLocId;
     Team team;
 };
-typedef std::multimap<uint32, GraveYardData> GraveYardMap;
+typedef std::multimap<uint32 /*zoneId*/, GraveYardData> GraveYardMap;
 typedef std::pair<GraveYardMap::const_iterator, GraveYardMap::const_iterator> GraveYardMapBounds;
 
 enum ConditionType
@@ -469,6 +506,7 @@ enum ConditionType
                                                             // True if player has skill skill_id and skill less than (and not equal) skill_value (for skill_value > 1)
                                                             // If skill_value == 1, then true if player has not skill skill_id
     CONDITION_REPUTATION_RANK_MAX   = 30,                   // faction_id   max_rank
+    CONDITION_COMPLETED_ENCOUNTER   = 31,                   // encounter_id encounter_id2       encounter_id[2] = DungeonEncounter(dbc).id (if value2 provided it will return value1 OR value2)
 };
 
 class PlayerCondition
@@ -579,11 +617,6 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, WeatherZoneChances> WeatherZoneMap;
 
-        static Player* GetPlayer(const char* name) { return ObjectAccessor::FindPlayerByName(name);}
-        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true) { return ObjectAccessor::FindPlayer(guid, inWorld); }
-
-        static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
-
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo *goinfo);
 
@@ -601,34 +634,10 @@ class ObjectMgr
         ArenaTeamMap::iterator GetArenaTeamMapBegin() { return mArenaTeamMap.begin(); }
         ArenaTeamMap::iterator GetArenaTeamMapEnd()   { return mArenaTeamMap.end(); }
 
-        static CreatureInfo const *GetCreatureTemplate( uint32 id );
-        CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
-        CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
-        uint32 GetCreatureModelAlternativeModel(uint32 modelId);
+        CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id) const;
+        uint32 GetCreatureModelAlternativeModel(uint32 modelId) const;
+
         CreatureSpellsList const* GetCreatureSpells( uint32 id, uint8 activeState = 0);
-
-        EquipmentInfo const *GetEquipmentInfo( uint32 entry );
-        static CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
-        {
-            return sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(lowguid);
-        }
-
-        static CreatureDataAddon const *GetCreatureTemplateAddon( uint32 entry )
-        {
-            return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry);
-        }
-
-        static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
-
-        static InstanceTemplate const* GetInstanceTemplate(uint32 map)
-        {
-            return sInstanceTemplate.LookupEntry<InstanceTemplate>(map);
-        }
-
-        static WorldTemplate const* GetWorldTemplate(uint32 map)
-        {
-            return sWorldTemplate.LookupEntry<WorldTemplate>(map);
-        }
 
         PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint32 level) const;
 
@@ -683,8 +692,9 @@ class ObjectMgr
 
         GossipText const* GetGossipText(uint32 Text_ID) const;
 
-        WorldSafeLocsEntry const *GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team);
+        WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, Team team);
         bool AddGraveYardLink(uint32 id, uint32 zone, Team team, bool inDB = true);
+        void SetGraveYardLinkTeam(uint32 id, uint32 zoneId, Team team);
         void RemoveGraveYardLink(uint32 id, uint32 zone, Team team, bool inDB = false);
         void LoadGraveyardZones();
         GraveYardData const* FindGraveYardData(uint32 id, uint32 zone) const;
@@ -697,8 +707,8 @@ class ObjectMgr
             return NULL;
         }
 
-        AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
-        AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
+        AreaTrigger const* GetGoBackTrigger(uint32 mapId) const;
+        AreaTrigger const* GetMapEntranceTrigger(uint32 mapId) const;
 
         RepRewardRate const* GetRepRewardRate(uint32 factionId) const
         {
@@ -751,6 +761,20 @@ class ObjectMgr
         }
 
 
+        // Static wrappers for various accessors
+        static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
+        static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
+        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for ObjectAccessor::FindPlayer
+        static CreatureInfo const* GetCreatureTemplate(uint32 id);                  ///< Wrapper for sCreatureStorage.LookupEntry
+        static CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);       ///< Wrapper for sCreatureModelStorage.LookupEntry
+        static EquipmentInfo const* GetEquipmentInfo(uint32 entry);                 ///< Wrapper for sEquipmentStorage.LookupEntry
+        static CreatureDataAddon const* GetCreatureAddon(uint32 lowguid);           ///< Wrapper for sCreatureDataAddonStorage.LookupEntry
+        static CreatureDataAddon const* GetCreatureTemplateAddon(uint32 entry);     ///< Wrapper for sCreatureInfoAddonStorage.LookupEntry
+        static ItemPrototype const* GetItemPrototype(uint32 id);                    ///< Wrapper for sItemStorage.LookupEntry
+        static InstanceTemplate const* GetInstanceTemplate(uint32 map);             ///< Wrapper for sInstanceTemplate.LookupEntry
+        static WorldTemplate const* GetWorldTemplate(uint32 map);                   ///< Wrapper for sWorldTemplate.LookupEntry
+
+        // Loading functions
         void LoadArenaTeams();
         void LoadGroups();
         void LoadQuests();
@@ -1086,16 +1110,7 @@ class ObjectMgr
         }
 
         // Check if a player meets condition conditionId
-        bool IsPlayerMeetToNEWCondition(Player const* pPlayer, uint16 conditionId) const
-        {
-            if (!pPlayer)
-                return false;                               // player not present, return false
-
-            if (const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(conditionId))
-                return condition->Meets(pPlayer);
-
-            return false;
-        }
+        bool IsPlayerMeetToNEWCondition(Player const* pPlayer, uint16 conditionId) const;
 
         GameTele const* GetGameTele(uint32 id) const
         {
@@ -1236,6 +1251,10 @@ class ObjectMgr
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
     protected:
 
+        // initial free low guid for selected guid type for map local guids
+        uint32 m_FirstTemporaryCreatureGuid;
+        uint32 m_FirstTemporaryGameObjectGuid;
+
         // first free id for selected id type
         IdGenerator<uint32> m_ArenaTeamIds;
         IdGenerator<uint32> m_AuctionIds;
@@ -1243,10 +1262,6 @@ class ObjectMgr
         IdGenerator<uint32> m_GuildIds;
         IdGenerator<uint32> m_MailIds;
         IdGenerator<uint32> m_PetNumbers;
-
-        // initial free low guid for selected guid type for map local guids
-        uint32 m_FirstTemporaryCreatureGuid;
-        uint32 m_FirstTemporaryGameObjectGuid;
 
         // guids from reserved range for use in .npc add/.gobject add commands for adding new static spawns (saved in DB) from client.
         ObjectGuidGenerator<HIGHGUID_UNIT>        m_StaticCreatureGuids;

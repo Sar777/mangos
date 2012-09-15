@@ -40,7 +40,6 @@ class Quest;
 class SpellCastTargets;
 class Unit;
 class WorldObject;
-struct SpellEntry;
 
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
@@ -368,12 +367,12 @@ class ScriptAction
         void HandleScriptStep();
 
     private:
+        const char* m_table;                                // of which table the script was started
+        Map* m_map;                                         // Map on which the action will be executed
         ObjectGuid m_sourceGuid;
         ObjectGuid m_targetGuid;
         ObjectGuid m_ownerGuid;                             // owner of source if source is item
-        const char* m_table;                                // of which table the script was started
         ScriptInfo const* m_script;                         // pointer to static script data
-        Map* m_map;                                         // Map on which the action will be executed
 
         // Helper functions
         bool GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject);
